@@ -1,0 +1,11 @@
+#!/bin/sh
+# $Id: dialyzer.in 2927 2010-05-10 15:20:26Z jean.sebastien.pedron $
+
+if [ "$SKIP_DIALYZER" ]; then
+	echo '  Skip dialyzer test ($SKIP_DIALYZER set)'
+	exit 0
+fi
+
+dialyzer -n -r @top_builddir@/ebin
+
+exit 0

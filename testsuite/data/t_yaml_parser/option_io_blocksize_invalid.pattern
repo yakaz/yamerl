@@ -1,0 +1,50 @@
+%% vim:ft=erlang:
+
+%% TEST
+?_assertThrow(
+  {yaml_parser,
+    {file,"${FILENAME}"},
+    <<>>,
+    0,
+    false,
+    [],
+    0,
+    0,
+    1,
+    1,
+    false,
+    1,
+    1,
+    undefined,
+    false,
+    undefined,
+    _,
+    _,
+    [],
+    {bcoll,root,0,-1,1,1,-1,1,1},
+    false,
+    false,
+    false,
+    [],
+    false,
+    false,
+    _,
+    [],
+    0,
+    1,
+    0,
+    undefined,
+    undefined,
+    _,
+    true,
+    [
+      {yaml_parser_error,undefined,undefined,error,
+        invalid_parser_option,
+        "Invalid value for option \"io_blocksize\": it must be a positive interger, expressed in bytes\n",
+        undefined,
+        [{option,{io_blocksize,invalid}}]}
+    ],
+    []
+  },
+  yaml_parser:file("${FILENAME}", [{io_blocksize, invalid}])
+)

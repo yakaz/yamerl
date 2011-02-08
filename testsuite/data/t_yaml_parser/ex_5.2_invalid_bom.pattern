@@ -1,0 +1,63 @@
+%% vim:ft=erlang:
+
+%% TEST
+?_assertMatch(
+  {yaml_parser,
+    {file,"${FILENAME}"},
+    <<>>,
+    90,
+    true,
+    [],
+    0,
+    45,
+    4,
+    1,
+    false,
+    3,
+    21,
+    {utf16,big},
+    false,
+    undefined,
+    _,
+    _,
+    [],
+    {bcoll,root,0,-1,1,1,-1,1,1},
+    false,
+    false,
+    false,
+    [{impl_key,false,undefined,undefined,undefined,undefined,undefined}],
+    false,
+    false,
+    _,
+    [],
+    0,
+    11,
+    10,
+    undefined,
+    undefined,
+    _,
+    false,
+    [
+      {yaml_parser_error,2,1,warning,bom_after_doc_start,_,undefined,[]}
+    ],
+    [
+      {yaml_stream_end,3,21},
+      {yaml_doc_end,3,21},
+      {yaml_collection_end,3,21,block,sequence},
+      {yaml_scalar,3,3,
+        {yaml_tag,3,3,{non_specific,"?"}},
+        flow,plain,"Inside a document."},
+      {yaml_sequence_entry,3,1},
+      {yaml_scalar,1,3,
+        {yaml_tag,1,3,{non_specific,"?"}},
+        flow,plain,"Invalid use of BOM"},
+      {yaml_sequence_entry,1,1},
+      {yaml_collection_start,1,1,
+        {yaml_tag,1,1,{non_specific,"?"}},
+        block,sequence},
+      {yaml_doc_start,1,1,{1,2},_},
+      {yaml_stream_start,1,1,{utf16,big}}
+    ]
+  },
+  yaml_parser:file("${FILENAME}")
+)

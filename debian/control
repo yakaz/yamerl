@@ -1,0 +1,14 @@
+Source: yaml
+Section: devel
+Priority: optional
+Maintainer: Jean-Sébastien Pédron <jean-sebastien@yakaz.com>
+Build-Depends: debhelper (>= 5.0.0), autotools-dev, erlang-dev (>= 1:13.b.1-3)
+Standards-Version: 3.8.4
+
+Package: yaml
+Architecture: all
+Section: devel
+Priority: optional
+Depends: ${erlang:Depends}
+Description: YAML parser
+ .

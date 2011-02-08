@@ -1,0 +1,52 @@
+%% vim:ft=erlang:
+
+%% TEST
+?_assertMatch(
+  {yaml_parser,
+    {file,"${FILENAME}"},
+    <<>>,
+    32,
+    true,
+    [],
+    0,
+    33,
+    8,
+    1,
+    false,
+    7,
+    8,
+    utf8,
+    false,
+    undefined,
+    _,
+    _,
+    [],
+    {bcoll,root,0,-1,1,1,-1,1,1},
+    false,
+    false,
+    false,
+    [{impl_key,false,undefined,undefined,undefined,undefined,undefined}],
+    false,
+    false,
+    _,
+    [],
+    0,
+    6,
+    5,
+    undefined,
+    undefined,
+    _,
+    false,
+    [],
+    [
+      {yaml_stream_end,7,8},
+      {yaml_doc_end,7,8},
+      {yaml_scalar,1,1,
+        {yaml_tag,1,1,{non_specific,"!"}},
+        block,folded,"trimmed\n\n\nas space"},
+      {yaml_doc_start,1,1,{1,2},_},
+      {yaml_stream_start,1,1,utf8}
+    ]
+  },
+  yaml_parser:file("${FILENAME}")
+)
