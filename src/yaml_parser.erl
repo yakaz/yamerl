@@ -276,8 +276,10 @@
 -define(IN_BLOCK_CTX(P),      (is_record(P#yaml_parser.cur_coll, bcoll))).
 -define(IN_FLOW_CTX(P),       (is_record(P#yaml_parser.cur_coll, fcoll))).
 
--define(IS_NEWLINE(C),        (C == $\n orelse C == $\r)).
 -define(IS_SPACE(C),          (C == $\s orelse C == $\t)).
+-define(IS_NEWLINE(C),        (C == $\n orelse C == $\r)).
+-define(IS_NEWLINE_11(C),
+  (C == 16#85 orelse C == 16#2028 orelse C == 16#2029)).
 
 -define(IS_FLOW_INDICATOR(C), (
     C == $[ orelse C == $] orelse
@@ -641,8 +643,9 @@ do_find_next_token(
   #yaml_parser{chars = [$\r], raw_eos = false} = Parser) ->
     %% Can't be sure it's a newline. It may be followed by a LF.
     return(Parser);
-do_find_next_token(#yaml_parser{chars = [C | _] = Chars} = Parser)
-  when ?IS_NEWLINE(C) ->
+do_find_next_token(
+  #yaml_parser{doc_version = Version, chars = [C | _] = Chars} = Parser)
+  when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     Parser1 = next_line(Parser, Chars),
     Parser2 = if
         ?IN_BLOCK_CTX(Parser1) -> allow_impl_key(Parser1, true);
@@ -660,8 +663,9 @@ do_find_next_token(#yaml_parser{chars = []} = Parser) ->
 
 %% Next token found!
 do_find_next_token(Parser) ->
-    Parser1 = check_for_closed_block_collections(Parser),
-    next_state(Parser1, fun determine_token_type/1).
+    Parser1 = warn_if_non_ascii_line_break(Parser),
+    Parser2 = check_for_closed_block_collections(Parser1),
+    next_state(Parser2, fun determine_token_type/1).
 
 %%
 %% Token type.
@@ -697,8 +701,10 @@ determine_token_type(
 
 %% Directives end indicator.
 determine_token_type(
-  #yaml_parser{chars = [$-, $-, $-, C | _], col = 1} = Parser)
-  when ?IS_NEWLINE(C) orelse ?IS_SPACE(C) ->
+  #yaml_parser{doc_version = Version,
+    chars = [$-, $-, $-, C | _], col = 1} = Parser)
+  when ?IS_NEWLINE(C) orelse ?IS_SPACE(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     Fun = fun(S) ->
         parse_document_sep(S, directives_end)
     end,
@@ -706,8 +712,10 @@ determine_token_type(
 
 %% Document end indicator.
 determine_token_type(
-  #yaml_parser{chars = [$., $., $., C | _], col = 1} = Parser)
-  when ?IS_NEWLINE(C) orelse ?IS_SPACE(C) ->
+  #yaml_parser{doc_version = Version,
+    chars = [$., $., $., C | _], col = 1} = Parser)
+  when ?IS_NEWLINE(C) orelse ?IS_SPACE(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     Fun = fun(S) ->
         parse_document_sep(S, document_end)
     end,
@@ -748,18 +756,24 @@ determine_token_type(#yaml_parser{chars = [$, | _]} = Parser) ->
     next_state(Parser, fun parse_flow_entry/1);
 
 %% Block collection entry indicator.
-determine_token_type(#yaml_parser{chars = [$-, C | _]} = Parser)
-  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) ->
+determine_token_type(
+  #yaml_parser{doc_version = Version, chars = [$-, C | _]} = Parser)
+  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     next_state(Parser, fun parse_block_entry/1);
 
 %% Mapping key indicator.
-determine_token_type(#yaml_parser{chars = [$?, C | _]} = Parser)
-  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) ->
+determine_token_type(
+  #yaml_parser{doc_version = Version, chars = [$?, C | _]} = Parser)
+  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     next_state(Parser, fun parse_mapping_key/1);
 
 %% Mapping value indicator.
-determine_token_type(#yaml_parser{chars = [$:, C | _]} = Parser)
-  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse ?IS_FLOW_INDICATOR(C) ->
+determine_token_type(
+  #yaml_parser{doc_version = Version, chars = [$:, C | _]} = Parser)
+  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse ?IS_FLOW_INDICATOR(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     next_state(Parser, fun parse_mapping_value/1);
 determine_token_type(#yaml_parser{chars = [$: | _],
     last_is_json_like = true} = Parser)
@@ -959,15 +973,18 @@ parse_directive(
     do_parse_directive(Parser4, Ctx).
 
 do_parse_directive(
-  #yaml_parser{chars = [C | _]} = Parser, Ctx) when
-  ?IS_NEWLINE(C) orelse ?IS_SPACE(C) ->
+  #yaml_parser{doc_version = Version, chars = [C | _]} = Parser, Ctx)
+  when ?IS_NEWLINE(C) orelse ?IS_SPACE(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     parse_directive2(Parser, Ctx);
+
 do_parse_directive(#yaml_parser{chars = [C | Rest]} = Parser, Ctx) ->
-    Parser1 = next_col(Parser, 1, Rest),
+    Parser1 = warn_if_non_ascii_line_break(Parser),
+    Parser2 = next_col(Parser1, 1, Rest),
     Ctx1    = Ctx#directive_ctx{
       name = [C | Ctx#directive_ctx.name]
     },
-    do_parse_directive(Parser1, Ctx1);
+    do_parse_directive(Parser2, Ctx1);
 
 do_parse_directive(
   #yaml_parser{chars = [], raw_eos = true} = Parser, Ctx) ->
@@ -991,8 +1008,10 @@ skip_directive_trailing_ws(#yaml_parser{chars = [C | Rest]} = Parser)
   when ?IS_SPACE(C) ->
     Parser1 = next_col(Parser, 1, Rest),
     skip_directive_trailing_ws(Parser1);
-skip_directive_trailing_ws(#yaml_parser{chars = [C | _]} = Parser)
-  when ?IS_NEWLINE(C) orelse C == $# ->
+skip_directive_trailing_ws(
+  #yaml_parser{doc_version = Version, chars = [C | _]} = Parser)
+  when ?IS_NEWLINE(C) orelse C == $# orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     next_state(Parser, fun find_next_token/1);
 skip_directive_trailing_ws(
   #yaml_parser{chars = []} = Parser) ->
@@ -1091,9 +1110,12 @@ parse_yaml_directive_minor(#yaml_parser{chars = [C | Rest]} = Parser,
       minor = Minor1
     },
     parse_yaml_directive_minor(Parser1, Ctx1);
-parse_yaml_directive_minor(#yaml_parser{chars = [C | _]} = Parser,
+parse_yaml_directive_minor(
+  #yaml_parser{doc_version = Version, chars = [C | _]} = Parser,
   #yaml_directive_ctx{minor = Minor} = Ctx)
-  when is_integer(Minor) andalso (?IS_SPACE(C) orelse ?IS_NEWLINE(C)) ->
+  when is_integer(Minor) andalso
+  (?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse
+   (Version == {1,1} andalso ?IS_NEWLINE_11(C))) ->
     %% Directive end.
     queue_yaml_directive(Parser, Ctx);
 parse_yaml_directive_minor(#yaml_parser{chars = [], raw_eos = true} = Parser,
@@ -1107,6 +1129,7 @@ parse_yaml_directive_minor(#yaml_parser{chars = [], raw_eos = false} = Parser,
 parse_yaml_directive_minor(#yaml_parser{chars = [_ | _]} = Parser,
   #yaml_directive_ctx{line = Line, col = Col}) ->
     %% Invalid character while parsing minor version number.
+    Parser1 = warn_if_non_ascii_line_break(Parser),
     Token = #yaml_yaml_directive{
       line   = Line,
       column = Col
@@ -1117,9 +1140,9 @@ parse_yaml_directive_minor(#yaml_parser{chars = [_ | _]} = Parser,
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
     },
-    Parser1 = add_error(Parser, Error,
+    Parser2 = add_error(Parser1, Error,
       "Invalid minor version number in YAML directive~n", []),
-    return(Parser1).
+    return(Parser2).
 
 %% Queue token.
 queue_yaml_directive(#yaml_parser{doc_version = undefined} = Parser,
@@ -1274,10 +1297,12 @@ parse_tag_directive_prefix(#yaml_parser{chars = [C | Rest]} = Parser,
     %% Skip leading white spaces.
     Parser1 = next_col(Parser, 1, Rest),
     parse_tag_directive_prefix(Parser1, Ctx);
-parse_tag_directive_prefix(#yaml_parser{chars = [C | _]} = Parser,
+parse_tag_directive_prefix(
+  #yaml_parser{doc_version = Version, chars = [C | _]} = Parser,
   #tag_directive_ctx{prefix = Prefix} = Ctx)
   when is_list(Prefix) andalso Prefix /= "" andalso
-  (?IS_SPACE(C) orelse ?IS_NEWLINE(C)) ->
+  (?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse
+   (Version == {1,1} andalso ?IS_NEWLINE_11(C))) ->
     queue_tag_directive(Parser, Ctx);
 parse_tag_directive_prefix(#yaml_parser{chars = [], raw_eos = true} = Parser,
   Ctx) ->
@@ -1290,6 +1315,7 @@ parse_tag_directive_prefix(#yaml_parser{chars = [_ | _]} = Parser,
   #tag_directive_ctx{handle = Handle, prefix = Prefix,
   line = Line, col = Col}) ->
     %% Invalid character while parsing tag prefix.
+    Parser1 = warn_if_non_ascii_line_break(Parser),
     Token = #yaml_tag_directive{
       handle = lists:reverse(Handle),
       prefix = lists:reverse(Prefix),
@@ -1302,9 +1328,9 @@ parse_tag_directive_prefix(#yaml_parser{chars = [_ | _]} = Parser,
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
     },
-    Parser1 = add_error(Parser, Error,
+    Parser2 = add_error(Parser1, Error,
       "Invalid tag prefix in TAG directive~n", []),
-    return(Parser1).
+    return(Parser2).
 
 %% Queue token.
 queue_tag_directive(#yaml_parser{tags = Tags} = Parser,
@@ -1360,15 +1386,20 @@ parse_reserved_directive_arg(#yaml_parser{chars = [C | Rest]} = Parser,
     %% Skip leading white spaces.
     Parser1 = next_col(Parser, 1, Rest),
     parse_reserved_directive_arg(Parser1, Ctx);
-parse_reserved_directive_arg(#yaml_parser{chars = [C | _]} = Parser,
+parse_reserved_directive_arg(
+  #yaml_parser{doc_version = Version, chars = [C | _]} = Parser,
   #reserved_directive_ctx{current = undefined} = Ctx)
-  when ?IS_NEWLINE(C) orelse C == $# ->
+  when ?IS_NEWLINE(C) orelse C == $# orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     %% End of directive.
     queue_reserved_directive(Parser, Ctx);
-parse_reserved_directive_arg(#yaml_parser{chars = [C | _]} = Parser,
+parse_reserved_directive_arg(
+  #yaml_parser{doc_version = Version, chars = [C | _]} = Parser,
   #reserved_directive_ctx{current = Current,
   args = Args, args_count = Count} = Ctx)
-  when is_list(Current) andalso (?IS_SPACE(C) orelse ?IS_NEWLINE(C)) ->
+  when is_list(Current) andalso
+  (?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse
+   (Version == {1,1} andalso ?IS_NEWLINE_11(C))) ->
     %% Current argument finished.
     Current1 = lists:reverse(Current),
     Ctx1     = Ctx#reserved_directive_ctx{
@@ -1379,7 +1410,8 @@ parse_reserved_directive_arg(#yaml_parser{chars = [C | _]} = Parser,
     parse_reserved_directive_arg(Parser, Ctx1);
 parse_reserved_directive_arg(#yaml_parser{chars = [C | Rest]} = Parser,
   #reserved_directive_ctx{current = Current} = Ctx) ->
-    Parser1  = next_col(Parser, 1, Rest),
+    Parser1 = warn_if_non_ascii_line_break(Parser),
+    Parser2  = next_col(Parser1, 1, Rest),
     Current1 = case Current of
         undefined -> [C];
         _         -> [C | Current]
@@ -1387,7 +1419,7 @@ parse_reserved_directive_arg(#yaml_parser{chars = [C | Rest]} = Parser,
     Ctx1 = Ctx#reserved_directive_ctx{
       current = Current1
     },
-    parse_reserved_directive_arg(Parser1, Ctx1);
+    parse_reserved_directive_arg(Parser2, Ctx1);
 parse_reserved_directive_arg(
   #yaml_parser{chars = [], raw_eos = true} = Parser, Ctx) ->
   %% End of directive.
@@ -1829,16 +1861,18 @@ parse_anchor_or_alias(
 %% White spaces and flow indicators are forbidden inside anchor or alias
 %% names.
 do_parse_anchor_or_alias(
-  #yaml_parser{chars = [C | _]} = Parser, Ctx) when
-  ?IS_NEWLINE(C) orelse ?IS_SPACE(C) orelse ?IS_FLOW_INDICATOR(C) ->
+  #yaml_parser{doc_version = Version, chars = [C | _]} = Parser, Ctx) when
+  ?IS_NEWLINE(C) orelse ?IS_SPACE(C) orelse ?IS_FLOW_INDICATOR(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     queue_anchor_or_alias_token(Parser, Ctx);
 
 do_parse_anchor_or_alias(#yaml_parser{chars = [C | Rest]} = Parser, Ctx) ->
-    Parser1 = next_col(Parser, 1, Rest),
+    Parser1 = warn_if_non_ascii_line_break(Parser),
+    Parser2 = next_col(Parser1, 1, Rest),
     Ctx1    = Ctx#anchor_ctx{
       output = [C | Ctx#anchor_ctx.output]
     },
-    do_parse_anchor_or_alias(Parser1, Ctx1);
+    do_parse_anchor_or_alias(Parser2, Ctx1);
 
 do_parse_anchor_or_alias(#yaml_parser{chars = [], raw_eos = true} = Parser,
   Ctx) ->
@@ -2029,8 +2063,10 @@ parse_tag_shorthand(#yaml_parser{chars = [C | _]} = Parser, Ctx)
   when ?IS_FLOW_INDICATOR(C) ->
     %% The next character starts another token.
     expand_tag(Parser, Ctx);
-parse_tag_shorthand(#yaml_parser{chars = [C | _]} = Parser, Ctx)
-  when ?IS_NEWLINE(C) orelse ?IS_SPACE(C) ->
+parse_tag_shorthand(
+  #yaml_parser{doc_version = Version, chars = [C | _]} = Parser, Ctx)
+  when ?IS_NEWLINE(C) orelse ?IS_SPACE(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     expand_tag(Parser, Ctx);
 
 parse_tag_shorthand(#yaml_parser{chars = [C | Rest]} = Parser,
@@ -2044,6 +2080,7 @@ parse_tag_shorthand(#yaml_parser{chars = [C | Rest]} = Parser,
 parse_tag_shorthand(#yaml_parser{chars = [_ | Rest]} = Parser,
   #tag_ctx{prefix = Prefix, suffix = Suffix, line = Line, col = Col} = Ctx) ->
     %% Character not allowed in a URI.
+    Parser1 = warn_if_non_ascii_line_break(Parser),
     Token = #yaml_tag{
       uri    = Prefix ++ lists:reverse(Suffix),
       line   = Line,
@@ -2055,10 +2092,10 @@ parse_tag_shorthand(#yaml_parser{chars = [_ | Rest]} = Parser,
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
     },
-    Parser1 = add_error(Parser, Error,
+    Parser2 = add_error(Parser1, Error,
       "Invalid character in tag handle~n", []),
-    Parser2 = next_col(Parser1, 1, Rest),
-    parse_tag_shorthand(Parser2, Ctx);
+    Parser3 = next_col(Parser2, 1, Rest),
+    parse_tag_shorthand(Parser3, Ctx);
 
 parse_tag_shorthand(#yaml_parser{chars = [], raw_eos = true} = Parser, Ctx) ->
     expand_tag(Parser, Ctx);
@@ -2192,8 +2229,9 @@ do_parse_block_scalar_header(
     ?SUSPEND_SUBPARSING(Parser, Ctx, do_parse_block_scalar_header);
 
 do_parse_block_scalar_header(
-  #yaml_parser{chars = [C | _] = Chars} = Parser, Ctx)
-  when ?IS_NEWLINE(C) ->
+  #yaml_parser{doc_version = Version, chars = [C | _] = Chars} = Parser, Ctx)
+  when ?IS_NEWLINE(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     Parser1 = next_line(Parser, Chars),
     prepare_parse_block_scalar(Parser1, Ctx);
 
@@ -2320,6 +2358,7 @@ do_parse_block_scalar_header(
 do_parse_block_scalar_header(
   #yaml_parser{chars = [_ | Rest]} = Parser,
   #block_scalar_hd_ctx{style = Style, line = Line, col = Col} = Ctx) ->
+    Parser1 = warn_if_non_ascii_line_break(Parser),
     Token = #yaml_scalar{
       style    = block,
       substyle = Style,
@@ -2334,11 +2373,11 @@ do_parse_block_scalar_header(
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
     },
-    Parser1 = add_error(Parser, Error,
+    Parser2 = add_error(Parser1, Error,
       "Invalid character in block scalar header~n", []),
-    Parser2 = next_col(Parser1, 1, Rest),
-    Ctx1 = final_indent(Parser2, Ctx),
-    do_parse_block_scalar_header(Parser2, Ctx1);
+    Parser3 = next_col(Parser2, 1, Rest),
+    Ctx1 = final_indent(Parser3, Ctx),
+    do_parse_block_scalar_header(Parser3, Ctx1);
 
 do_parse_block_scalar_header(
   #yaml_parser{chars = [], raw_eos = true} = Parser, Ctx) ->
@@ -2389,9 +2428,9 @@ do_parse_block_scalar(
 
 %% This is an empty line just after the header.
 do_parse_block_scalar(
-  #yaml_parser{chars = [C | _] = Chars} = Parser,
+  #yaml_parser{doc_version = Version, chars = [C | _] = Chars} = Parser,
   #block_scalar_ctx{newline = false, spaces = Spaces, output = ""} = Ctx)
-  when ?IS_NEWLINE(C) ->
+  when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     Parser1 = next_line(Parser, Chars),
     Ctx1    = Ctx#block_scalar_ctx{
       newline = true,
@@ -2401,9 +2440,9 @@ do_parse_block_scalar(
 
 %% Literal style: no line folding.
 do_parse_block_scalar(
-  #yaml_parser{chars = [C | _] = Chars} = Parser,
+  #yaml_parser{doc_version = Version, chars = [C | _] = Chars} = Parser,
   #block_scalar_ctx{spaces = Spaces, style = literal} = Ctx)
-  when ?IS_NEWLINE(C) ->
+  when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     Parser1 = next_line(Parser, Chars),
     Ctx1    = Ctx#block_scalar_ctx{
       newline = true,
@@ -2413,10 +2452,10 @@ do_parse_block_scalar(
 
 %% Folded style: a newline at the end of a normal-indented line.
 do_parse_block_scalar(
-  #yaml_parser{chars = [C | _] = Chars} = Parser,
+  #yaml_parser{doc_version = Version, chars = [C | _] = Chars} = Parser,
   #block_scalar_ctx{spaces = Spaces, newline = false,
   more_indent = false} = Ctx)
-  when ?IS_NEWLINE(C) ->
+  when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     Parser1 = next_line(Parser, Chars),
     Ctx1    = Ctx#block_scalar_ctx{
       newline = true,
@@ -2426,10 +2465,10 @@ do_parse_block_scalar(
 
 %% Folded style: an empty line after a normal-indented line.
 do_parse_block_scalar(
-  #yaml_parser{chars = [C | _] = Chars} = Parser,
+  #yaml_parser{doc_version = Version, chars = [C | _] = Chars} = Parser,
   #block_scalar_ctx{spaces = Spaces, newline = true,
   more_indent = false} = Ctx)
-  when ?IS_NEWLINE(C) ->
+  when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     Parser1 = next_line(Parser, Chars),
     Spaces1 = case Spaces of
         [$\s | S] -> S;
@@ -2443,9 +2482,9 @@ do_parse_block_scalar(
 
 %% Folded style: a newline in a more-indented paragraph.
 do_parse_block_scalar(
-  #yaml_parser{chars = [C | _] = Chars} = Parser,
+  #yaml_parser{doc_version = Version, chars = [C | _] = Chars} = Parser,
   #block_scalar_ctx{spaces = Spaces, more_indent = true} = Ctx)
-  when ?IS_NEWLINE(C) ->
+  when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     Parser1 = next_line(Parser, Chars),
     Ctx1    = Ctx#block_scalar_ctx{
       newline = true,
@@ -2561,12 +2600,16 @@ do_parse_block_scalar(
     %% plain scalar.
     ?SUSPEND_SUBPARSING(Parser, Ctx, do_parse_block_scalar);
 do_parse_block_scalar(
-  #yaml_parser{chars = [$-, $-, $-, C | _], col = 1} = Parser, Ctx)
-  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) ->
+  #yaml_parser{doc_version = Version,
+    chars = [$-, $-, $-, C | _], col = 1} = Parser, Ctx)
+  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     queue_block_scalar_token(Parser, Ctx);
 do_parse_block_scalar(
-  #yaml_parser{chars = [$., $., $., C | _], col = 1} = Parser, Ctx)
-  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) ->
+  #yaml_parser{doc_version = Version,
+    chars = [$., $., $., C | _], col = 1} = Parser, Ctx)
+  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     queue_block_scalar_token(Parser, Ctx);
 do_parse_block_scalar(
   #yaml_parser{chars = [$-, $-, $-], raw_eos = true, col = 1} = Parser, Ctx) ->
@@ -2583,15 +2626,16 @@ do_parse_block_scalar(
 do_parse_block_scalar(
   #yaml_parser{chars = [C | Rest]} = Parser,
   #block_scalar_ctx{style = literal, spaces = Spaces} = Ctx) ->
-    Parser1 = next_col(Parser, 1, Rest),
+    Parser1 = warn_if_non_ascii_line_break(Parser),
+    Parser2 = next_col(Parser1, 1, Rest),
     Ctx1    = Ctx#block_scalar_ctx{
       spaces  = "",
       newline = false,
       output  = [C | Spaces ++ Ctx#block_scalar_ctx.output],
-      endline = ?CURSOR_LINE(Parser1),
-      endcol  = ?CURSOR_COLUMN(Parser1)
+      endline = ?CURSOR_LINE(Parser2),
+      endcol  = ?CURSOR_COLUMN(Parser2)
     },
-    do_parse_block_scalar(Parser1, Ctx1);
+    do_parse_block_scalar(Parser2, Ctx1);
 
 %% Folded style: a normal-indented line.
 do_parse_block_scalar(
@@ -3034,9 +3078,10 @@ do_parse_flow_scalar(
 %% Escaped newline.
 %% All trailing whitespaces are kept as content before an escaped
 %% newline: this is handled in the $\\ clause above.
-do_parse_flow_scalar(#yaml_parser{chars = [C | _] = Chars} = Parser,
+do_parse_flow_scalar(
+  #yaml_parser{doc_version = Version, chars = [C | _] = Chars} = Parser,
   #flow_scalar_ctx{style = double_quoted, next_escaped = true} = Ctx)
-  when ?IS_NEWLINE(C) ->
+  when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     Parser1 = next_line(Parser, Chars),
     Ctx1    = Ctx#flow_scalar_ctx{
       next_escaped = false,
@@ -3048,6 +3093,7 @@ do_parse_flow_scalar(#yaml_parser{chars = [C | _] = Chars} = Parser,
 do_parse_flow_scalar(#yaml_parser{chars = [C | Rest]} = Parser,
   #flow_scalar_ctx{next_escaped = true, line = Line, col = Col,
   style = Style, output = Output} = Ctx) ->
+    Parser1 = warn_if_non_ascii_line_break(Parser),
     case unescape_char(C) of
         undefined ->
             %% Invalid escaped character.
@@ -3066,19 +3112,19 @@ do_parse_flow_scalar(#yaml_parser{chars = [C | Rest]} = Parser,
               line   = ?CURSOR_LINE(Parser),
               column = ?CURSOR_COLUMN(Parser) - 1
             },
-            Parser1 = add_error(Parser, Error,
+            Parser2 = add_error(Parser1, Error,
               "Invalid escaped character~n", []),
             Ctx1 = Ctx#flow_scalar_ctx{
               next_escaped = false
             },
-            do_parse_flow_scalar(Parser1, Ctx1);
+            do_parse_flow_scalar(Parser2, Ctx1);
         C1 ->
-            Parser1 = next_col(Parser, 1, Rest),
+            Parser2 = next_col(Parser1, 1, Rest),
             Ctx1    = Ctx#flow_scalar_ctx{
               next_escaped = false,
               output       = [C1 | Ctx#flow_scalar_ctx.output]
             },
-            do_parse_flow_scalar(Parser1, Ctx1)
+            do_parse_flow_scalar(Parser2, Ctx1)
     end;
 
 %% In a single-quoted string, a single quote is escaped by doubling
@@ -3105,9 +3151,10 @@ do_parse_flow_scalar(#yaml_parser{chars = [$', $' | Rest]} = Parser,
 %% at the beginning of the first line.
 %%
 
-do_parse_flow_scalar(#yaml_parser{chars = [C | _] = Chars} = Parser,
+do_parse_flow_scalar(
+  #yaml_parser{doc_version = Version, chars = [C | _] = Chars} = Parser,
   #flow_scalar_ctx{newline = false} = Ctx)
-  when ?IS_NEWLINE(C) ->
+  when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     Parser1 = next_line(Parser, Chars),
     Ctx1    = Ctx#flow_scalar_ctx{
       spaces  = " ",
@@ -3115,9 +3162,10 @@ do_parse_flow_scalar(#yaml_parser{chars = [C | _] = Chars} = Parser,
     },
     do_parse_flow_scalar(Parser1, Ctx1);
 
-do_parse_flow_scalar(#yaml_parser{chars = [C | _] = Chars} = Parser,
+do_parse_flow_scalar(
+  #yaml_parser{doc_version = Version, chars = [C | _] = Chars} = Parser,
   #flow_scalar_ctx{newline = true, spaces = Spaces} = Ctx)
-  when ?IS_NEWLINE(C) ->
+  when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     Parser1 = next_line(Parser, Chars),
     Spaces1 = case Spaces of
         [$\s | S] -> S;
@@ -3181,9 +3229,11 @@ do_parse_flow_scalar(#yaml_parser{chars = [$:], raw_eos = false} = Parser,
     %% We don't have enough data to determine if it's the end of the
     %% plain scalar.
     ?SUSPEND_SUBPARSING(Parser, Ctx, do_parse_flow_scalar);
-do_parse_flow_scalar(#yaml_parser{chars = [$:, C | _]} = Parser,
+do_parse_flow_scalar(
+  #yaml_parser{doc_version = Version, chars = [$:, C | _]} = Parser,
   #flow_scalar_ctx{style = plain} = Ctx)
-  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) ->
+  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     %% A ':' character followed by white spaces is not allowed in a
     %% plain scalar: end it. Only one character is available but it's
     %% enough to take a decision. The next state will handle the newline
@@ -3213,15 +3263,19 @@ do_parse_flow_scalar(
     %% plain scalar.
     ?SUSPEND_SUBPARSING(Parser, Ctx, do_parse_flow_scalar);
 do_parse_flow_scalar(
-  #yaml_parser{chars = [$-, $-, $-, C | _], col = 1} = Parser,
+  #yaml_parser{doc_version = Version,
+    chars = [$-, $-, $-, C | _], col = 1} = Parser,
   #flow_scalar_ctx{style = plain} = Ctx)
-  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) ->
+  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     %% A directives end indicator puts an end to the plain scalar.
     queue_flow_scalar_token(Parser, Ctx#flow_scalar_ctx{spaces = ""});
 do_parse_flow_scalar(
-  #yaml_parser{chars = [$., $., $., C | _], col = 1} = Parser,
+  #yaml_parser{doc_version = Version,
+    chars = [$., $., $., C | _], col = 1} = Parser,
   #flow_scalar_ctx{style = plain} = Ctx)
-  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) ->
+  when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse
+  (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     %% A document end indicator puts an end to the plain scalar.
     queue_flow_scalar_token(Parser, Ctx#flow_scalar_ctx{spaces = ""});
 do_parse_flow_scalar(
@@ -3256,15 +3310,16 @@ do_parse_flow_scalar(#yaml_parser{chars = [], raw_eos = true} = Parser,
 do_parse_flow_scalar(#yaml_parser{chars = [C | Rest]} = Parser,
   #flow_scalar_ctx{spaces = Spaces} = Ctx)
   when C == 16#9 orelse (C >= 16#20 andalso C =< 16#10FFFF) ->
-    Parser1 = next_col(Parser, 1, Rest),
+    Parser1 = warn_if_non_ascii_line_break(Parser),
+    Parser2 = next_col(Parser1, 1, Rest),
     Ctx1    = Ctx#flow_scalar_ctx{
       spaces  = "",
       newline = false,
       output  = [C | Spaces ++ Ctx#flow_scalar_ctx.output],
-      endline = ?CURSOR_LINE(Parser1),
-      endcol  = ?CURSOR_COLUMN(Parser1)
+      endline = ?CURSOR_LINE(Parser2),
+      endcol  = ?CURSOR_COLUMN(Parser2)
     },
-    do_parse_flow_scalar(Parser1, Ctx1);
+    do_parse_flow_scalar(Parser2, Ctx1);
 
 do_parse_flow_scalar(#yaml_parser{chars = [], raw_eos = true} = Parser,
   #flow_scalar_ctx{style = Style, line = Line, col = Col, output = Output}) ->
@@ -3342,8 +3397,8 @@ hex_to_dec([], Number) ->
 %% Comments.
 %% -------------------------------------------------------------------
 
-parse_comment(#yaml_parser{chars = [C | _]} = Parser)
-  when ?IS_NEWLINE(C) ->
+parse_comment(#yaml_parser{doc_version = Version, chars = [C | _]} = Parser)
+  when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     %% A comment ends at the end of the line.
     %% This clause also takes care of DOS newline (even if the buffer
     %% contains only \r and not \n yet). It doesn't matter because we
@@ -3351,8 +3406,9 @@ parse_comment(#yaml_parser{chars = [C | _]} = Parser)
     %% moved forward.
     next_state(Parser, fun find_next_token/1);
 parse_comment(#yaml_parser{chars = [_ | Rest]} = Parser) ->
-    Parser1 = next_col(Parser, 1, Rest),
-    parse_comment(Parser1);
+    Parser1 = warn_if_non_ascii_line_break(Parser),
+    Parser2 = next_col(Parser1, 1, Rest),
+    parse_comment(Parser2);
 parse_comment(#yaml_parser{chars = [], raw_eos = false} = Parser) ->
     return(Parser);
 parse_comment(#yaml_parser{chars = [], raw_eos = true} = Parser) ->
@@ -4101,7 +4157,8 @@ next_col(
 
 next_line(Parser, [$\r, $\n | Rest]) ->
     next_line(Parser, 2, Rest);
-next_line(Parser, [C | Rest]) when ?IS_NEWLINE(C) ->
+next_line(#yaml_parser{doc_version = Version} = Parser, [C | Rest])
+  when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     next_line(Parser, 1, Rest).
 
 next_line(
@@ -4266,6 +4323,21 @@ is_uri_hier_part_valid(Parser, Token, [_ | _]) ->
       column = ?TOKEN_COLUMN(Token)
     },
     add_error(Parser, Error, "Invalid character in URI scheme~n", []).
+
+warn_if_non_ascii_line_break(#yaml_parser{chars = [C | _]} = Parser)
+  when ?IS_NEWLINE_11(C) ->
+    %% Non-ASCII line break in a YAML 1.2 document.
+    Error = #yaml_parser_error{
+      type   = warning,
+      name   = non_ascii_line_break,
+      line   = ?CURSOR_LINE(Parser),
+      column = ?CURSOR_COLUMN(Parser)
+    },
+    add_error(Parser, Error,
+      "Use of non-ASCII line break is not supported anymore starting "
+      "with YAML 1.2; treated as non-break character~n", []);
+warn_if_non_ascii_line_break(Parser) ->
+    Parser.
 
 add_error(Parser, Error, Format, Args) ->
     %% Format error message.
