@@ -1,7 +1,6 @@
 %% $Id$
 
 -module(yaml_parser).
--vsn("$Revision$ ").
 
 -include("yaml_parser.hrl").
 -include("yaml_tokens.hrl").
