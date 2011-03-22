@@ -2,6 +2,8 @@
 %% Data types specifications.
 %% -------------------------------------------------------------------
 
+-define(MIN_YAML_MAJOR_VERSION_SUPPORTED, 1).
+-define(MIN_YAML_MINOR_VERSION_SUPPORTED, 1).
 -define(MAX_YAML_MAJOR_VERSION_SUPPORTED, 1).
 -define(MAX_YAML_MINOR_VERSION_SUPPORTED, 2).
 -define(IMPLICIT_YAML_VERSION, {

@@ -895,8 +895,28 @@ start_doc(#yaml_parser{doc_version = Version, tags = Tags} = Parser,
         (Major == ?MAX_YAML_MAJOR_VERSION_SUPPORTED andalso
          Minor =< ?MAX_YAML_MINOR_VERSION_SUPPORTED) ->
             Parser;
+        {Major, Minor} when Major < ?MIN_YAML_MAJOR_VERSION_SUPPORTED orelse
+        (Major == ?MIN_YAML_MAJOR_VERSION_SUPPORTED andalso
+         Minor < ?MIN_YAML_MINOR_VERSION_SUPPORTED) ->
+            %% The document's version is not supported at all (below
+            %% minimum supported version).
+            Error = #yaml_parser_error{
+              name   = version_not_supported,
+              token  = Token,
+              line   = Line,
+              column = Col
+            },
+            Parser0 = add_error(Parser, Error,
+              "Version ~b.~b not supported (minimum version ~b.~b)~n",
+              [
+                Major, Minor,
+                ?MIN_YAML_MAJOR_VERSION_SUPPORTED,
+                ?MIN_YAML_MINOR_VERSION_SUPPORTED
+              ]),
+            return(Parser0);
         {Major, Minor} when Major > ?MAX_YAML_MAJOR_VERSION_SUPPORTED ->
-            %% The document's version is not supported at all.
+            %% The document's version is not supported at all (major
+            %% above maximum supporter major).
             Error = #yaml_parser_error{
               name   = version_not_supported,
               token  = Token,
