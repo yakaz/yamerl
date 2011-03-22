@@ -4,6 +4,7 @@
 ?_assertThrow(
   {yaml_parser,
     string,
+    [],
     <<>>,
     0,
     false,
@@ -40,7 +41,7 @@
     [
       {yaml_parser_error,undefined,undefined,error,
         invalid_parser_option,
-        "Invalid value for option \"token_fun\": it must be an anonymous function or arity 1\n",
+        "Invalid value for option \"token_fun\": it must be a function taking the parser state as its sole argument\n",
         undefined,
         [{option,{token_fun,invalid}}]}
     ],

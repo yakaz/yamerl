@@ -58,7 +58,8 @@
     %%
 
     %% An indication of the source of the stream, eg. a file.
-    source :: any(),
+    source       :: any(),
+    options = [] :: [yaml_parser_option()],
 
     %% Raw data corresponds to Unicode characters not decoded yet. The
     %% raw index indicates where the raw data is in the stream; it
@@ -351,22 +352,11 @@ new(Source, Options) ->
     Parser = #yaml_parser{
       source = Source
     },
-    Parser1 = case proplists:get_value(token_fun, Options) of
-        Fun when Fun == undefined orelse is_function(Fun, 1) ->
-            Parser#yaml_parser{
-              token_fun = Fun
-            };
-        Bad_Arg ->
-            Error = #yaml_parser_error{
-              name  = invalid_parser_option,
-              extra = [{option, {token_fun, Bad_Arg}}]
-            },
-            P1 = add_error(Parser, Error,
-              "Invalid value for option \"token_fun\": "
-              "it must be an anonymous function or arity 1~n", []),
-            return(P1)
-    end,
-    Parser1.
+    check_options(Parser, Options),
+    Parser#yaml_parser{
+      options   = Options,
+      token_fun = proplists:get_value(token_fun, Options)
+    }.
 
 next_chunk(Parser, <<>>, false) ->
     %% No need to proceed further without any data.
@@ -405,21 +395,7 @@ file(Filename) ->
 
 file(Filename, Options) ->
     Parser    = new({file, Filename}, Options),
-    Blocksize = case proplists:get_value(io_blocksize, Options) of
-        BS when is_integer(BS) andalso BS >= 1 ->
-            BS;
-        undefined ->
-            ?IO_BLOCKSIZE;
-        Bad_Arg ->
-            Error1 = #yaml_parser_error{
-              name  = invalid_parser_option,
-              extra = [{option, {io_blocksize, Bad_Arg}}]
-            },
-            Parser1 = add_error(Parser, Error1,
-              "Invalid value for option \"io_blocksize\": "
-              "it must be a positive interger, expressed in bytes~n", []),
-            return(Parser1)
-    end,
+    Blocksize = proplists:get_value(io_blocksize, Options, ?IO_BLOCKSIZE),
     case file:open(Filename, [read, binary]) of
         {ok, FD} ->
             %% The file is read in binary mode. The scanner is
@@ -874,13 +850,16 @@ start_doc(#yaml_parser{doc_started = true} = Parser,
     %% new one.
     Parser1 = end_doc(Parser, Line, Col, Insert_At),
     start_doc(Parser1, Line, Col, next_insert_at(Insert_At, 1));
-start_doc(#yaml_parser{doc_version = Version, tags = Tags} = Parser,
+start_doc(
+  #yaml_parser{options = Options, doc_version = Version, tags = Tags} = Parser,
   Line, Col, Insert_At) ->
     %% When a document starts, we set the version to
     %% ?IMPLICIT_DOC_VERSION if no YAML directive were specified.
+    Forced   = proplists:get_value(doc_version, Options),
     Version1 = case Version of
-        undefined -> ?IMPLICIT_YAML_VERSION;
-        _         -> Version
+        _ when Forced /= undefined -> Forced;
+        undefined                  -> ?IMPLICIT_YAML_VERSION;
+        _                          -> Version
     end,
     Token = #yaml_doc_start{
       version = Version1,
@@ -889,11 +868,6 @@ start_doc(#yaml_parser{doc_version = Version, tags = Tags} = Parser,
       column  = Col
     },
     Parser1 = case Version1 of
-        {Major, Minor} when
-        Major <  ?MAX_YAML_MAJOR_VERSION_SUPPORTED orelse
-        (Major == ?MAX_YAML_MAJOR_VERSION_SUPPORTED andalso
-         Minor =< ?MAX_YAML_MINOR_VERSION_SUPPORTED) ->
-            Parser;
         {Major, Minor} when Major < ?MIN_YAML_MAJOR_VERSION_SUPPORTED orelse
         (Major == ?MIN_YAML_MAJOR_VERSION_SUPPORTED andalso
          Minor < ?MIN_YAML_MINOR_VERSION_SUPPORTED) ->
@@ -913,6 +887,12 @@ start_doc(#yaml_parser{doc_version = Version, tags = Tags} = Parser,
                 ?MIN_YAML_MINOR_VERSION_SUPPORTED
               ]),
             return(Parser0);
+        {Major, Minor} when
+        Major <  ?MAX_YAML_MAJOR_VERSION_SUPPORTED orelse
+        (Major == ?MAX_YAML_MAJOR_VERSION_SUPPORTED andalso
+         Minor =< ?MAX_YAML_MINOR_VERSION_SUPPORTED) ->
+            %% Version supported.
+            Parser;
         {Major, Minor} when Major > ?MAX_YAML_MAJOR_VERSION_SUPPORTED ->
             %% The document's version is not supported at all (major
             %% above maximum supporter major).
@@ -4160,6 +4140,41 @@ setup_default_tags(Parser) ->
 %% -------------------------------------------------------------------
 %% Internal functions.
 %% -------------------------------------------------------------------
+
+check_options(Parser, [{doc_version, {Major, Minor}} | Rest]) when
+  is_integer(Major) andalso Major >= 0 andalso
+  is_integer(Minor) andalso Minor >= 0 ->
+    check_options(Parser, Rest);
+check_options(Parser, [{io_blocksize, BS} | Rest])
+  when is_integer(BS) andalso BS >= 1 ->
+    check_options(Parser, Rest);
+check_options(Parser, [{token_fun, Fun} | Rest])
+  when is_function(Fun, 1) ->
+    check_options(Parser, Rest);
+check_options(Parser, [Option | _]) ->
+    Error = #yaml_parser_error{
+      name  = invalid_parser_option,
+      extra = [{option, Option}]
+    },
+    Parser1 = case Option of
+        {doc_version, _} ->
+            add_error(Parser, Error,
+              "Invalid value for option \"doc_version\": "
+              "it must be a tuple of the form {Major, Minor} "
+              "where Major and Minor are positive integers~n", []);
+        {io_blocksize, _} ->
+            add_error(Parser, Error,
+              "Invalid value for option \"io_blocksize\": "
+              "it must be a positive interger, expressed in bytes~n", []);
+        {token_fun, _} ->
+            add_error(Parser, Error,
+              "Invalid value for option \"token_fun\": "
+              "it must be a function taking the parser state "
+              "as its sole argument~n", [])
+    end,
+    return(Parser1);
+check_options(_, []) ->
+    ok.
 
 next_state(Parser, State) ->
     State(Parser#yaml_parser{stream_state = State}).

@@ -4,6 +4,7 @@
 ?_assertMatch(
   {yaml_parser,
     string,
+    [],
     <<>>,
     19,
     true,

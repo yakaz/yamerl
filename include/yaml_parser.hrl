@@ -1,5 +1,5 @@
 %% -------------------------------------------------------------------
-%% Data types specifications.
+%% Supported versions range.
 %% -------------------------------------------------------------------
 
 -define(MIN_YAML_MAJOR_VERSION_SUPPORTED, 1).
@@ -10,6 +10,13 @@
     ?MAX_YAML_MAJOR_VERSION_SUPPORTED,
     ?MAX_YAML_MINOR_VERSION_SUPPORTED
   }).
+
+%% -------------------------------------------------------------------
+%% Options.
+%% -------------------------------------------------------------------
+
+-type yaml_parser_option() :: {io_blocksize, pos_integer()}
+                            | {document_version, document_version()}.
 
 %% -------------------------------------------------------------------
 %% Errors and warnings.

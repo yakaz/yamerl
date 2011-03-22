@@ -4,6 +4,7 @@
 ?_assertThrow(
   {yaml_parser,
     {file,"${FILENAME}"},
+    [{io_blocksize, 1}],
     <<233, $\n>>,
     3,
     false,

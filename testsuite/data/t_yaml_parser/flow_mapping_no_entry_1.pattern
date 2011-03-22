@@ -4,6 +4,7 @@
 ?_assertThrow(
   {yaml_parser,
     {file,"${FILENAME}"},
+    [],
     <<>>,
     20,
     true,

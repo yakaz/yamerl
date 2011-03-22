@@ -4,6 +4,7 @@
 ?_assertMatch(
   {yaml_parser,
     {file,"${FILENAME}"},
+    [{io_blocksize, 1}],
     <<>>,
     40,
     true,
