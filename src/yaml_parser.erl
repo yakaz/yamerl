@@ -163,7 +163,7 @@
     %%
 
     %% Callbacks.
-    token_fun :: fun((yaml_token()) -> ok | {ok, fun()}) | undefined,
+    token_fun :: yaml_parser_token_fun() | undefined,
 
     %% List of scanned tokens with counters.
     tokens        = []  :: [yaml_token()],

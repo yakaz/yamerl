@@ -15,8 +15,11 @@
 %% Options.
 %% -------------------------------------------------------------------
 
--type yaml_parser_option() :: {io_blocksize, pos_integer()}
-                            | {document_version, document_version()}.
+-type yaml_parser_token_fun() :: fun((yaml_token()) -> ok | {ok, fun()}).
+
+-type yaml_parser_option() :: {document_version, document_version()}
+                            | {io_blocksize, pos_integer()}
+                            | {token_fun, yaml_parser_token_fun()}.
 
 %% -------------------------------------------------------------------
 %% Errors and warnings.
