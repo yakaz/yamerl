@@ -2,7 +2,12 @@
 
 erlsrcdir = $(ERLANG_INSTALL_LIB_DIR_yaml)/src
 
-dist_erlsrc_DATA = yaml_parser.erl
+dist_erlsrc_DATA = yaml_parser.erl					\
+		   yaml_repr.erl					\
+		   yaml_node_seq.erl					\
+		   yaml_node_map.erl					\
+		   yaml_node_str.erl					\
+		   yaml_node_erlang_fun.erl
 
 CLEANFILES = Emakefile
 
