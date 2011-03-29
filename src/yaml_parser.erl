@@ -15,7 +15,10 @@
     file/2,
     next_chunk/3,
     next_chunk/2,
-    last_chunk/2
+    last_chunk/2,
+    get_token_fun/1,
+    set_token_fun/2,
+    option_names/0
   ]).
 
 %% -------------------------------------------------------------------
@@ -349,11 +352,9 @@ new(Source) ->
     new(Source, []).
 
 new(Source, Options) ->
-    Parser = #yaml_parser{
-      source = Source
-    },
-    check_options(Parser, Options),
-    Parser#yaml_parser{
+    check_options(Options),
+    #yaml_parser{
+      source    = Source,
       options   = Options,
       token_fun = proplists:get_value(token_fun, Options)
     }.
@@ -449,6 +450,16 @@ file2(#yaml_parser{source = {file, Filename}} = Parser, FD, Blocksize) ->
               [Filename, file:format_error(Reason)]),
             return(Parser1)
     end.
+
+%% -------------------------------------------------------------------
+%% Public API: get/set the token function.
+%% -------------------------------------------------------------------
+
+get_token_fun(#yaml_parser{token_fun = Fun}) ->
+    Fun.
+
+set_token_fun(Parser, Fun) when is_function(Fun, 1) ->
+    Parser#yaml_parser{token_fun = Fun}.
 
 %% -------------------------------------------------------------------
 %% Determine encoding and decode Unicode.
@@ -4056,15 +4067,31 @@ do_emit_token(
           last_token    = Token
         }
     catch
+        throw:Error when is_record(Error, yaml_parser_error) ->
+            Parser1 = add_error(Parser, Error),
+            Parser2 = Parser1#yaml_parser{
+              tks_queued    = Queued1,
+              tks_first_idx = First1,
+              tks_emitted   = Emitted + 1,
+              last_token    = Token
+            },
+            if
+                Error#yaml_parser_error.type == error -> return(Parser2);
+                true                                  -> Parser2
+            end;
         throw:{Fun2, Error} when is_record(Error, yaml_parser_error) ->
             Parser1 = add_error(Parser, Error),
-            Parser1#yaml_parser{
+            Parser2 = Parser1#yaml_parser{
               token_fun     = Fun2,
               tks_queued    = Queued1,
               tks_first_idx = First1,
               tks_emitted   = Emitted + 1,
               last_token    = Token
-            }
+            },
+            if
+                Error#yaml_parser_error.type == error -> return(Parser2);
+                true                                  -> Parser2
+            end
     end.
 
 next_insert_at(tail, _)      -> tail;
@@ -4141,40 +4168,64 @@ setup_default_tags(Parser) ->
 %% Internal functions.
 %% -------------------------------------------------------------------
 
-check_options(Parser, [{doc_version, {Major, Minor}} | Rest]) when
+option_names() ->
+    [
+      doc_version,
+      io_blocksize,
+      token_fun
+    ].
+
+check_options([Option | Rest]) ->
+    case is_option_valid(Option) of
+        true  -> check_options(Rest);
+        false -> invalid_option(Option)
+    end;
+check_options([]) ->
+    ok.
+
+is_option_valid({doc_version, {Major, Minor}}) when
   is_integer(Major) andalso Major >= 0 andalso
   is_integer(Minor) andalso Minor >= 0 ->
-    check_options(Parser, Rest);
-check_options(Parser, [{io_blocksize, BS} | Rest])
+    true;
+is_option_valid({io_blocksize, BS})
   when is_integer(BS) andalso BS >= 1 ->
-    check_options(Parser, Rest);
-check_options(Parser, [{token_fun, Fun} | Rest])
+    true;
+is_option_valid({token_fun, Fun})
   when is_function(Fun, 1) ->
-    check_options(Parser, Rest);
-check_options(Parser, [Option | _]) ->
+    true;
+is_option_valid(_) ->
+    false.
+
+invalid_option(Option) ->
     Error = #yaml_parser_error{
       name  = invalid_parser_option,
       extra = [{option, Option}]
     },
-    Parser1 = case Option of
+    Error1 = case Option of
         {doc_version, _} ->
-            add_error(Parser, Error,
-              "Invalid value for option \"doc_version\": "
+            Error#yaml_parser_error{
+              text = "Invalid value for option \"doc_version\": "
               "it must be a tuple of the form {Major, Minor} "
-              "where Major and Minor are positive integers~n", []);
+              "where Major and Minor are positive integers\n"
+            };
         {io_blocksize, _} ->
-            add_error(Parser, Error,
-              "Invalid value for option \"io_blocksize\": "
-              "it must be a positive interger, expressed in bytes~n", []);
+            Error#yaml_parser_error{
+              text = "Invalid value for option \"io_blocksize\": "
+              "it must be a positive interger, expressed in bytes\n"
+            };
         {token_fun, _} ->
-            add_error(Parser, Error,
-              "Invalid value for option \"token_fun\": "
+            Error#yaml_parser_error{
+              text = "Invalid value for option \"token_fun\": "
               "it must be a function taking the parser state "
-              "as its sole argument~n", [])
+              "as its sole argument\n"
+            };
+        _ ->
+            Error#yaml_parser_error{
+              text = io_lib:flatten(io_lib:format("Unknown option \"~w\"~n",
+                  [Option]))
+            }
     end,
-    return(Parser1);
-check_options(_, []) ->
-    ok.
+    throw(Error1).
 
 next_state(Parser, State) ->
     State(Parser#yaml_parser{stream_state = State}).
