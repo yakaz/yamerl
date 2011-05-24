@@ -11,4 +11,10 @@ Section: devel
 Priority: optional
 Depends: ${erlang:Depends}
 Description: YAML parser
+ YAML is a human-friendly, cross language, Unicode based data
+ serialization language designed around the common native data types of
+ agile programming languages
+ .
+ This parser conforms to the version 1.2 of the specification, 3rd
+ edition (2009-10-01)
  .
