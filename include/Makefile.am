@@ -2,7 +2,9 @@
 
 headersdir = $(ERLANG_INSTALL_LIB_DIR_yaml)/include
 
-dist_headers_DATA = yaml_parser.hrl					\
+dist_headers_DATA = yaml_types.hrl					\
+		    yaml_parser.hrl					\
 		    yaml_tokens.hrl					\
 		    yaml_repr.hrl					\
-		    yaml_nodes.hrl
+		    yaml_nodes.hrl					\
+		    yaml_nodes_yakaz.hrl

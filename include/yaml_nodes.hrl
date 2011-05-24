@@ -1,17 +1,68 @@
+-ifndef(yaml_nodes_hrl).
+-define(yaml_nodes_hrl, true).
+
+-include("yaml_types.hrl").
+
+%% CAUTION:
+%% Records defined in this file have default values for all members.
+%% Those default values are often bad values but this is needed so that
+%% Erlang won't add "undefined" in our back to the allowed values in the
+%% type specifications.
+
 %% -------------------------------------------------------------------
 %% Nodes specifications.
 %% -------------------------------------------------------------------
 
-%% String.
--record(yaml_string, {
+%% String (Failsafe Schema).
+-record(yaml_str, {
     module = undefined         :: atom(),
     tag    = "!"               :: tag_uri(),
     pres   = []                :: list(),
     text   = ""                :: string()
   }).
--type yaml_string()            :: #yaml_string{}.
--type yaml_simple_string()     :: string().
+-type yaml_str()               :: #yaml_str{}.
+-type yaml_simple_str()        :: string().
 
+%% Null (Core Schema).
+-record(yaml_null, {
+    module = undefined         :: atom(),
+    tag    = "!"               :: tag_uri(),
+    pres   = []                :: list()
+  }).
+-type yaml_null()              :: #yaml_null{}.
+-type yaml_simple_null()       :: null.
+
+%% Boolean (Core Schema).
+-record(yaml_bool, {
+    module = undefined         :: atom(),
+    tag    = "!"               :: tag_uri(),
+    pres   = []                :: list(),
+    value  = true              :: boolean()
+  }).
+-type yaml_bool()              :: #yaml_bool{}.
+-type yaml_simple_bool()       :: boolean().
+
+%% Integer (Core Schema).
+-record(yaml_int, {
+    module = undefined         :: atom(),
+    tag    = "!"               :: tag_uri(),
+    pres   = []                :: list(),
+    value  = 0                 :: integer()
+  }).
+-type yaml_int()               :: #yaml_int{}.
+-type yaml_simple_int()        :: integer().
+
+%% Erlang atom.
+-record(yaml_erlang_atom, {
+    module = undefined         :: atom(),
+    tag    = "!"               :: tag_uri(),
+    pres   = []                :: list(),
+    name                       :: atom()
+  }).
+-type yaml_erlang_atom()        :: #yaml_erlang_atom{}.
+-type yaml_simple_erlang_atom() :: atom().
+
+%% Erlang anonymous function.
 -record(yaml_erlang_fun, {
     module = undefined         :: atom(),
     tag    = "!"               :: tag_uri(),
@@ -22,30 +73,50 @@
 -type yaml_erlang_fun()        :: #yaml_erlang_fun{}.
 -type yaml_simple_erlang_fun() :: function().
 
--record(yaml_sequence, {
+%% Timestamp.
+-record(yaml_timestamp, {
+    module = undefined         :: atom(),
+    tag    = "!"               :: tag_uri(),
+    pres   = []                :: list(),
+    year                       :: calendar:year() | undefined,
+    month                      :: calendar:month() | undefined,
+    day                        :: calendar:day() | undefined,
+    hour   = 0                 :: calendar:hour(),
+    minute = 0                 :: calendar:minute(),
+    second = 0                 :: calendar:second(),
+    frac   = 0                 :: non_neg_integer(),
+    tz     = 0                 :: integer()
+  }).
+-type yaml_timestamp()         :: #yaml_timestamp{}.
+-type yaml_simple_timestamp()  :: calendar:t_datetime()
+                                | {undefined, calendar:t_time()}.
+
+%% Sequence (Failsafe Schema).
+-record(yaml_seq, {
     module  = undefined        :: atom(),
     tag     = "!"              :: tag_uri(),
     pres    = []               :: list(),
     entries = []               :: [yaml_node()],
     count   = 0                :: non_neg_integer()
   }).
--type yaml_sequence()          :: #yaml_sequence{}.
--type yaml_simple_sequence()   :: [yaml_simple_node()].
--type yaml_partial_sequence()  :: {
+-type yaml_seq()               :: #yaml_seq{}.
+-type yaml_simple_seq()        :: [yaml_simple_node()].
+-type yaml_partial_seq()       :: {
   atom(),
   {seq, non_neg_integer()},
   [yaml_node() | yaml_simple_node() | '$insert_here']
 }.
 
--record(yaml_mapping, {
+%% Mapping (Failsafe Schema).
+-record(yaml_map, {
     module = undefined         :: atom(),
     tag    = "!"               :: tag_uri(),
     pres   = []                :: list(),
     pairs  = []                :: [{yaml_node(), yaml_node()}]
   }).
--type yaml_mapping()           :: #yaml_mapping{}.
--type yaml_simple_mapping()    :: [{yaml_simple_node(), yaml_simple_node()}].
--type yaml_partial_mapping()   :: {
+-type yaml_map()               :: #yaml_map{}.
+-type yaml_simple_map()        :: [{yaml_simple_node(), yaml_simple_node()}].
+-type yaml_partial_map()       :: {
   atom(),
   {map, yaml_node() | yaml_simple_node() | undefined},
   [{
@@ -54,30 +125,68 @@
     }]
 }.
 
--record(yaml_document, {
+%% Document.
+-record(yaml_doc, {
     root = undefined           :: yaml_node() | yaml_simple_node() | undefined
   }).
--type yaml_document()          :: #yaml_document{root :: yaml_node()}.
--type yaml_simple_document()   :: #yaml_document{root :: yaml_simple_node()}.
--type yaml_partial_document()  :: #yaml_document{}.
+-type yaml_doc()               :: #yaml_doc{root :: yaml_node()}.
+-type yaml_simple_doc()        :: #yaml_doc{root :: yaml_simple_node()}.
+-type yaml_partial_doc()       :: #yaml_doc{}.
 
 %% -------------------------------------------------------------------
 %% Final data type specifications.
 %% -------------------------------------------------------------------
 
--type yaml_node()         :: yaml_sequence()
-                           | yaml_mapping()
-                           | yaml_string()
-                           | yaml_erlang_fun().
+-type yaml_user_node()        :: tuple().
+-type yaml_user_simple_node() :: term().
 
--type yaml_simple_node()  :: yaml_simple_sequence()
-                           | yaml_simple_mapping()
-                           | yaml_simple_string()
-                           | yaml_simple_erlang_fun().
-
--type yaml_partial_node() :: yaml_partial_sequence()
-                           | yaml_partial_mapping()
-                           | yaml_string()
+-type yaml_node()         :: yaml_seq()
+                           | yaml_map()
+                           | yaml_str()
+                           | yaml_null()
+                           | yaml_bool()
+                           | yaml_int()
+                           | yaml_timestamp()
+                           | yaml_erlang_atom()
                            | yaml_erlang_fun()
-                           | yaml_simple_string()
-                           | yaml_simple_erlang_fun().
+                           | yaml_user_node().
+
+-type yaml_simple_node()  :: yaml_simple_seq()
+                           | yaml_simple_map()
+                           | yaml_simple_str()
+                           | yaml_simple_null()
+                           | yaml_simple_bool()
+                           | yaml_simple_int()
+                           | yaml_simple_timestamp()
+                           | yaml_simple_erlang_atom()
+                           | yaml_simple_erlang_fun()
+                           | yaml_user_simple_node().
+
+-type yaml_partial_node() :: yaml_partial_seq()
+                           | yaml_partial_map()
+                           | yaml_str()
+                           | yaml_null()
+                           | yaml_bool()
+                           | yaml_int()
+                           | yaml_timestamp()
+                           | yaml_erlang_atom()
+                           | yaml_erlang_fun()
+                           | yaml_user_node()
+                           | yaml_simple_str()
+                           | yaml_simple_null()
+                           | yaml_simple_bool()
+                           | yaml_simple_int()
+                           | yaml_simple_timestamp()
+                           | yaml_simple_erlang_atom()
+                           | yaml_simple_erlang_fun()
+                           | yaml_user_simple_node().
+
+%% -------------------------------------------------------------------
+%% Macros to access common members of the node records.
+%% -------------------------------------------------------------------
+
+-define(NODE_MOD(N),  element(#yaml_str.module, N)).
+-define(NODE_TAG(N),  element(#yaml_str.tag, N)).
+-define(NODE_PRES(N), element(#yaml_str.pres, N)).
+
+-endif.
