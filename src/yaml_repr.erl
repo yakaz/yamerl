@@ -15,10 +15,16 @@
     file/2,
     next_chunk/3,
     next_chunk/2,
-    last_chunk/2
+    last_chunk/2,
+    get_pres_details/1,
+    node_line/1,
+    node_column/1
   ]).
 
--define(DEFAULT_NODE_MODS, [
+-define(CORE_SCHEMA_MODS, [
+    yaml_node_null,
+    yaml_node_bool,
+    yaml_node_int,
     yaml_node_str,
     yaml_node_seq,
     yaml_node_map
@@ -74,12 +80,58 @@ file(Filename, Options) ->
     Repr#yaml_repr.docs.
 
 %% -------------------------------------------------------------------
+%% Presentation details.
+%% -------------------------------------------------------------------
+
+get_pres_details(Token) ->
+    Line   = ?TOKEN_LINE(Token),
+    Column = ?TOKEN_COLUMN(Token),
+    [{line, Line}, {column, Column}].
+
+%% -------------------------------------------------------------------
+%% Node informations.
+%% -------------------------------------------------------------------
+
+node_line(Node) ->
+    case node_pres(Node) of
+        undefined -> undefined;
+        Pres      -> proplists:get_value(line, Pres)
+    end.
+
+node_column(Node) ->
+    case node_pres(Node) of
+        undefined -> undefined;
+        Pres      -> proplists:get_value(column, Pres)
+    end.
+
+node_pres(Node) when
+  is_record(Node, yaml_seq) orelse
+  is_record(Node, yaml_map) orelse
+  is_record(Node, yaml_str) orelse
+  is_record(Node, yaml_null) orelse
+  is_record(Node, yaml_bool) orelse
+  is_record(Node, yaml_int) orelse
+  is_record(Node, yaml_timestamp) orelse
+  is_record(Node, yaml_erlang_atom) orelse
+  is_record(Node, yaml_erlang_fun) ->
+    ?NODE_PRES(Node);
+node_pres(Node) when is_tuple(Node) ->
+    %% For user-defined nodes, we call the module responsible for it.
+    Mod = ?NODE_MOD(Node),
+    try
+        Mod:node_pres(Node)
+    catch
+        error:undef ->
+            undefined
+    end.
+
+%% -------------------------------------------------------------------
 %% Representation.
 %% -------------------------------------------------------------------
 
 represent(Repr, #yaml_doc_start{}) ->
     %% Prepare a document node.
-    Doc = #yaml_document{},
+    Doc = #yaml_doc{},
     Repr1 = Repr#yaml_repr{
       current_doc = [Doc]
     },
@@ -107,22 +159,22 @@ represent(
         #yaml_collection_start{tag = T} -> T;
         #yaml_scalar{tag = T}           -> T
     end,
-    Mod = case Tag of
+    Ret = case Tag of
         #yaml_tag{uri = {non_specific, _}} ->
             %% The node has a non-specific tag. We let each module
             %% decides if they want to represent the node.
-            find_matching_mod(Repr, Mods, Token);
+            try_represent(Repr, Mods, Token);
         #yaml_tag{uri = URI} ->
             %% We look up this URI in the tag's index.
             case proplists:get_value(URI, Tags) of
-                M when M /= undefined ->
-                    M;
+                Mod when Mod /= undefined ->
+                    Mod:represent_token(Repr, undefined, Token);
                 undefined ->
                     %% This tag isn't handled by anything!
                     Text = lists:flatten(io_lib:format(
                         "Tag \"~s\" unrecognized by any module~n", [URI])),
                     Error = #yaml_parser_error{
-                      name   = unrecognized_tag,
+                      name   = unrecognized_node,
                       token  = Tag,
                       text   = Text,
                       line   = ?TOKEN_LINE(Tag),
@@ -131,34 +183,36 @@ represent(
                     throw(Error)
             end
     end,
-    Ret = Mod:represent_token(Repr, undefined, Token),
     handle_represent_return(Repr, Doc, Ret);
 
-represent(#yaml_repr{current_doc = [{Mod, _, _} = Node | Doc]} = Repr, Token) ->
+represent(
+  #yaml_repr{current_doc =
+    [#unfinished_node{module = Mod} = Node | Doc]} = Repr,
+  Token) ->
     %% This token continues a node. We call the current node's module to
     %% handle it.
     Ret = Mod:represent_token(Repr, Node, Token),
     handle_represent_return(Repr, Doc, Ret).
 
-find_matching_mod(Repr, [Mod | Rest], Token) ->
-    case Mod:matches(Repr, Token) of
-        true  -> Mod;
-        false -> find_matching_mod(Repr, Rest, Token)
+try_represent(Repr, [Mod | Rest], Token) ->
+    case Mod:try_represent_token(Repr, undefined, Token) of
+        unrecognized -> try_represent(Repr, Rest, Token);
+        Ret          -> Ret
     end;
-find_matching_mod(_, [], Token) ->
+try_represent(_, [], Token) ->
     Error = #yaml_parser_error{
-      name   = unrecognized_tag,
+      name   = unrecognized_node,
       token  = Token,
-      text   = "No module found to handle token~n",
+      text   = "No module found to handle node~n",
       line   = ?TOKEN_LINE(Token),
       column = ?TOKEN_COLUMN(Token)
     },
     throw(Error).
 
 represent_parent(#yaml_repr{docs = Docs, docs_count = Count} = Repr,
-  [#yaml_document{} = Doc], Root) ->
+  [#yaml_doc{} = Doc], Root) ->
     %% This node is the root of the document.
-    Doc1 = Doc#yaml_document{
+    Doc1 = Doc#yaml_doc{
       root = Root
     },
     Repr1 = Repr#yaml_repr{
@@ -169,7 +223,7 @@ represent_parent(#yaml_repr{docs = Docs, docs_count = Count} = Repr,
       anchors              = dict:new()
     },
     return_new_fun(Repr1);
-represent_parent(Repr, [{Mod, _, _} = Node | Doc], Child) ->
+represent_parent(Repr, [#unfinished_node{module = Mod} = Node | Doc], Child) ->
     %% We call the parent node's module to handle this new child node.
     Ret = Mod:represent_node(Repr, Node, Child),
     handle_represent_return(Repr, Doc, Ret).
@@ -196,14 +250,24 @@ return_new_fun(Repr) ->
 %% Node modules.
 %% -------------------------------------------------------------------
 
-setup_node_mods(#yaml_repr{options = Options} = Repr) ->
-    Mods  = proplists:get_value(node_mods, Options, []) ++ ?DEFAULT_NODE_MODS,
+setup_node_mods(Repr) ->
+    Mods  = yaml_app:get_param(node_mods) ++ ?CORE_SCHEMA_MODS,
+    Auto  = filter_autodetected_node_mods(Mods, []),
     Tags  = index_tags(Mods, []),
     Repr1 = Repr#yaml_repr{
-      mods = Mods,
+      mods = Auto,
       tags = Tags
     },
     return_new_fun(Repr1).
+
+filter_autodetected_node_mods([Mod | Rest], Auto) ->
+    Auto1 = case erlang:function_exported(Mod, try_represent_token, 3) of
+        true  -> [Mod | Auto];
+        false -> Auto
+    end,
+    filter_autodetected_node_mods(Rest, Auto1);
+filter_autodetected_node_mods([], Auto) ->
+    lists:reverse(Auto).
 
 index_tags([Mod | Rest], Tags) ->
     try
@@ -257,20 +321,6 @@ check_options([]) ->
 
 is_option_valid({simple_structs, Flag}) when is_boolean(Flag) ->
     true;
-is_option_valid({node_mods, Mods}) when is_list(Mods) ->
-    Fun = fun(Mod) ->
-        try
-            Mod:module_info(),
-            false
-        catch
-            _:_ ->
-                true
-        end
-    end,
-    case lists:filter(Fun, Mods) of
-        [] -> true;
-        _  -> false
-    end;
 is_option_valid(_) ->
     false.
 
@@ -284,11 +334,6 @@ invalid_option(Option) ->
             Error#yaml_parser_error{
               text = "Invalid value for option \"simple_structs\": "
               "it must be a boolean\n"
-            };
-        {node_mods, _} ->
-            Error#yaml_parser_error{
-              text = "Invalid value for option \"node_mods\": "
-              "it must be a list of module names (atoms)\n"
             };
         _ ->
             Error#yaml_parser_error{
