@@ -18,7 +18,8 @@
     last_chunk/2,
     get_token_fun/1,
     set_token_fun/2,
-    option_names/0
+    option_names/0,
+    get_errors/1
   ]).
 
 %% -------------------------------------------------------------------
@@ -432,8 +433,8 @@ file2(#yaml_parser{source = {file, Filename}} = Parser, FD, Blocksize) ->
                         Parser1
                 end
             catch
-                throw:Exception when is_record(Exception, yaml_parser) ->
-                    %% Close the file an throw the exception again.
+                throw:{yaml_parser, _} = Exception ->
+                    %% Close the file and throw the exception again.
                     file:close(FD),
                     throw(Exception)
             end;
@@ -460,6 +461,15 @@ get_token_fun(#yaml_parser{token_fun = Fun}) ->
 
 set_token_fun(Parser, Fun) when is_function(Fun, 1) ->
     Parser#yaml_parser{token_fun = Fun}.
+
+%% -------------------------------------------------------------------
+%% Errors and warnings handling.
+%% -------------------------------------------------------------------
+
+get_errors(#yaml_parser{errors = Errors}) ->
+    lists:reverse(Errors);
+get_errors(#yaml_parser_error{} = Error) ->
+    [Error].
 
 %% -------------------------------------------------------------------
 %% Determine encoding and decode Unicode.
@@ -1614,16 +1624,17 @@ parse_flow_entry(
       "Empty flow collection entry not allowed~n", []),
     Parser2 = next_col(Parser1, 1, Rest),
     next_state(Parser2, fun find_next_token/1);
-parse_flow_entry(#yaml_parser{chars = [_ | Rest]} = Parser) ->
+parse_flow_entry(#yaml_parser{chars = [_ | Rest],
+  cur_coll = #fcoll{kind = Kind}} = Parser) ->
     Parser1 = finish_incomplete_flow_entries(Parser),
     Parser2 = remove_impl_key_pos(Parser1),
     Parser3 = allow_impl_key(Parser2, true),
-    Parser4 = case Parser3#yaml_parser.cur_coll of
-        #fcoll{kind = sequence} ->
+    Parser4 = case Kind of
+        sequence ->
             Parser3#yaml_parser{
               pending_entry = true
             };
-        #fcoll{kind = mapping} ->
+        mapping ->
             Parser3#yaml_parser{
               waiting_for_kvpair = true
             }
@@ -3452,7 +3463,6 @@ save_impl_key_pos(
               chars_idx = Chars_Index,
               token_idx = First + Queued
             },
-            catch throw(bla),
             Parser#yaml_parser{ik_stack = [Impl_Key | Rest]};
         Required ->
             Error = #yaml_parser_error{
@@ -4446,8 +4456,11 @@ add_error(
     }.
 
 return(#yaml_parser{has_errors = true} = Parser) ->
-    throw(Parser);
+    throw_parser_state(Parser);
 return(#yaml_parser{raw_eos = true, chars_len = 0} = Parser) ->
     Parser;
 return(Parser) ->
     {continue, Parser}.
+
+throw_parser_state(Parser) ->
+    throw({yaml_parser, Parser}).
