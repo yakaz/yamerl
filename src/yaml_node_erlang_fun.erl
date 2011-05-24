@@ -8,8 +8,8 @@
 %% Public API.
 -export([
     tags/0,
-    matches/2,
-    represent_token/3
+    represent_token/3,
+    node_pres/1
   ]).
 
 -define(TAG, "tag:erlang.org,2011:fun").
@@ -19,8 +19,6 @@
 %% -------------------------------------------------------------------
 
 tags() -> [?TAG].
-
-matches(_, _) -> false.
 
 represent_token(#yaml_repr{simple_structs = Simple},
   undefined, #yaml_scalar{text = Text} = Token) ->
@@ -33,9 +31,11 @@ represent_token(#yaml_repr{simple_structs = Simple},
                         Simple ->
                             Fun;
                         true ->
+                            Pres = yaml_repr:get_pres_details(Token),
                             #yaml_erlang_fun{
                               module   = ?MODULE,
                               tag      = ?TAG,
+                              pres     = Pres,
                               function = Fun,
                               text     = Text
                             }
@@ -60,4 +60,16 @@ represent_token(#yaml_repr{simple_structs = Simple},
               column = 0
             },
             throw(Error)
-    end.
+    end;
+represent_token(_, _, Token) ->
+    Error = #yaml_parser_error{
+      name   = not_an_erlang_fun,
+      token  = Token,
+      text   = "Invalid Erlang anonymous function",
+      line   = ?TOKEN_LINE(Token),
+      column = ?TOKEN_COLUMN(Token)
+    },
+    throw(Error).
+
+node_pres(Node) ->
+    ?NODE_PRES(Node).

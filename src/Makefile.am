@@ -7,6 +7,13 @@ dist_erlsrc_DATA = yaml_parser.erl					\
 		   yaml_node_seq.erl					\
 		   yaml_node_map.erl					\
 		   yaml_node_str.erl					\
+		   yaml_node_null.erl					\
+		   yaml_node_bool.erl					\
+		   yaml_node_int.erl					\
+		   yaml_node_size.erl					\
+		   yaml_node_timestamp.erl				\
+		   yaml_node_ipaddr.erl					\
+		   yaml_node_erlang_atom.erl				\
 		   yaml_node_erlang_fun.erl
 
 CLEANFILES = Emakefile

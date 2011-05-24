@@ -1,4 +1,4 @@
--module(yaml_node_str).
+-module(yaml_node_erlang_atom).
 
 -include("yaml_parser.hrl").
 -include("yaml_tokens.hrl").
@@ -8,12 +8,11 @@
 %% Public API.
 -export([
     tags/0,
-    try_represent_token/3,
     represent_token/3,
     node_pres/1
   ]).
 
--define(TAG, "tag:yaml.org,2002:str").
+-define(TAG, "tag:erlang.org,2011:atom").
 
 %% -------------------------------------------------------------------
 %% Public API.
@@ -21,31 +20,25 @@
 
 tags() -> [?TAG].
 
-try_represent_token(Repr, Node, #yaml_scalar{} = Token) ->
-    represent_token(Repr, Node, Token);
-try_represent_token(_, _, _) ->
-    unrecognized.
-
 represent_token(#yaml_repr{simple_structs = true},
   undefined, #yaml_scalar{text = Text}) ->
-    Node = Text,
-    {finished, Node};
+    {finished, list_to_atom(Text)};
 represent_token(#yaml_repr{simple_structs = false},
   undefined, #yaml_scalar{text = Text} = Token) ->
     Pres = yaml_repr:get_pres_details(Token),
-    Node = #yaml_str{
-      module = ?MODULE,
-      tag    = ?TAG,
-      pres   = Pres,
-      text   = Text
+    Node = #yaml_erlang_atom{
+      module   = ?MODULE,
+      tag      = ?TAG,
+      pres     = Pres,
+      name     = list_to_atom(Text)
     },
     {finished, Node};
 
 represent_token(_, _, Token) ->
     Error = #yaml_parser_error{
-      name   = not_a_string,
+      name   = not_an_erlang_atom,
       token  = Token,
-      text   = "Invalid string",
+      text   = "Invalid Erlang atom",
       line   = ?TOKEN_LINE(Token),
       column = ?TOKEN_COLUMN(Token)
     },

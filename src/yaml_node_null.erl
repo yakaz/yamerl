@@ -1,6 +1,5 @@
--module(yaml_node_str).
+-module(yaml_node_null).
 
--include("yaml_parser.hrl").
 -include("yaml_tokens.hrl").
 -include("yaml_repr.hrl").
 -include("yaml_nodes.hrl").
@@ -13,7 +12,7 @@
     node_pres/1
   ]).
 
--define(TAG, "tag:yaml.org,2002:str").
+-define(TAG, "tag:yaml.org,2002:null").
 
 %% -------------------------------------------------------------------
 %% Public API.
@@ -21,35 +20,30 @@
 
 tags() -> [?TAG].
 
-try_represent_token(Repr, Node, #yaml_scalar{} = Token) ->
+try_represent_token(Repr, Node,
+  #yaml_scalar{tag = #yaml_tag{uri = {non_specific, "?"}},
+  text = Text} = Token) when
+  Text == "" orelse
+  Text == "null" orelse
+  Text == "Null" orelse
+  Text == "NULL" orelse
+  Text == "~" ->
     represent_token(Repr, Node, Token);
 try_represent_token(_, _, _) ->
     unrecognized.
 
 represent_token(#yaml_repr{simple_structs = true},
-  undefined, #yaml_scalar{text = Text}) ->
-    Node = Text,
-    {finished, Node};
+  undefined, #yaml_scalar{}) ->
+    {finished, null};
 represent_token(#yaml_repr{simple_structs = false},
-  undefined, #yaml_scalar{text = Text} = Token) ->
+  undefined, #yaml_scalar{} = Token) ->
     Pres = yaml_repr:get_pres_details(Token),
-    Node = #yaml_str{
+    Node = #yaml_null{
       module = ?MODULE,
       tag    = ?TAG,
-      pres   = Pres,
-      text   = Text
+      pres   = Pres
     },
-    {finished, Node};
-
-represent_token(_, _, Token) ->
-    Error = #yaml_parser_error{
-      name   = not_a_string,
-      token  = Token,
-      text   = "Invalid string",
-      line   = ?TOKEN_LINE(Token),
-      column = ?TOKEN_COLUMN(Token)
-    },
-    throw(Error).
+    {finished, Node}.
 
 node_pres(Node) ->
     ?NODE_PRES(Node).

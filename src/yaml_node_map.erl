@@ -1,5 +1,6 @@
 -module(yaml_node_map).
 
+-include("yaml_parser.hrl").
 -include("yaml_tokens.hrl").
 -include("yaml_repr.hrl").
 -include("yaml_nodes.hrl").
@@ -7,9 +8,10 @@
 %% Public API.
 -export([
     tags/0,
-    matches/2,
+    try_represent_token/3,
     represent_token/3,
-    represent_node/3
+    represent_node/3,
+    node_pres/1
   ]).
 
 -define(TAG, "tag:yaml.org,2002:map").
@@ -20,41 +22,75 @@
 
 tags() -> [?TAG].
 
-matches(_, #yaml_collection_start{kind = mapping}) -> true;
-matches(_, _)                                      -> false.
+try_represent_token(Repr, Node,
+  #yaml_collection_start{kind = mapping} = Token) ->
+    represent_token(Repr, Node, Token);
+try_represent_token(_, _, _) ->
+    unrecognized.
 
-represent_token(_, undefined, #yaml_collection_start{}) ->
-    Node = {?MODULE, {map, undefined}, []},
+represent_token(_, undefined, #yaml_collection_start{} = Token) ->
+    Pres = yaml_repr:get_pres_details(Token),
+    Node = #unfinished_node{
+      path = {map, undefined},
+      pres = Pres,
+      priv = []
+    },
     {unfinished, Node, false};
-represent_token(_, {Mod, Path_Comp, Pairs},
+represent_token(_, #unfinished_node{priv = Pairs} = Node,
   #yaml_mapping_key{}) ->
-    Node = {Mod, Path_Comp, [{'$insert_here', undefined} | Pairs]},
-    {unfinished, Node, false};
-represent_token(_, {Mod, Path_Comp, [{Key, undefined} | Pairs]},
+    Node1 = Node#unfinished_node{
+      priv = [{'$insert_here', undefined} | Pairs]
+    },
+    {unfinished, Node1, false};
+represent_token(_, #unfinished_node{priv = [{Key, undefined} | Pairs]} = Node,
   #yaml_mapping_value{}) ->
-    Node = {Mod, Path_Comp, [{Key, '$insert_here'} | Pairs]},
-    {unfinished, Node, false};
+    Node1 = Node#unfinished_node{
+      priv = [{Key, '$insert_here'} | Pairs]
+    },
+    {unfinished, Node1, false};
 
 represent_token(#yaml_repr{simple_structs = true},
-  {_, _, Pairs}, #yaml_collection_end{}) ->
+  #unfinished_node{priv = Pairs}, #yaml_collection_end{}) ->
     Node = lists:reverse(Pairs),
     {finished, Node};
 represent_token(#yaml_repr{simple_structs = false},
-  {_, _, Pairs}, #yaml_collection_end{}) ->
-    Node = #yaml_mapping{
+  #unfinished_node{pres = Pres, priv = Pairs}, #yaml_collection_end{}) ->
+    Node = #yaml_map{
       module = ?MODULE,
       tag    = ?TAG,
+      pres   = Pres,
       pairs  = lists:reverse(Pairs)
     },
-    {finished, Node}.
+    {finished, Node};
+
+represent_token(_, _, Token) ->
+    Error = #yaml_parser_error{
+      name   = not_a_mapping,
+      token  = Token,
+      text   = "Invalid mapping",
+      line   = ?TOKEN_LINE(Token),
+      column = ?TOKEN_COLUMN(Token)
+    },
+    throw(Error).
 
 represent_node(_,
-  {Mod, {map, undefined}, [{'$insert_here', undefined} | Pairs]},
+  #unfinished_node{path = {map, undefined},
+    priv = [{'$insert_here', undefined} | Pairs]} = Node,
   Key) ->
-    Node = {Mod, {map, Key}, [{Key, undefined} | Pairs]},
-    {unfinished, Node, false};
+    Node1 = Node#unfinished_node{
+      path = {map, Key},
+      priv = [{Key, undefined} | Pairs]
+    },
+    {unfinished, Node1, false};
 represent_node(_,
-  {Mod, {map, _}, [{Key, '$insert_here'} | Pairs]},
+  #unfinished_node{path = {map, _},
+    priv = [{Key, '$insert_here'} | Pairs]} = Node,
   Value) ->
-    Node = {Mod, {map, undefined}, [{Key, Value} | Pairs]},
-    {unfinished, Node, false}.
+    Node1 = Node#unfinished_node{
+      path = {map, undefined},
+      priv = [{Key, Value} | Pairs]
+    },
+    {unfinished, Node1, false}.
+
+node_pres(Node) ->
+    ?NODE_PRES(Node).
