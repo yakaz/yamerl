@@ -4154,7 +4154,7 @@ update_impl_key_index2(Parser, [], _, _, Result) ->
 %% Tag resolution.
 %% -------------------------------------------------------------------
 
-setup_default_tags(Parser) ->
+setup_default_tags(#yaml_parser{options = Options} = Parser) ->
     Tags  = dict:new(),
     %% By default, "!" is resolved as "!" and the tag is considered
     %% local.
@@ -4165,13 +4165,21 @@ setup_default_tags(Parser) ->
     %% Non-specific tags are associated to nodes which don't have an
     %% explicit tag or to those with the "!" explicit non-specific tag.
     %% The non-specific tags are resolved using a schema.
-    %% TODO.
     Tags3 = dict:store({default, {non_specific, "!"}}, "tag:yaml.org,2002:",
       Tags2),
     Tags4 = dict:store({default, {non_specific, "?"}}, "tag:yaml.org,2002:",
       Tags3),
+    Tags5 = case proplists:get_value(default_tags, Options) of
+        undefined ->
+            Tags4;
+        List ->
+            Fun = fun({Prefix, Value}, T) ->
+                dict:store({default, Prefix}, Value, T)
+            end,
+            lists:foldl(Fun, Tags4, List)
+    end,
     Parser#yaml_parser{
-      tags = Tags4
+      tags = Tags5
     }.
 
 %% -------------------------------------------------------------------
@@ -4180,6 +4188,7 @@ setup_default_tags(Parser) ->
 
 option_names() ->
     [
+      default_tags,
       doc_version,
       io_blocksize,
       token_fun
@@ -4193,6 +4202,21 @@ check_options([Option | Rest]) ->
 check_options([]) ->
     ok.
 
+is_option_valid({default_tags, List}) when is_list(List) ->
+    %% This fun() returns true for any invalid entries, to keep only
+    %% those.
+    Fun = fun
+        ({{non_specific, A}, B}) ->
+            not (io_lib:char_list(A) andalso io_lib:char_list(B));
+        ({A, B}) ->
+            not (io_lib:char_list(A) andalso io_lib:char_list(B));
+        (_) ->
+            true
+    end,
+    case lists:filter(Fun, List) of
+        [] -> true;
+        _  -> false
+    end;
 is_option_valid({doc_version, {Major, Minor}}) when
   is_integer(Major) andalso Major >= 0 andalso
   is_integer(Minor) andalso Minor >= 0 ->
@@ -4212,6 +4236,11 @@ invalid_option(Option) ->
       extra = [{option, Option}]
     },
     Error1 = case Option of
+        {default_tags, _} ->
+            Error#yaml_parser_error{
+              text = "Invalid value for option \"default_tags\": "
+              "it must be a list of {Prefix, Prefix_Value}.\n"
+            };
         {doc_version, _} ->
             Error#yaml_parser_error{
               text = "Invalid value for option \"doc_version\": "
