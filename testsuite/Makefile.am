@@ -10,9 +10,11 @@ ERL_TESTS = t_yaml_parser
 
 TESTS = dialyzer $(ERL_TESTS)
 
-EXTRA_DIST = $(TPL_PL) $(TPL_ERL) $(ERL_FILES) eunit_lib.erl eunit_tty.erl cover_to_html.sh data
+EXTRA_DIST = $(TPL_PL) $(TPL_ERL) $(ERL_FILES) eunit_lib.erl 		\
+	     eunit_tty.erl cover_to_html.sh data
 
-CLEANFILES = $(ERL_TESTS) $(TPL_FILES) eunit_lib.beam eunit_tty.beam erl_crash.dump cover_*.html
+CLEANFILES = $(ERL_TESTS) $(TPL_FILES) eunit_lib.beam eunit_tty.beam 	\
+	     erl_crash.dump cover_*.html
 
 $(ERL_TESTS): $(ETEST) eunit_lib.erl eunit_tty.erl $(TPL_PL) $(TPL_ERL) data/$@/*.pattern
 	@(test ! -e eunit_lib.beam 					\

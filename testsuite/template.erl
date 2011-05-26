@@ -1,6 +1,6 @@
 %% $Id: bones_version.erl 2899 2010-05-07 15:06:08Z jean.sebastien.pedron $
 
--module(${MODULE}).
+-module('${MODULE}').
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -20,21 +20,34 @@ main_test_() ->
 
 setup() ->
     %% Setup coverity checking.
-    Dir         = os:getenv("srcdir"),
-    Include_Dir = filename:join([Dir, "..", "include"]),
-    Src_Dir     = filename:join([Dir, "..", "src"]),
+    Dir           = os:getenv("srcdir"),
+    Include_Dir   = filename:join([Dir, "..", "include"]),
+    Src_Dir       = filename:join([Dir, "..", "src"]),
     Cover_To_Html = filename:join([Dir, "cover_to_html.sh"]),
+    Mods_List     = filename:join([Dir, "data", ?MODULE_STRING,
+        "COVERED-MODS"]),
     cover:start(),
-    cover:compile_directory(Src_Dir, [{i, Include_Dir}]),
-    Cover_To_Html.
+    Covered_Mods  = case file:consult(Mods_List) of
+        {ok, [ML]} ->
+            Fun = fun(M) ->
+                F = filename:join([Src_Dir, M]) ++ ".erl",
+                cover:compile_module(F, [{i, Include_Dir}])
+            end,
+            lists:foreach(Fun, ML),
+            ML;
+        _ ->
+            []
+    end,
+    {Covered_Mods, Cover_To_Html}.
 
-cleanup(Cover_To_Html) ->
-    Covered_Mod = list_to_atom(string:substr(atom_to_list(?MODULE), 3)),
-    print_coverage(Cover_To_Html, [Covered_Mod]),
+cleanup({Covered_Mods, Cover_To_Html}) ->
+    print_coverage(Cover_To_Html, Covered_Mods),
     cover:stop().
 
 print_coverage(Cover_To_Html, Modules) ->
-    io:format(standard_error, "  Coverage:~n", []),
+    Name  = string:to_upper([hd(?MODULE_STRING)]) ++ tl(?MODULE_STRING),
+    Name1 = string:join(string:tokens(Name, "_"), " "),
+    io:format(standard_error, "  ~s / Coverage:~n", [Name1]),
     print_coverage2(Cover_To_Html, Modules).
 
 print_coverage2(Cover_To_Html, [Mod | Rest]) ->
@@ -42,7 +55,7 @@ print_coverage2(Cover_To_Html, [Mod | Rest]) ->
     Mod_S = atom_to_list(Mod),
     if
         Cov > 0 andalso Not_Cov > 0 ->
-            file:write_file("cover_" ++ Mod_S ++ ".percent",
+            file:write_file("cover_" ?MODULE_STRING "_" ++ Mod_S ++ ".percent",
               list_to_binary(io_lib:format("~.1f",
                   [Cov * 100 / (Cov + Not_Cov)]))),
             io:format(standard_error, "   - ~s: ~.1f%~n",
@@ -50,8 +63,9 @@ print_coverage2(Cover_To_Html, [Mod | Rest]) ->
         true ->
             io:format(standard_error, "   - ~s: n/a~n~n", [Mod])
     end,
-    cover:analyse_to_file(Mod, "cover_" ++ Mod_S ++ ".out", []),
-    os:cmd(Cover_To_Html ++ " " ++ Mod_S),
+    cover:analyse_to_file(Mod,
+      "cover_" ?MODULE_STRING "_" ++ Mod_S ++ ".out", []),
+    os:cmd(Cover_To_Html ++ " " ?MODULE_STRING " " ++ Mod_S),
     print_coverage2(Cover_To_Html, Rest);
 print_coverage2(_, []) ->
     ok.
