@@ -177,7 +177,9 @@ EOF
 			mod=${name#cover_${test_name}_}
 			percent=`cat $name.percent 2> /dev/null`
 			color=`echo $percent | sed -e 's/\..*$//'`
-			color=$((color / 10 * 10))
+			if [ $((color % 5)) -gt 0 ]; then
+				color=$((color + (5 - color % 5)))
+			fi
 			color=`eval echo \\${color_$color}`
 			cat << EOF >> "$out"
 <tr>
