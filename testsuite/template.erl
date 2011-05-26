@@ -56,12 +56,15 @@ print_coverage2(Cover_To_Html, [Mod | Rest]) ->
     if
         Cov > 0 andalso Not_Cov > 0 ->
             file:write_file("cover_" ?MODULE_STRING "_" ++ Mod_S ++ ".percent",
-              list_to_binary(io_lib:format("~.1f",
+              list_to_binary(io_lib:format("~.1f~n",
                   [Cov * 100 / (Cov + Not_Cov)]))),
             io:format(standard_error, "   - ~s: ~.1f%~n",
               [Mod, Cov * 100 / (Cov + Not_Cov)]);
         true ->
-            io:format(standard_error, "   - ~s: n/a~n~n", [Mod])
+            file:write_file("cover_" ?MODULE_STRING "_" ++ Mod_S ++ ".percent",
+              list_to_binary(io_lib:format("0.0~n",
+                  []))),
+            io:format(standard_error, "   - ~s: n/a~n", [Mod])
     end,
     cover:analyse_to_file(Mod,
       "cover_" ?MODULE_STRING "_" ++ Mod_S ++ ".out", []),
