@@ -45,8 +45,7 @@ next_chunk(Parser, More_Data, EOS) ->
     Parser = yaml_parser:next_chunk(Parser, More_Data, EOS),
     if
         EOS ->
-            Repr = (yaml_parser:get_token_fun(Parser))(get_repr),
-            Repr#yaml_repr.docs;
+            (yaml_parser:get_token_fun(Parser))(get_docs);
         true ->
             Parser
     end.
@@ -67,8 +66,7 @@ string(String) ->
 string(String, Options) ->
     Parser_Options = initialize(Options),
     Parser = yaml_parser:string(String, Parser_Options),
-    Repr   = (yaml_parser:get_token_fun(Parser))(get_repr),
-    Repr#yaml_repr.docs.
+    (yaml_parser:get_token_fun(Parser))(get_docs).
 
 file(Filename) ->
     file(Filename, []).
@@ -76,8 +74,7 @@ file(Filename) ->
 file(Filename, Options) ->
     Parser_Options = initialize(Options),
     Parser = yaml_parser:file(Filename, Parser_Options),
-    Repr   = (yaml_parser:get_token_fun(Parser))(get_repr),
-    Repr#yaml_repr.docs.
+    (yaml_parser:get_token_fun(Parser))(get_docs).
 
 %% -------------------------------------------------------------------
 %% Presentation details.
@@ -239,10 +236,16 @@ handle_represent_return(Repr, Doc, {unfinished, Node, Is_Leaf}) ->
     },
     return_new_fun(Repr1).
 
-return_new_fun(Repr) ->
+return_new_fun(#yaml_repr{simple_structs = Simple} = Repr) ->
     Fun = fun
-        (get_repr) -> Repr;
-        (T)        -> represent(Repr, T)
+        (get_docs) when Simple ->
+            [Doc#yaml_doc.root || Doc <- Repr#yaml_repr.docs];
+        (get_docs) ->
+            Repr#yaml_repr.docs;
+        (get_repr) ->
+            Repr;
+        (T) ->
+            represent(Repr, T)
     end,
     {ok, Fun}.
 
