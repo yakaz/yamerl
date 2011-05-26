@@ -94,7 +94,7 @@ EOF
 update_index () {
 	out=index.html
 
-	timestamp=`date +'Date: %Y-%m-%d at %H:%M:%S'`
+	timestamp=`date +'%Y-%m-%d at %H:%M:%S'`
 
 	cat << EOF > "$out"
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
@@ -138,6 +138,28 @@ th {
 <p id="timestamp">Date: ${timestamp}</p>
 EOF
 
+	color_0="ff2200"
+	color_5="ff3800"
+	color_10="ff4e00"
+	color_15="ff6400"
+	color_20="ff7a00"
+	color_25="ff9000"
+	color_30="ffa500"
+	color_35="ffbb00"
+	color_40="ffd100"
+	color_45="ffe700"
+	color_50="fdfc00"
+	color_55="ecff00"
+	color_60="d6ff00"
+	color_65="c0ff00"
+	color_70="aaff00"
+	color_75="94ff00"
+	color_80="7eff00"
+	color_85="69ff00"
+	color_90="53ff00"
+	color_95="3dff00"
+	color_100="27ff00"
+
 	for test_name in *.erl; do
 		test_name=${test_name%.erl}
 		pretty_name=`echo $test_name | tr "_" " "`
@@ -146,18 +168,22 @@ EOF
 <table>
 <tr>
 <th style="width: 200px; text-align: left;">Module</th>
-<th style="width: 100px; text-align: right;">Coverage</th>
+<th style="width: 100px; text-align: right;" colspan="2">Coverage</th>
 </tr>
 EOF
 
-		for pct in cover_${test_name}_*.percent; do
-			name=${pct%.percent}
+		for mod_out in cover_${test_name}_*.out; do
+			name=${mod_out%.out}
 			mod=${name#cover_${test_name}_}
-			percent=`cat $pct`
+			percent=`cat $name.percent 2> /dev/null`
+			color=`echo $percent | sed -e 's/\..*$//'`
+			color=$((color / 10 * 10))
+			color=`eval echo \\${color_$color}`
 			cat << EOF >> "$out"
 <tr>
 <td><a href="${name}.html">$mod</a></td>
 <td style="text-align: right;">$percent %</td>
+<td style="width: 5px; padding: 0px; background-color: #$color;"></td>
 </tr>
 EOF
 		done
