@@ -48,6 +48,8 @@ represent_token(#yaml_repr{simple_structs = true},
     case string_to_timestamp(Text) of
         {undefined, undefined, undefined, H, Mi, S, _, _} ->
             {finished, {undefined, {H, Mi, S}}};
+        {Y, Mo, D, undefined, undefined, undefined, _, _} ->
+            {finished, {{Y, Mo, D}, undefined}};
         {Y, Mo, D, H, Mi, S, _, _} ->
             {finished, {{Y, Mo, D}, {H, Mi, S}}};
         error ->
@@ -105,7 +107,8 @@ string_to_timestamp(Text) ->
               list_to_integer(Y),
               list_to_integer(Mo),
               list_to_integer(D),
-              0, 0, 0, 0, 0
+              undefined, undefined, undefined,
+              0, 0
             };
         {match, [_, _, _, _, _, _, _, _, _, H, Mi, S]} ->
             %% Only a time.
