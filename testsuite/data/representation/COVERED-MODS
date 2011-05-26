@@ -1,0 +1,16 @@
+%% vim:ft=erlang:
+
+[
+  yaml_repr,
+  yaml_node_bool,
+  yaml_node_erlang_atom,
+  yaml_node_erlang_fun,
+  yaml_node_int,
+  yaml_node_ipaddr,
+  yaml_node_map,
+  yaml_node_null,
+  yaml_node_seq,
+  yaml_node_size,
+  yaml_node_str,
+  yaml_node_timestamp
+].

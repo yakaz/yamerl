@@ -1,0 +1,35 @@
+%% vim:ft=erlang:
+
+%% TEST
+{setup,
+  fun() ->
+      application:start(yaml),
+      yaml_app:set_param(node_mods, [yaml_node_erlang_fun])
+  end,
+  [
+    {generator,
+      fun() ->
+          [Erlang_Fun_Simple] = yaml_repr:file("${FILENAME}",
+            [{simple_structs, true}]),
+          ?_assertMatch(
+            "Hello World!",
+            Erlang_Fun_Simple()
+          )
+      end},
+    {generator,
+      fun() ->
+          [{yaml_doc,
+              {yaml_erlang_fun,yaml_node_erlang_fun,
+                "tag:erlang.org,2011:fun",
+                [{line,1},{column,28}],
+                Erlang_Fun_Normal,
+                "fun() -> \"Hello World!\" end.\n"}}
+          ] = yaml_repr:file("${FILENAME}",
+            [{simple_structs, false}]),
+          ?_assertMatch(
+            "Hello World!",
+            Erlang_Fun_Normal()
+          )
+      end}
+  ]
+}

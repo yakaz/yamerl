@@ -1,0 +1,25 @@
+- true
+- True
+- TRUE
+- y
+- Y
+- yes
+- Yes
+- YES
+- on
+- On
+- ON
+
+- false
+- False
+- FALSE
+- n
+- N
+- no
+- No
+- NO
+- off
+- Off
+- OFF
+
+- Not a bool

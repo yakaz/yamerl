@@ -4,9 +4,9 @@ ETEST   = etest
 TPL_PL  = template.pl
 TPL_ERL = template.erl
 
-TPL_FILES = t_yaml_parser.erl
+TPL_FILES = parsing.erl representation.erl
 
-ERL_TESTS = t_yaml_parser
+ERL_TESTS = parsing representation
 
 TESTS = dialyzer $(ERL_TESTS)
 
@@ -14,7 +14,8 @@ EXTRA_DIST = $(TPL_PL) $(TPL_ERL) $(ERL_FILES) eunit_lib.erl 		\
 	     eunit_tty.erl cover_to_html.sh data
 
 CLEANFILES = $(ERL_TESTS) $(TPL_FILES) eunit_lib.beam eunit_tty.beam 	\
-	     erl_crash.dump cover_*.html
+	     erl_crash.dump cover_*.html cover_*.out cover_*.percent	\
+	     index.html
 
 $(ERL_TESTS): $(ETEST) eunit_lib.erl eunit_tty.erl $(TPL_PL) $(TPL_ERL) data/$@/*.pattern
 	@(test ! -e eunit_lib.beam 					\

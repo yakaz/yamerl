@@ -1,0 +1,37 @@
+%% vim:ft=erlang:
+
+%% TEST
+{setup,
+  fun() ->
+      application:start(yaml),
+      yaml_app:set_param(node_mods, [yaml_node_erlang_atom])
+  end,
+  [
+    ?_assertMatch(
+      [
+        [
+          atom,
+          'atom requiring quoting!'
+        ]
+      ],
+      yaml_repr:file("${FILENAME}", [{simple_structs, true}])
+    ),
+    ?_assertMatch(
+      [
+        {yaml_doc,
+          {yaml_seq,yaml_node_seq,"tag:yaml.org,2002:seq",
+            [{line,1},{column,1}],
+            [{yaml_erlang_atom,yaml_node_erlang_atom,
+                "tag:erlang.org,2011:atom",
+                [{line,1},{column,31}],
+                atom},
+              {yaml_erlang_atom,yaml_node_erlang_atom,
+                "tag:erlang.org,2011:atom",
+                [{line,2},{column,31}],
+                'atom requiring quoting!'}],
+            2}}
+      ],
+      yaml_repr:file("${FILENAME}", [{simple_structs, false}])
+    )
+  ]
+}

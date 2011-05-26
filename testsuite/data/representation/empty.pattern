@@ -1,0 +1,18 @@
+%% vim:ft=erlang:
+
+%% TEST
+{setup,
+  fun() ->
+      application:start(yaml)
+  end,
+  [
+    ?_assertMatch(
+      [],
+      yaml_repr:file("${FILENAME}", [{simple_structs, true}])
+    ),
+    ?_assertMatch(
+      [],
+      yaml_repr:file("${FILENAME}", [{simple_structs, false}])
+    )
+  ]
+}
