@@ -11,7 +11,8 @@
     tags/0,
     try_represent_token/3,
     represent_token/3,
-    node_pres/1
+    node_pres/1,
+    parse/1
   ]).
 
 -define(TAG, "tag:yakaz.com,2011:ipaddr").
@@ -139,7 +140,7 @@ string_to_ip2(Token, Text) ->
     end.
 
 string_to_ip3(Token, Text) ->
-    case inet_parse:address(Text) of
+    case parse(Text) of
         {ok, Address} ->
             Address;
         _ ->
@@ -151,6 +152,12 @@ string_to_ip3(Token, Text) ->
               column = ?TOKEN_COLUMN(Token)
             },
             throw(Error)
+    end.
+
+parse(Text) ->
+    case inet_parse:ipv4strict_address(Text) of
+        {ok, IP} -> {ok, IP};
+        _        -> inet_parse:ipv6strict_address(Text)
     end.
 
 exception(Token) ->
