@@ -410,7 +410,7 @@ file(Filename, Options) ->
               extra = [{error, Reason}]
             },
             Parser2 = add_error(Parser, Error2,
-              "Failed to open file \"~s\": ~s~n",
+              "Failed to open file \"~s\": ~s",
               [Filename, file:format_error(Reason)]),
             return(Parser2)
     end.
@@ -447,7 +447,7 @@ file2(#yaml_parser{source = {file, Filename}} = Parser, FD, Blocksize) ->
               extra = [{error, Reason}]
             },
             Parser1 = add_error(Parser, Error,
-              "Failed to read file \"~s\": ~s~n",
+              "Failed to read file \"~s\": ~s",
               [Filename, file:format_error(Reason)]),
             return(Parser1)
     end.
@@ -500,7 +500,7 @@ decode_unicode(#yaml_parser{stream_state = State,
                       extra = [{byte, Raw_Index1 + 1}]
                     },
                     add_error(Parser1, Error,
-                      "Invalid Unicode character at byte #~b~n",
+                      "Invalid Unicode character at byte #~b",
                       [Raw_Index1 + 1])
             end;
         New_Chars ->
@@ -691,7 +691,7 @@ determine_token_type(
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "A BOM must not appear inside a document~n", []),
+      "A BOM must not appear inside a document", []),
     Parser2 = next_col(Parser1, 1, Rest),
     next_state(Parser2, fun find_next_token/1);
 
@@ -832,7 +832,7 @@ determine_token_type(#yaml_parser{chars = [C | _]} = Parser)
     },
     Parser1 = add_error(Parser, Error,
       "The reserved indicator \"~c\" is not allowed at the "
-      "beginning of a plain scalar~n", [C]),
+      "beginning of a plain scalar", [C]),
     Fun = fun(S) ->
         parse_flow_scalar(S, plain)
     end,
@@ -901,7 +901,7 @@ start_doc(
               column = Col
             },
             Parser0 = add_error(Parser, Error,
-              "Version ~b.~b not supported (minimum version ~b.~b)~n",
+              "Version ~b.~b not supported (minimum version ~b.~b)",
               [
                 Major, Minor,
                 ?MIN_YAML_MAJOR_VERSION_SUPPORTED,
@@ -924,7 +924,7 @@ start_doc(
               column = Col
             },
             Parser0 = add_error(Parser, Error,
-              "Version ~b.~b not supported (maximum version ~b.~b)~n",
+              "Version ~b.~b not supported (maximum version ~b.~b)",
               [
                 Major, Minor,
                 ?MAX_YAML_MAJOR_VERSION_SUPPORTED,
@@ -943,7 +943,7 @@ start_doc(
             },
             Parser0 = add_error(Parser, Error,
               "Version ~b.~b not supported (maximum version ~b.~b); "
-              "parsing may fail~n",
+              "parsing may fail",
               [
                 Major, Minor,
                 ?MAX_YAML_MAJOR_VERSION_SUPPORTED,
@@ -1044,7 +1044,7 @@ skip_directive_trailing_ws(#yaml_parser{chars = [_ | _]} = Parser) ->
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Unexpected directive extra parameters~n", []),
+      "Unexpected directive extra parameters", []),
     return(Parser1).
 
 %%
@@ -1099,7 +1099,7 @@ parse_yaml_directive_major(#yaml_parser{chars = [_ | _]} = Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Invalid major version number in YAML directive~n", []),
+      "Invalid major version number in YAML directive", []),
     return(Parser1);
 parse_yaml_directive_major(#yaml_parser{chars = [], raw_eos = true} = Parser,
   #yaml_directive_ctx{line = Line, col = Col}) ->
@@ -1115,7 +1115,7 @@ parse_yaml_directive_major(#yaml_parser{chars = [], raw_eos = true} = Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Unexpected end-of-stream while parsing YAML directive~n", []),
+      "Unexpected end-of-stream while parsing YAML directive", []),
     return(Parser1).
 
 %% Minor version number.
@@ -1161,7 +1161,7 @@ parse_yaml_directive_minor(#yaml_parser{chars = [_ | _]} = Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser2 = add_error(Parser1, Error,
-      "Invalid minor version number in YAML directive~n", []),
+      "Invalid minor version number in YAML directive", []),
     return(Parser2).
 
 %% Queue token.
@@ -1196,7 +1196,7 @@ queue_yaml_directive(Parser,
       column = Col
     },
     Parser1 = add_error(Parser, Error,
-      "Multiple YAML directives found: the last one will be used~n", []),
+      "Multiple YAML directives found: the last one will be used", []),
     Parser2 = Parser1#yaml_parser{
       doc_version = undefined
     },
@@ -1271,7 +1271,7 @@ parse_tag_directive_handle(#yaml_parser{chars = [_ | _]} = Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Invalid tag handle in TAG directive~n", []),
+      "Invalid tag handle in TAG directive", []),
     return(Parser1);
 parse_tag_directive_handle(#yaml_parser{chars = [], raw_eos = true} = Parser,
   #tag_directive_ctx{handle = Handle, line = Line, col = Col}) ->
@@ -1292,7 +1292,7 @@ parse_tag_directive_handle(#yaml_parser{chars = [], raw_eos = true} = Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Unexpected end-of-stream while parsing TAG directive~n", []),
+      "Unexpected end-of-stream while parsing TAG directive", []),
     return(Parser1).
 
 %% Tag prefix.
@@ -1349,7 +1349,7 @@ parse_tag_directive_prefix(#yaml_parser{chars = [_ | _]} = Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser2 = add_error(Parser1, Error,
-      "Invalid tag prefix in TAG directive~n", []),
+      "Invalid tag prefix in TAG directive", []),
     return(Parser2).
 
 %% Queue token.
@@ -1378,7 +1378,7 @@ queue_tag_directive(#yaml_parser{tags = Tags} = Parser,
             },
             add_error(Parser1, Error,
               "Multiple declarations of the same handle found: "
-              "the last one will be used~n", [])
+              "the last one will be used", [])
     end,
     Parser3 = queue_token(Parser2, Token),
     Tags1   = dict:store(Handle1, Prefix1, Tags),
@@ -1470,7 +1470,7 @@ queue_reserved_directive(Parser,
       column = Col
     },
     Parser1 = add_error(Parser, Error,
-      "Reserved directive \"~s\" ignored~n", [Name]),
+      "Reserved directive \"~s\" ignored", [Name]),
     Parser2 = queue_token(Parser1, Token),
     next_state(Parser2, fun skip_directive_trailing_ws/1).
 
@@ -1489,7 +1489,7 @@ parse_block_entry(Parser) when ?IN_BLOCK_CTX(Parser) ->
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Block sequence entry not allowed here~n", []),
+      "Block sequence entry not allowed here", []),
     return(Parser1);
 parse_block_entry(Parser) when ?IN_FLOW_CTX(Parser) ->
     Error = #yaml_parser_error{
@@ -1498,7 +1498,7 @@ parse_block_entry(Parser) when ?IN_FLOW_CTX(Parser) ->
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Block collection not allowed inside flow collection~n", []),
+      "Block collection not allowed inside flow collection", []),
     return(Parser1).
 
 queue_block_sequence_entry_token(
@@ -1587,7 +1587,7 @@ parse_flow_collection_end(
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "A ~s closing character is used to close a ~s collection~n",
+      "A ~s closing character is used to close a ~s collection",
       [Kind, Expected]),
     parse_flow_collection_end(Parser1, Expected);
 parse_flow_collection_end(
@@ -1599,7 +1599,7 @@ parse_flow_collection_end(
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "The ~s closing character doesn't match any opening character~n",
+      "The ~s closing character doesn't match any opening character",
       [Kind]),
     Parser2 = next_col(Parser1, 1, Rest),
     next_state(Parser2, fun find_next_token/1).
@@ -1621,7 +1621,7 @@ parse_flow_entry(
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Empty flow collection entry not allowed~n", []),
+      "Empty flow collection entry not allowed", []),
     Parser2 = next_col(Parser1, 1, Rest),
     next_state(Parser2, fun find_next_token/1);
 parse_flow_entry(#yaml_parser{chars = [_ | Rest],
@@ -1648,7 +1648,7 @@ parse_flow_entry(Parser) when ?IN_BLOCK_CTX(Parser) ->
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Flow collection entry not allowed outside any flow collection~n", []),
+      "Flow collection entry not allowed outside any flow collection", []),
     return(Parser1).
 
 %% -------------------------------------------------------------------
@@ -1672,7 +1672,7 @@ parse_mapping_key(Parser) ->
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Block mapping key not allowed here~n", []),
+      "Block mapping key not allowed here", []),
     return(Parser1).
 
 queue_mapping_key_token(#yaml_parser{chars = [_ | Rest]} = Parser) ->
@@ -1749,7 +1749,7 @@ parse_mapping_value(
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Block mapping value not allowed here~n", []),
+      "Block mapping value not allowed here", []),
     return(Parser1);
 
 parse_mapping_value(
@@ -1793,7 +1793,7 @@ queue_mapping_value_token(
     },
     Parser1 = add_error(Parser, Error,
       "Block mapping value's indentation (column #~b) "
-      "greater than expected (column #~b)~n",
+      "greater than expected (column #~b)",
       [Col, Indent]),
     queue_mapping_value_token2(Parser1);
 queue_mapping_value_token(Parser) ->
@@ -1946,7 +1946,7 @@ parse_tag(#yaml_parser{last_tag = Tag} = Parser)
     },
     Parser1 = add_error(Parser, Error,
       "Multiple tag properties attached to one node: "
-      "the last one will be used~n", []),
+      "the last one will be used", []),
     Parser2 = Parser1#yaml_parser{
       last_tag = undefined
     },
@@ -1998,7 +1998,7 @@ parse_verbatim_tag(#yaml_parser{chars = [$! | Rest]} = Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Invalid character in tag handle~n", []),
+      "Invalid character in tag handle", []),
     Parser2 = next_col(Parser1, 1, Rest),
     parse_verbatim_tag(Parser2, Ctx);
 parse_verbatim_tag(#yaml_parser{chars = [C | Rest]} = Parser, Ctx)
@@ -2023,7 +2023,7 @@ parse_verbatim_tag(#yaml_parser{chars = [_ | Rest]} = Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Invalid character in tag handle~n", []),
+      "Invalid character in tag handle", []),
     Parser2 = next_col(Parser1, 1, Rest),
     parse_verbatim_tag(Parser2, Ctx);
 parse_verbatim_tag(#yaml_parser{chars = [], raw_eos = false} = Parser, Ctx) ->
@@ -2043,7 +2043,7 @@ parse_verbatim_tag(#yaml_parser{chars = [], raw_eos = true} = Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Unexpected end-of-stream while parsing tag handle~n", []),
+      "Unexpected end-of-stream while parsing tag handle", []),
     return(Parser1).
 
 %%
@@ -2075,7 +2075,7 @@ parse_tag_shorthand(#yaml_parser{chars = [$! | Rest]} = Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Invalid character in tag handle~n", []),
+      "Invalid character in tag handle", []),
     Parser2 = next_col(Parser1, 1, Rest),
     parse_tag_shorthand(Parser2, Ctx);
 
@@ -2114,7 +2114,7 @@ parse_tag_shorthand(#yaml_parser{chars = [_ | Rest]} = Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser2 = add_error(Parser1, Error,
-      "Invalid character in tag handle~n", []),
+      "Invalid character in tag handle", []),
     Parser3 = next_col(Parser2, 1, Rest),
     parse_tag_shorthand(Parser3, Ctx);
 
@@ -2156,7 +2156,7 @@ expand_tag(Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error1,
-      "Tag suffix mandatory~n", []),
+      "Tag suffix mandatory", []),
     expand_tag2(Parser1, Ctx);
 expand_tag(Parser, Ctx) ->
     expand_tag2(Parser, Ctx).
@@ -2184,7 +2184,7 @@ expand_tag2(#yaml_parser{tags = Tags} = Parser,
               column = ?CURSOR_COLUMN(Parser)
             },
             Parser0 = add_error(Parser, Error,
-              "Tag handle \"~s\" never declared~n", [Prefix]),
+              "Tag handle \"~s\" never declared", [Prefix]),
             {Parser0, Bad_URI}
     end,
     Ctx1 = Ctx#tag_ctx{
@@ -2207,7 +2207,7 @@ queue_tag_token(Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Local tag suffix mandatory~n", []),
+      "Local tag suffix mandatory", []),
     queue_tag_token2(Parser1, Ctx);
 queue_tag_token(Parser, Ctx) ->
     queue_tag_token2(Parser, Ctx).
@@ -2306,7 +2306,7 @@ do_parse_block_scalar_header(
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Multiple chomping indicators specified: the last one will be used~n",
+      "Multiple chomping indicators specified: the last one will be used",
       []),
     Parser2 = next_col(Parser1, 1, Rest),
     Chomp = case C of
@@ -2358,7 +2358,7 @@ do_parse_block_scalar_header(
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Multiple indent indicators specified: the last one will be used~n",
+      "Multiple indent indicators specified: the last one will be used",
       []),
     Parser2 = next_col(Parser1, 1, Rest),
     Ctx1 = Ctx#block_scalar_hd_ctx{
@@ -2395,7 +2395,7 @@ do_parse_block_scalar_header(
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser2 = add_error(Parser1, Error,
-      "Invalid character in block scalar header~n", []),
+      "Invalid character in block scalar header", []),
     Parser3 = next_col(Parser2, 1, Rest),
     Ctx1 = final_indent(Parser3, Ctx),
     do_parse_block_scalar_header(Parser3, Ctx1);
@@ -2548,7 +2548,7 @@ do_parse_block_scalar(
     },
     Parser1 = add_error(Parser, Error,
       "A leading all-space line has too many spaces (~b) "
-      "compared to detected indentation (~b)~n", [Longest, Indent - 1]),
+      "compared to detected indentation (~b)", [Longest, Indent - 1]),
     Ctx1 = Ctx#block_scalar_ctx{
       longest_empty = 0
     },
@@ -2608,7 +2608,7 @@ do_parse_block_scalar(
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Invalid block scalar indentation~n", []),
+      "Invalid block scalar indentation", []),
     return(Parser1);
 
 %% The next line has a directives end or document end marker: end the
@@ -2827,7 +2827,7 @@ do_parse_flow_scalar(
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Unexpected end-of-stream while parsing flow scalar~n", []),
+      "Unexpected end-of-stream while parsing flow scalar", []),
     return(Parser1);
 do_parse_flow_scalar(
   #yaml_parser{chars = [$u | _], chars_len = Len} = Parser,
@@ -2896,7 +2896,7 @@ do_parse_flow_scalar(
       column = ?CURSOR_COLUMN(Parser) - 1
     },
     Parser1 = add_error(Parser, Error,
-      "Invalid escaped character~n", []),
+      "Invalid escaped character", []),
     Ctx1 = Ctx#flow_scalar_ctx{
       next_escaped = false
     },
@@ -2924,7 +2924,7 @@ do_parse_flow_scalar(
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Unexpected end-of-stream while parsing flow scalar~n", []),
+      "Unexpected end-of-stream while parsing flow scalar", []),
     return(Parser1);
 do_parse_flow_scalar(
   #yaml_parser{chars = [$U | _], chars_len = Len} = Parser,
@@ -2995,7 +2995,7 @@ do_parse_flow_scalar(
       column = ?CURSOR_COLUMN(Parser) - 1
     },
     Parser1 = add_error(Parser, Error,
-      "Invalid escaped character~n", []),
+      "Invalid escaped character", []),
     Ctx1 = Ctx#flow_scalar_ctx{
       next_escaped = false
     },
@@ -3022,7 +3022,7 @@ do_parse_flow_scalar(#yaml_parser{chars = [_ | _]} = Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Invalid UTF-16 surrogate pair~n", []),
+      "Invalid UTF-16 surrogate pair", []),
     Ctx1 = Ctx#flow_scalar_ctx{
       surrogate = undefined
     },
@@ -3050,7 +3050,7 @@ do_parse_flow_scalar(
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Unexpected end-of-stream while parsing flow scalar~n", []),
+      "Unexpected end-of-stream while parsing flow scalar", []),
     return(Parser1);
 do_parse_flow_scalar(
   #yaml_parser{chars = [$x | _], chars_len = Len} = Parser,
@@ -3090,7 +3090,7 @@ do_parse_flow_scalar(
       column = ?CURSOR_COLUMN(Parser) - 1
     },
     Parser1 = add_error(Parser, Error,
-      "Invalid escaped character~n", []),
+      "Invalid escaped character", []),
     Ctx1 = Ctx#flow_scalar_ctx{
       next_escaped = false
     },
@@ -3134,7 +3134,7 @@ do_parse_flow_scalar(#yaml_parser{chars = [C | Rest]} = Parser,
               column = ?CURSOR_COLUMN(Parser) - 1
             },
             Parser2 = add_error(Parser1, Error,
-              "Invalid escaped character~n", []),
+              "Invalid escaped character", []),
             Ctx1 = Ctx#flow_scalar_ctx{
               next_escaped = false
             },
@@ -3359,7 +3359,7 @@ do_parse_flow_scalar(#yaml_parser{chars = [], raw_eos = true} = Parser,
       column = ?CURSOR_COLUMN(Parser)
     },
     Parser1 = add_error(Parser, Error,
-      "Unexpected end-of-stream while parsing flow scalar~n", []),
+      "Unexpected end-of-stream while parsing flow scalar", []),
     return(Parser1);
 do_parse_flow_scalar(#yaml_parser{chars = []} = Parser, Ctx) ->
     ?SUSPEND_SUBPARSING(Parser, Ctx, do_parse_flow_scalar).
@@ -3471,7 +3471,7 @@ save_impl_key_pos(
               column = Col
             },
             Parser1 = add_error(Parser, Error,
-              "Required implicit key not allowed here~n", []),
+              "Required implicit key not allowed here", []),
             return(Parser1);
         true ->
             Parser
@@ -3488,7 +3488,7 @@ queue_impl_key(#yaml_parser{last_token_endline = Line,
       column = Impl_Key#impl_key.col
     },
     Parser1 = add_error(Parser, Error,
-      "An implicit key must not span several lines~n", []),
+      "An implicit key must not span several lines", []),
     queue_impl_key2(Parser1);
 queue_impl_key(#yaml_parser{last_token_endline = Line,
     ik_stack = [#impl_key{line = Impl_Line} = Impl_Key | _]} = Parser)
@@ -3501,7 +3501,7 @@ queue_impl_key(#yaml_parser{last_token_endline = Line,
       column = Impl_Key#impl_key.col
     },
     Parser1 = add_error(Parser, Error,
-      "An implicit key must not span several lines~n", []),
+      "An implicit key must not span several lines", []),
     queue_impl_key2(Parser1);
 queue_impl_key(#yaml_parser{chars_idx = Index,
     ik_stack = [#impl_key{chars_idx = Impl_Index} = Impl_Key | _]} = Parser)
@@ -3514,7 +3514,7 @@ queue_impl_key(#yaml_parser{chars_idx = Index,
       column = Impl_Key#impl_key.col
     },
     Parser1 = add_error(Parser, Error,
-      "An implicit key must not take more than 1024 characters~n", []),
+      "An implicit key must not take more than 1024 characters", []),
     queue_impl_key2(Parser1);
 queue_impl_key(Parser) ->
     queue_impl_key2(Parser).
@@ -3547,7 +3547,7 @@ remove_impl_key_pos(
       column = Col
     },
     Parser1 = add_error(Parser, Error,
-      "Expected sequence entry or mapping implicit key not found~n", []),
+      "Expected sequence entry or mapping implicit key not found", []),
     return(Parser1);
 remove_impl_key_pos(
   #yaml_parser{ik_stack = [_ | Rest]} = Parser) ->
@@ -3860,7 +3860,7 @@ emit_tokens2(#yaml_parser{tks_queued = Queued, tks_first_idx = First} = Parser,
     },
     Parser1 = add_error(Parser, Error,
       "Multiple tag properties attached to one node: "
-      "the last one will be used~n", []),
+      "the last one will be used", []),
     Parser2 = Parser1#yaml_parser{
       tks_queued    = Queued - 1,
       tks_first_idx = First + 1,
@@ -3892,7 +3892,7 @@ emit_tokens2(#yaml_parser{tks_queued = Queued, tks_first_idx = First} = Parser,
     },
     Parser1 = add_error(Parser, Error,
       "Multiple anchor properties attached to one node: "
-      "the last one will be used~n", []),
+      "the last one will be used", []),
     Parser2 = Parser1#yaml_parser{
       tks_queued    = Queued - 1,
       tks_first_idx = First + 1,
@@ -3983,7 +3983,7 @@ check_tokens_in_a_row(Parser, Token1, Token2) when
       column = ?TOKEN_COLUMN(Token2)
     },
     Parser1 = add_error(Parser, Error,
-      "Unexpected \"~s\" token following a \"~s\" token~n",
+      "Unexpected \"~s\" token following a \"~s\" token",
       [?TOKEN_NAME(Token2), ?TOKEN_NAME(Token1)]),
     return(Parser1);
 check_tokens_in_a_row(Parser, _, _) ->
@@ -4239,28 +4239,28 @@ invalid_option(Option) ->
         {default_tags, _} ->
             Error#yaml_parser_error{
               text = "Invalid value for option \"default_tags\": "
-              "it must be a list of {Prefix, Prefix_Value}.\n"
+              "it must be a list of {Prefix, Prefix_Value}"
             };
         {doc_version, _} ->
             Error#yaml_parser_error{
               text = "Invalid value for option \"doc_version\": "
               "it must be a tuple of the form {Major, Minor} "
-              "where Major and Minor are positive integers\n"
+              "where Major and Minor are positive integers"
             };
         {io_blocksize, _} ->
             Error#yaml_parser_error{
               text = "Invalid value for option \"io_blocksize\": "
-              "it must be a positive interger, expressed in bytes\n"
+              "it must be a positive interger, expressed in bytes"
             };
         {token_fun, _} ->
             Error#yaml_parser_error{
               text = "Invalid value for option \"token_fun\": "
               "it must be a function taking the parser state "
-              "as its sole argument\n"
+              "as its sole argument"
             };
         _ ->
             Error#yaml_parser_error{
-              text = io_lib:flatten(io_lib:format("Unknown option \"~w\"~n",
+              text = io_lib:flatten(io_lib:format("Unknown option \"~w\"",
                   [Option]))
             }
     end,
@@ -4396,7 +4396,7 @@ is_uri_scheme_valid1(Parser, Token, [_ | _]) ->
       line   = ?TOKEN_LINE(Token),
       column = ?TOKEN_COLUMN(Token)
     },
-    add_error(Parser, Error, "Invalid character in URI scheme~n", []);
+    add_error(Parser, Error, "Invalid character in URI scheme", []);
 is_uri_scheme_valid1(Parser, Token, []) ->
     Error = #yaml_parser_error{
       name   = invalid_uri,
@@ -4405,7 +4405,7 @@ is_uri_scheme_valid1(Parser, Token, []) ->
       line   = ?TOKEN_LINE(Token),
       column = ?TOKEN_COLUMN(Token)
     },
-    add_error(Parser, Error, "Unexpected end of URI~n", []).
+    add_error(Parser, Error, "Unexpected end of URI", []).
 
 is_uri_scheme_valid2(Parser, Token, [C | Rest]) when
   (C >= $a andalso C =< $z) orelse
@@ -4423,7 +4423,7 @@ is_uri_scheme_valid2(Parser, Token, [_ | _]) ->
       line   = ?TOKEN_LINE(Token),
       column = ?TOKEN_COLUMN(Token)
     },
-    add_error(Parser, Error, "Invalid character in URI scheme~n", []);
+    add_error(Parser, Error, "Invalid character in URI scheme", []);
 is_uri_scheme_valid2(Parser, Token, []) ->
     Error = #yaml_parser_error{
       name   = invalid_uri,
@@ -4432,7 +4432,7 @@ is_uri_scheme_valid2(Parser, Token, []) ->
       line   = ?TOKEN_LINE(Token),
       column = ?TOKEN_COLUMN(Token)
     },
-    add_error(Parser, Error, "Unexpected end of URI~n", []).
+    add_error(Parser, Error, "Unexpected end of URI", []).
 
 is_uri_hier_part_valid(Parser, Token, [C | Rest]) when ?IS_URI_CHAR(C) ->
     is_uri_hier_part_valid(Parser, Token, Rest);
@@ -4446,7 +4446,7 @@ is_uri_hier_part_valid(Parser, Token, [_ | _]) ->
       line   = ?TOKEN_LINE(Token),
       column = ?TOKEN_COLUMN(Token)
     },
-    add_error(Parser, Error, "Invalid character in URI scheme~n", []).
+    add_error(Parser, Error, "Invalid character in URI scheme", []).
 
 warn_if_non_ascii_line_break(#yaml_parser{chars = [C | _]} = Parser)
   when ?IS_NEWLINE_11(C) ->
@@ -4459,7 +4459,7 @@ warn_if_non_ascii_line_break(#yaml_parser{chars = [C | _]} = Parser)
     },
     add_error(Parser, Error,
       "Use of non-ASCII line break is not supported anymore starting "
-      "with YAML 1.2; treated as non-break character~n", []);
+      "with YAML 1.2; treated as non-break character", []);
 warn_if_non_ascii_line_break(Parser) ->
     Parser.
 

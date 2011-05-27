@@ -21,15 +21,6 @@
     node_column/1
   ]).
 
--define(CORE_SCHEMA_MODS, [
-    yaml_node_null,
-    yaml_node_bool,
-    yaml_node_int,
-    yaml_node_str,
-    yaml_node_seq,
-    yaml_node_map
-  ]).
-
 %% -------------------------------------------------------------------
 %% Public API: chunked stream scanning.
 %% -------------------------------------------------------------------
@@ -169,7 +160,7 @@ represent(
                 undefined ->
                     %% This tag isn't handled by anything!
                     Text = lists:flatten(io_lib:format(
-                        "Tag \"~s\" unrecognized by any module~n", [URI])),
+                        "Tag \"~s\" unrecognized by any module", [URI])),
                     Error = #yaml_parser_error{
                       name   = unrecognized_node,
                       token  = Tag,
@@ -200,7 +191,7 @@ try_represent(_, [], Token) ->
     Error = #yaml_parser_error{
       name   = unrecognized_node,
       token  = Token,
-      text   = "No module found to handle node~n",
+      text   = "No module found to handle node",
       line   = ?TOKEN_LINE(Token),
       column = ?TOKEN_COLUMN(Token)
     },
@@ -336,11 +327,11 @@ invalid_option(Option) ->
         {simpl_estructs, _} ->
             Error#yaml_parser_error{
               text = "Invalid value for option \"simple_structs\": "
-              "it must be a boolean\n"
+              "it must be a boolean"
             };
         _ ->
             Error#yaml_parser_error{
-              text = io_lib:flatten(io_lib:format("Unknown option \"~w\"~n",
+              text = io_lib:flatten(io_lib:format("Unknown option \"~w\"",
                   [Option]))
             }
     end,
