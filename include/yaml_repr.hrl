@@ -35,4 +35,13 @@
     anchors              = dict:new() :: dict()
   }).
 
+-define(CORE_SCHEMA_MODS, [
+    yaml_node_null,
+    yaml_node_bool,
+    yaml_node_int,
+    yaml_node_str,
+    yaml_node_seq,
+    yaml_node_map
+  ]).
+
 -endif.

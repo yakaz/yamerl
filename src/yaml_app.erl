@@ -2,6 +2,8 @@
 
 -behaviour(application).
 
+-include("yaml_repr.hrl").
+
 %% Configuration API.
 -export([
     params_list/0,
@@ -128,7 +130,8 @@ log_param_errors([Param | Rest]) ->
 
 start(_, _) ->
     Steps = [
-      check_params
+      check_params,
+      preload_core_schema_mods
     ],
     case do_start(Steps) of
         {error, Reason, Message} ->
@@ -160,6 +163,17 @@ do_start([check_params | Rest]) ->
             Message = io_lib:format(
               "~s: invalid application configuration~n", [?APPLICATION]),
             {error, invalid_configuration, Message}
+    end;
+do_start([preload_core_schema_mods | Rest]) ->
+    Fun = fun(Mod) -> Mod:module_info() end,
+    try
+        lists:foreach(Fun, ?CORE_SCHEMA_MODS),
+        do_start(Rest)
+    catch
+        _:_ ->
+            Message = io_lib:format(
+              "~s: failed to preload Core Schema modules~n", [?APPLICATION]),
+            {error, bad_score_schema_mods, Message}
     end;
 do_start([]) ->
     yaml_sup:start_link().
