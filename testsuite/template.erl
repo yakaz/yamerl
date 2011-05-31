@@ -54,7 +54,7 @@ print_coverage2(Cover_To_Html, [Mod | Rest]) ->
     {ok, {_Module, {Cov, Not_Cov}}} = cover:analyse(Mod, module),
     Mod_S = atom_to_list(Mod),
     if
-        Cov > 0 andalso Not_Cov > 0 ->
+        Cov > 0 orelse Not_Cov > 0 ->
             file:write_file("cover_" ?MODULE_STRING "_" ++ Mod_S ++ ".percent",
               list_to_binary(io_lib:format("~.1f~n",
                   [Cov * 100 / (Cov + Not_Cov)]))),
