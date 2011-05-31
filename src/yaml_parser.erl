@@ -4264,7 +4264,7 @@ invalid_option(Option) ->
                   [Option]))
             }
     end,
-    throw(Error1).
+    throw_parser_state(Error1).
 
 next_state(Parser, State) ->
     State(Parser#yaml_parser{stream_state = State}).
@@ -4491,5 +4491,5 @@ return(#yaml_parser{raw_eos = true, chars_len = 0} = Parser) ->
 return(Parser) ->
     {continue, Parser}.
 
-throw_parser_state(Parser) ->
-    throw({yaml_parser, Parser}).
+throw_parser_state(Parser_Or_Error) ->
+    throw({yaml_parser, Parser_Or_Error}).
