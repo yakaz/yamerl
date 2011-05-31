@@ -1,5 +1,5 @@
--ifndef(yaml_repr_hrl).
--define(yaml_repr_hrl, true).
+-ifndef(internal_yaml_repr_hrl).
+-define(internal_yaml_repr_hrl, true).
 
 -include("yaml_nodes.hrl").
 
@@ -29,19 +29,10 @@
                                           yaml_simple_doc()],
     docs_count           = 0          :: non_neg_integer(),
     current_doc          = undefined  :: [yaml_partial_doc() |
-                                          yaml_partial_node() |
-                                          undefined],
+                                          yaml_partial_node()]
+                                       | undefined,
     current_node_is_leaf = false      :: boolean(),
     anchors              = dict:new() :: dict()
   }).
-
--define(CORE_SCHEMA_MODS, [
-    yaml_node_null,
-    yaml_node_bool,
-    yaml_node_int,
-    yaml_node_str,
-    yaml_node_seq,
-    yaml_node_map
-  ]).
 
 -endif.

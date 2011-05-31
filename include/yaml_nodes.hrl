@@ -189,4 +189,17 @@
 -define(NODE_TAG(N),  element(#yaml_str.tag, N)).
 -define(NODE_PRES(N), element(#yaml_str.pres, N)).
 
+%% -------------------------------------------------------------------
+%% List of modules implementing the Core Schema nodes.
+%% -------------------------------------------------------------------
+
+-define(CORE_SCHEMA_MODS, [
+    yaml_node_null,
+    yaml_node_bool,
+    yaml_node_int,
+    yaml_node_str,
+    yaml_node_seq,
+    yaml_node_map
+  ]).
+
 -endif.
