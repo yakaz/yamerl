@@ -40,7 +40,7 @@
     false,
     [
       {yaml_parser_error,1,1,warning,reserved_directive,
-        "Reserved directive \"FOO\" ignored\n",
+        "Reserved directive \"FOO\" ignored",
         {yaml_reserved_directive,1,1,"FOO",["bar","baz"],2},
         []}
     ],

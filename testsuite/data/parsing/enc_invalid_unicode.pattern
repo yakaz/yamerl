@@ -41,7 +41,7 @@
       true,
       [
         {yaml_parser_error,undefined,undefined,error,
-          invalid_unicode, "Invalid Unicode character at byte #4\n", undefined,
+          invalid_unicode, "Invalid Unicode character at byte #4", undefined,
           [{byte,4}]}
       ],
       [

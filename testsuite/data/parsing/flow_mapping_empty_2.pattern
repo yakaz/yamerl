@@ -41,7 +41,7 @@
       true,
       [
         {yaml_parser_error,2,1,error,flow_collection_entry_not_allowed,
-          "Empty flow collection entry not allowed\n",undefined,[]}
+          "Empty flow collection entry not allowed",undefined,[]}
       ],
       [
         {yaml_stream_end,3,2},

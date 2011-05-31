@@ -40,7 +40,7 @@
     false,
     [
       {yaml_parser_error,2,3,warning,invalid_implicit_key,
-        "An implicit key must not span several lines\n",
+        "An implicit key must not span several lines",
         undefined,[]}
     ],
     [

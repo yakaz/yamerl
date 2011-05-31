@@ -41,7 +41,7 @@
       true,
       [
         {yaml_parser_error,1,1,error,version_not_supported,
-          "Version 2.0 not supported (maximum version 1.2)\n",
+          "Version 2.0 not supported (maximum version 1.2)",
           {yaml_doc_start,1,1,{2,0},_},
           []}
       ],

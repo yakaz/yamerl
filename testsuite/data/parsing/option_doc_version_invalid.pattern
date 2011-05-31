@@ -2,11 +2,12 @@
 
 %% TEST
 ?_assertThrow(
-  {yaml_parser_error,undefined,undefined,error,
-    invalid_parser_option,
-    "Invalid value for option \"doc_version\": it must be a tuple of the form {Major, Minor} where Major and Minor are positive integers\n",
-    undefined,
-    [{option,{doc_version,invalid}}]
-  },
+  {yaml_parser,
+    {yaml_parser_error,undefined,undefined,error,
+      invalid_parser_option,
+      "Invalid value for option \"doc_version\": it must be a tuple of the form {Major, Minor} where Major and Minor are positive integers",
+      undefined,
+      [{option,{doc_version,invalid}}]
+    }},
   yaml_parser:file("${FILENAME}", [{doc_version, invalid}])
 )

@@ -2,11 +2,12 @@
 
 %% TEST
 ?_assertThrow(
-  {yaml_parser_error,undefined,undefined,error,
-    invalid_parser_option,
-    "Invalid value for option \"io_blocksize\": it must be a positive interger, expressed in bytes\n",
-    undefined,
-    [{option,{io_blocksize,invalid}}]
-  },
+  {yaml_parser,
+    {yaml_parser_error,undefined,undefined,error,
+      invalid_parser_option,
+      "Invalid value for option \"io_blocksize\": it must be a positive interger, expressed in bytes",
+      undefined,
+      [{option,{io_blocksize,invalid}}]
+    }},
   yaml_parser:file("${FILENAME}", [{io_blocksize, invalid}])
 )

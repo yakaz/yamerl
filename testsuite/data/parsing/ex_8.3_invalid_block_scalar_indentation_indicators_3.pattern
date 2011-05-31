@@ -41,7 +41,7 @@
       true,
       [
         {yaml_parser_error,2,2,error,invalid_block_scalar_indentation,
-          "Invalid block scalar indentation\n",
+          "Invalid block scalar indentation",
           {yaml_scalar,1,3,{yaml_tag,1,3,{non_specific,"!"}},block,literal,[]},
           []}
       ],

@@ -41,11 +41,11 @@
       true,
       [
         {yaml_parser_error,4,9,error,undeclared_tag_handle,
-          "Tag handle \"!h!\" never declared\n",
+          "Tag handle \"!h!\" never declared",
           {yaml_tag,4,3,"!h!bar"},
           []},
         {yaml_parser_error,3,6,error,invalid_tag_handle,
-          "Tag suffix mandatory\n",
+          "Tag suffix mandatory",
           {yaml_tag,3,3,"!e!"},
           []}
       ],

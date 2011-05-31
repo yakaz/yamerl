@@ -40,7 +40,7 @@
     false,
     [
       {yaml_parser_error,2,1,warning,multiple_yaml_directives,
-        "Multiple YAML directives found: the last one will be used\n",
+        "Multiple YAML directives found: the last one will be used",
         {yaml_yaml_directive,2,1,{1,1}},
         []}
     ],

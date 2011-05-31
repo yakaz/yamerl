@@ -40,10 +40,10 @@
     false,
     [
       {yaml_parser_error,2,15,warning,reserved_indicator,
-        "The reserved indicator \"`\" is not allowed at the beginning of a plain scalar\n",
+        "The reserved indicator \"`\" is not allowed at the beginning of a plain scalar",
         undefined,[]},
       {yaml_parser_error,1,16,warning,reserved_indicator,
-        "The reserved indicator \"@\" is not allowed at the beginning of a plain scalar\n",
+        "The reserved indicator \"@\" is not allowed at the beginning of a plain scalar",
         undefined,[]}
     ],
     [

@@ -41,7 +41,7 @@
       true,
       [
         {yaml_parser_error,3,1,error,unpected_token,
-          "Unexpected \"yaml_scalar\" token following a \"yaml_scalar\" token\n",
+          "Unexpected \"yaml_scalar\" token following a \"yaml_scalar\" token",
           {yaml_scalar,3,1,
             {yaml_tag,3,1,{non_specific,"!"}},
             flow,double_quoted,"item2"},

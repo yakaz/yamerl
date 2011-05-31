@@ -41,11 +41,11 @@
       true,
       [
         {yaml_parser_error,2,3,warning,invalid_uri,
-          "Invalid character in URI scheme\n",
+          "Invalid character in URI scheme",
           {yaml_tag,2,3,"$:?"},
           []},
         {yaml_parser_error,1,7,error,invalid_tag_handle,
-          "Local tag suffix mandatory\n",
+          "Local tag suffix mandatory",
           {yaml_tag,1,3,"!"},
           []}
       ],

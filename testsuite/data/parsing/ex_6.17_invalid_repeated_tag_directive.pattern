@@ -41,7 +41,7 @@
     [
       {yaml_parser_error,2,1,warning,
         multiple_tag_handle_declarations,
-        "Multiple declarations of the same handle found: the last one will be used\n",
+        "Multiple declarations of the same handle found: the last one will be used",
         {yaml_tag_directive,2,1,"!","!foo"},
         []}
     ],
