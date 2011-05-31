@@ -41,23 +41,23 @@ represent_token(#yaml_repr{simple_structs = Simple},
                             }
                     end,
                     {finished, Node};
-                {error, {Line, _, Desc}} ->
+                {error, {Line, _, Desc}} when Line >= 1 ->
                     Error = #yaml_parser_error{
                       name   = invalid_erlang_fun2,
                       token  = Token,
                       text   = lists:flatten(erl_parse:format_error(Desc)),
                       line   = ?TOKEN_LINE(Token) + Line - 1,
-                      column = 0
+                      column = 1
                     },
                     throw(Error)
             end;
-        {error, {Line, _, Desc}, _} ->
+        {error, {Line, _, Desc}, _} when Line >= 1 ->
             Error = #yaml_parser_error{
               name   = invalid_erlang_fun1,
               token  = Token,
               text   = lists:flatten(erl_scan:format_error(Desc)),
               line   = ?TOKEN_LINE(Token) + Line - 1,
-              column = 0
+              column = 1
             },
             throw(Error)
     end;

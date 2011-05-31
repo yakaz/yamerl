@@ -19,7 +19,8 @@
     get_token_fun/1,
     set_token_fun/2,
     option_names/0,
-    get_errors/1
+    get_errors/1,
+    throw_error/1
   ]).
 
 %% -------------------------------------------------------------------
@@ -4260,11 +4261,11 @@ invalid_option(Option) ->
             };
         _ ->
             Error#yaml_parser_error{
-              text = io_lib:flatten(io_lib:format("Unknown option \"~w\"",
+              text = lists:flatten(io_lib:format("Unknown option \"~w\"",
                   [Option]))
             }
     end,
-    throw_parser_state(Error1).
+    throw_error(Error1).
 
 next_state(Parser, State) ->
     State(Parser#yaml_parser{stream_state = State}).
@@ -4485,11 +4486,12 @@ add_error(
     }.
 
 return(#yaml_parser{has_errors = true} = Parser) ->
-    throw_parser_state(Parser);
+    throw_error(Parser);
 return(#yaml_parser{raw_eos = true, chars_len = 0} = Parser) ->
     Parser;
 return(Parser) ->
     {continue, Parser}.
 
-throw_parser_state(Parser_Or_Error) ->
+-spec throw_error(#yaml_parser{} | #yaml_parser_error{}) -> no_return().
+throw_error(Parser_Or_Error) ->
     throw({yaml_parser, Parser_Or_Error}).

@@ -168,7 +168,7 @@ represent(
                       line   = ?TOKEN_LINE(Tag),
                       column = ?TOKEN_COLUMN(Tag)
                     },
-                    throw(Error)
+                    yaml_parser:throw_error(Error)
             end
     end,
     handle_represent_return(Repr, Doc, Ret);
@@ -324,15 +324,15 @@ invalid_option(Option) ->
       extra = [{option, Option}]
     },
     Error1 = case Option of
-        {simpl_estructs, _} ->
+        {simple_structs, _} ->
             Error#yaml_parser_error{
               text = "Invalid value for option \"simple_structs\": "
               "it must be a boolean"
             };
         _ ->
             Error#yaml_parser_error{
-              text = io_lib:flatten(io_lib:format("Unknown option \"~w\"",
+              text = lists:flatten(io_lib:format("Unknown option \"~w\"",
                   [Option]))
             }
     end,
-    throw(Error1).
+    yaml_parser:throw_error(Error1).
