@@ -2,7 +2,7 @@
 
 -behaviour(application).
 
--include("yaml_repr.hrl").
+-include("yaml_nodes.hrl").
 
 %% Configuration API.
 -export([

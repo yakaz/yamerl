@@ -7,7 +7,8 @@
 %% Options.
 %% -------------------------------------------------------------------
 
--type yaml_parser_token_fun() :: fun((yaml_token()) -> ok | {ok, fun()}).
+-type yaml_parser_token_fun() ::
+        fun((yaml_token() | term()) -> ok | {ok, yaml_parser_token_fun()}).
 
 -type yaml_parser_option() :: {default_tags, [{tag_uri(), tag_prefix()}]}
                             | {document_version, document_version()}

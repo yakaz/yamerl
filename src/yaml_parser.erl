@@ -1,9 +1,8 @@
-%% $Id$
-
 -module(yaml_parser).
 
--include("yaml_parser.hrl").
+-include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
+-include("internal/yaml_parser.hrl").
 
 %% Public API.
 -export([
@@ -18,180 +17,12 @@
     last_chunk/2,
     get_token_fun/1,
     set_token_fun/2,
-    option_names/0,
-    get_errors/1,
-    throw_error/1
+    option_names/0
   ]).
 
 %% -------------------------------------------------------------------
-%% Main record to store the scanner state.
+%% Secondary records to store the scanner state.
 %% -------------------------------------------------------------------
-
--record(impl_key, {
-    possible = false  :: boolean(),
-    required          :: boolean(),
-    line              :: position(),
-    col               :: position(),
-    chars_idx         :: pos_integer(),
-    token_idx         :: pos_integer()
-  }).
-
--record(bcoll, {
-    kind   = root     :: root | sequence | mapping,
-    indent = 0        :: 0    | position(),
-    kidx   = -1       :: pos_integer() | -1, %% Last key index.
-    kline  = 1        :: position(),         %% Last key line.
-    kcol   = 1        :: position(),         %% Last key column.
-    vidx   = -1       :: pos_integer() | -1, %% Last value index.
-    vline  = 1        :: position(),         %% Last value line.
-    vcol   = 1        :: position()          %% Last value column.
-  }).
-
--record(fcoll, {
-    kind   = sequence :: sequence | mapping | single_mapping,
-    kidx   = -1       :: pos_integer() | -1, %% Last key/entry index.
-    kline  = 1        :: position(),         %% Last key/entry line.
-    kcol   = 1        :: position(),         %% Last key/entry column.
-    vidx   = -1       :: pos_integer() | -1, %% Last value index.
-    vline  = 1        :: position(),         %% Last value line.
-    vcol   = 1        :: position()          %% Last value column.
-  }).
-
--record(yaml_parser, {
-    %%
-    %% Buffer management.
-    %%
-
-    %% An indication of the source of the stream, eg. a file.
-    source       :: any(),
-    options = [] :: [yaml_parser_option()],
-
-    %% Raw data corresponds to Unicode characters not decoded yet. The
-    %% raw index indicates where the raw data is in the stream; it
-    %% equals the amount of data already decoded in bytes. The raw_eos
-    %% is a flag indicating the end of stream; this flag is set when the
-    %% last chunk is seen.
-    raw_data = <<>>  :: binary(),
-    raw_idx  = 0     :: non_neg_integer(),
-    raw_eos  = false :: boolean(),
-
-    %% Characters data are the decoded Unicode characters but not
-    %% scanned yet. The length corresponds to the number of characters
-    %% in this list. The index indicates where the characters data is in
-    %% the stream; it equals to the amount of data already scanned in
-    %% characters.
-    chars     = "" :: string(),
-    chars_len = 0  :: non_neg_integer(),
-    chars_idx = 0  :: non_neg_integer(),
-
-    %% Cursor "position". While scanning the stream, we keep the line
-    %% and column number. We also need to remember the last token end
-    %% line and column.
-    line                = 1     :: pos_integer(),
-    col                 = 1     :: pos_integer(),
-    endpos_set_by_token = false :: boolean(),
-    last_token_endline  = 1     :: pos_integer(),
-    last_token_endcol   = 1     :: pos_integer(),
-
-    %%
-    %% Stream informations.
-    %%
-
-    %% Character encoding of the stream. It must be a valid Unicode
-    %% character encoding and it must not change after stream start.
-    encoding :: encoding() | undefined,
-
-    %%
-    %% Document informations.
-    %% Those informations are reset between each document.
-    %%
-
-    %% "doc_started" indicates if the document is started or not.
-    %% This is used to know when directives are allowed for example.
-    %% The document version is set by a YAML directive or to
-    %% ?IMPLICIT_YAML_VERSION when a document starts if there were no
-    %% directive.
-    doc_started = false :: boolean(),
-    doc_version         :: document_version() | undefined,
-
-    %% "tags" is a dictionary containing default tag handles and those
-    %% defined by TAG directives. It's used during tag resolution. The
-    %% last tag property is stored in "last_tag" and is attached to a
-    %% node only when this node is about to be emitted.
-    tags = dict:new() :: tags_table(),
-
-    %%
-    %% Parsing state.
-    %%
-
-    %% The stream state corresponds to the name of the function to call
-    %% when more data is available. This state is influenced by several
-    %% parameters:
-    %%   o  the block-context indentation prefixes (a stack);
-    %%   o  the level of flow-context nesting (a stack too).
-    stream_state = fun start_stream/1 :: fun((#yaml_parser{}) ->
-                                               {ok, #yaml_parser{}}
-                                             | {continue, #yaml_parser{}}
-                                             | none()),
-    parent_colls = []                 :: [#bcoll{} | #fcoll{}],
-    cur_coll     = #bcoll{}           :: #bcoll{} | #fcoll{},
-
-    %% When parsing a flow collection, we keep a "pending_entry" flag.
-    %% The next token may trigger the queueing of a sequence entry token.
-    pending_entry = false :: boolean(),
-
-    %% We also keep a flag to know if the next expected token is a key:
-    %% value pair.
-    waiting_for_kvpair = false :: boolean(),
-
-    %% Implicit keys handling.
-    %% We need to know if the next token could be an implicit key.
-    %% Furthermore, while searching for ':', marking the "end" of an
-    %% implicit key, we need to store the positions where an implicit
-    %% key could appear. In block context, an implicit key can't contain
-    %% an implicit key. But in flow context, an implicit key can embed
-    %% another implicit key.
-    ik_allowed = false :: boolean(),
-    ik_stack   = []    :: [#impl_key{}],
-
-    %% We remember if the last queued token is JSON-like. JSON-like
-    %% nodes are single- and double-quoted scalars and flow collections.
-    %% Therefore, the JSON-like tokens are single- and double-quoted
-    %% scalar tokens and flow collection end tokens.
-    last_is_json_like = false :: boolean(),
-
-    %% Did the last parsing eat the newline?
-    missed_nl = false :: boolean(),
-
-    %%
-    %% Parsing output.
-    %%
-
-    %% Callbacks.
-    token_fun :: yaml_parser_token_fun() | undefined,
-
-    %% List of scanned tokens with counters.
-    tokens        = []  :: [yaml_token()],
-    tks_queued    = 0   :: non_neg_integer(),
-    tks_first_idx = 1   :: pos_integer(),
-    tks_emitted   = 0   :: non_neg_integer(),
-
-    %% We keep a copy of the last emitted token. This is used for
-    %% verification purpose. For instance, two scalars in a row is an
-    %% error.
-    last_tag            :: yaml_tag()    | undefined,
-    last_anchor         :: yaml_anchor() | undefined,
-    last_token          :: yaml_token()  | undefined,
-
-    %% List of warnings and errors. The scan won't necessarily stop at
-    %% the first error.
-    has_errors = false  :: boolean(),
-    errors     = []     :: [#yaml_parser_error{}],
-
-    %% When the user doesn't specify a "token_fun" callback module all
-    %% tokens to be emitted are stored in the following list.
-    tks_ready  = []     :: [yaml_token()]
-  }).
 
 -record(directive_ctx, {
     line      :: position(),
@@ -356,9 +187,10 @@ new(Source) ->
 new(Source, Options) ->
     check_options(Options),
     #yaml_parser{
-      source    = Source,
-      options   = Options,
-      token_fun = proplists:get_value(token_fun, Options)
+      source       = Source,
+      options      = Options,
+      stream_state = fun start_stream/1,
+      token_fun    = proplists:get_value(token_fun, Options)
     }.
 
 next_chunk(Parser, <<>>, false) ->
@@ -406,7 +238,7 @@ file(Filename, Options) ->
             %% the stream accordingly.
             file2(Parser, FD, Blocksize);
         {error, Reason} ->
-            Error2 = #yaml_parser_error{
+            Error2 = #yaml_parsing_error{
               name  = file_open_failure,
               extra = [{error, Reason}]
             },
@@ -443,7 +275,7 @@ file2(#yaml_parser{source = {file, Filename}} = Parser, FD, Blocksize) ->
             file:close(FD),
             next_chunk(Parser, <<>>, true);
         {error, Reason} ->
-            Error = #yaml_parser_error{
+            Error = #yaml_parsing_error{
               name = file_read_failure,
               extra = [{error, Reason}]
             },
@@ -462,15 +294,6 @@ get_token_fun(#yaml_parser{token_fun = Fun}) ->
 
 set_token_fun(Parser, Fun) when is_function(Fun, 1) ->
     Parser#yaml_parser{token_fun = Fun}.
-
-%% -------------------------------------------------------------------
-%% Errors and warnings handling.
-%% -------------------------------------------------------------------
-
-get_errors(#yaml_parser{errors = Errors}) ->
-    lists:reverse(Errors);
-get_errors(#yaml_parser_error{} = Error) ->
-    [Error].
 
 %% -------------------------------------------------------------------
 %% Determine encoding and decode Unicode.
@@ -496,7 +319,7 @@ decode_unicode(#yaml_parser{stream_state = State,
                 incomplete ->
                     Parser1;
                 error ->
-                    Error = #yaml_parser_error{
+                    Error = #yaml_parsing_error{
                       name  = invalid_unicode,
                       extra = [{byte, Raw_Index1 + 1}]
                     },
@@ -685,7 +508,7 @@ determine_token_type(
     %% A BOM is forbidden after the document start. Because it's not
     %% fatal during parsing, we only add a warning. Note that the YAML
     %% specification considers this to be an error.
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       type   = warning,
       name   = bom_after_doc_start,
       line   = ?CURSOR_LINE(Parser),
@@ -825,7 +648,7 @@ determine_token_type(#yaml_parser{chars = [$" | _]} = Parser) ->
 %% We add a warning and parse it as a plain scalar.
 determine_token_type(#yaml_parser{chars = [C | _]} = Parser)
   when C == $@ orelse C == $` ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = reserved_indicator,
       type   = warning,
       line   = ?CURSOR_LINE(Parser),
@@ -895,7 +718,7 @@ start_doc(
          Minor < ?MIN_YAML_MINOR_VERSION_SUPPORTED) ->
             %% The document's version is not supported at all (below
             %% minimum supported version).
-            Error = #yaml_parser_error{
+            Error = #yaml_parsing_error{
               name   = version_not_supported,
               token  = Token,
               line   = Line,
@@ -918,7 +741,7 @@ start_doc(
         {Major, Minor} when Major > ?MAX_YAML_MAJOR_VERSION_SUPPORTED ->
             %% The document's version is not supported at all (major
             %% above maximum supporter major).
-            Error = #yaml_parser_error{
+            Error = #yaml_parsing_error{
               name   = version_not_supported,
               token  = Token,
               line   = Line,
@@ -935,7 +758,7 @@ start_doc(
         {Major, Minor} when Minor > ?MAX_YAML_MINOR_VERSION_SUPPORTED ->
             %% The document's minor version is greater than the
             %% supported version. Add a warning and continue anyway.
-            Error = #yaml_parser_error{
+            Error = #yaml_parsing_error{
               name   = version_not_supported,
               type   = warning,
               token  = Token,
@@ -1039,7 +862,7 @@ skip_directive_trailing_ws(
     return(Parser);
 
 skip_directive_trailing_ws(#yaml_parser{chars = [_ | _]} = Parser) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = unexpected_directive_extra_params,
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
@@ -1093,7 +916,7 @@ parse_yaml_directive_major(#yaml_parser{chars = [_ | _]} = Parser,
       line   = Line,
       column = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_yaml_directive,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -1109,7 +932,7 @@ parse_yaml_directive_major(#yaml_parser{chars = [], raw_eos = true} = Parser,
       line   = Line,
       column = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_yaml_directive,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -1155,7 +978,7 @@ parse_yaml_directive_minor(#yaml_parser{chars = [_ | _]} = Parser,
       line   = Line,
       column = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_yaml_directive,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -1189,7 +1012,7 @@ queue_yaml_directive(Parser,
       line    = Line,
       column  = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       type   = warning,
       name   = multiple_yaml_directives,
       token  = Token,
@@ -1265,7 +1088,7 @@ parse_tag_directive_handle(#yaml_parser{chars = [_ | _]} = Parser,
       line   = Line,
       column = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_tag_directive,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -1286,7 +1109,7 @@ parse_tag_directive_handle(#yaml_parser{chars = [], raw_eos = true} = Parser,
       line   = Line,
       column = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_tag_directive,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -1343,7 +1166,7 @@ parse_tag_directive_prefix(#yaml_parser{chars = [_ | _]} = Parser,
       line   = Line,
       column = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_tag_directive,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -1370,7 +1193,7 @@ queue_tag_directive(#yaml_parser{tags = Tags} = Parser,
         false ->
             Parser1;
         true ->
-            Error = #yaml_parser_error{
+            Error = #yaml_parsing_error{
               type   = warning,
               name   = multiple_tag_handle_declarations,
               token  = Token,
@@ -1463,7 +1286,7 @@ queue_reserved_directive(Parser,
       line       = Line,
       column     = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       type   = warning,
       name   = reserved_directive,
       token  = Token,
@@ -1484,7 +1307,7 @@ parse_block_entry(#yaml_parser{ik_allowed = true} = Parser)
   when ?IN_BLOCK_CTX(Parser) ->
     queue_block_sequence_entry_token(Parser);
 parse_block_entry(Parser) when ?IN_BLOCK_CTX(Parser) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = block_sequence_entry_not_allowed,
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
@@ -1493,7 +1316,7 @@ parse_block_entry(Parser) when ?IN_BLOCK_CTX(Parser) ->
       "Block sequence entry not allowed here", []),
     return(Parser1);
 parse_block_entry(Parser) when ?IN_FLOW_CTX(Parser) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = block_collection_in_flow_context,
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
@@ -1582,7 +1405,7 @@ parse_flow_collection_end(
 parse_flow_collection_end(
   #yaml_parser{cur_coll = #fcoll{kind = Expected}} = Parser, Kind) ->
     %% Closing a different-type collection.
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = closing_non_matching_flow_collection_type,
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
@@ -1594,7 +1417,7 @@ parse_flow_collection_end(
 parse_flow_collection_end(
   #yaml_parser{chars = [_ | Rest], cur_coll = #bcoll{}} = Parser, Kind) ->
     %% Closing a never-opened collection.
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = closing_never_opened_flow_collection,
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
@@ -1616,7 +1439,7 @@ parse_flow_entry(
   (Kind == mapping  andalso ?MISSING_KVPAIR(Parser)) ->
     %% In a flow collection, the "," entry indicator immediatly follows a
     %% collection-start or a previous entry indicator.
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = flow_collection_entry_not_allowed,
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
@@ -1643,7 +1466,7 @@ parse_flow_entry(#yaml_parser{chars = [_ | Rest],
     Parser5 = next_col(Parser4, 1, Rest),
     next_state(Parser5, fun find_next_token/1);
 parse_flow_entry(Parser) when ?IN_BLOCK_CTX(Parser) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = flow_collection_entry_not_allowed,
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
@@ -1667,7 +1490,7 @@ parse_mapping_key(Parser)
     queue_mapping_key_token(Parser);
 parse_mapping_key(Parser) ->
     %% A mapping key is NOT allowed here.
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = block_mapping_key_not_allowed,
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
@@ -1744,7 +1567,7 @@ parse_mapping_value(
     queue_mapping_value_token(Parser2);
 parse_mapping_value(
   #yaml_parser{ik_allowed = false} = Parser) when ?IN_BLOCK_CTX(Parser) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = block_mapping_value_not_allowed,
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
@@ -1786,7 +1609,7 @@ queue_mapping_value_token(
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_block_mapping_value_indentation,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -1940,7 +1763,7 @@ parse_tag(#yaml_parser{chars = [_ | Rest], line = Line, col = Col,
     determine_tag_type(Parser3, Ctx);
 parse_tag(#yaml_parser{last_tag = Tag} = Parser)
   when Tag /= undefined ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = multiple_tag_properties,
       line   = ?CURSOR_LINE(Parser),
       column = ?CURSOR_COLUMN(Parser)
@@ -1992,7 +1815,7 @@ parse_verbatim_tag(#yaml_parser{chars = [$! | Rest]} = Parser,
       line   = Line,
       column = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_tag_handle,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -2017,7 +1840,7 @@ parse_verbatim_tag(#yaml_parser{chars = [_ | Rest]} = Parser,
       line   = Line,
       column = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_tag_handle,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -2037,7 +1860,7 @@ parse_verbatim_tag(#yaml_parser{chars = [], raw_eos = true} = Parser,
       line   = Line,
       column = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = unexpected_eos,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -2069,7 +1892,7 @@ parse_tag_shorthand(#yaml_parser{chars = [$! | Rest]} = Parser,
       line   = Line,
       column = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_tag_handle,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -2108,7 +1931,7 @@ parse_tag_shorthand(#yaml_parser{chars = [_ | Rest]} = Parser,
       line   = Line,
       column = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_tag_handle,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -2150,7 +1973,7 @@ expand_tag(Parser,
       line   = Line,
       column = Col
     },
-    Error1 = #yaml_parser_error{
+    Error1 = #yaml_parsing_error{
       name   = invalid_tag_handle,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -2178,7 +2001,7 @@ expand_tag2(#yaml_parser{tags = Tags} = Parser,
               line   = Line,
               column = Col
             },
-            Error = #yaml_parser_error{
+            Error = #yaml_parsing_error{
               name   = undeclared_tag_handle,
               token  = Token,
               line   = ?CURSOR_LINE(Parser),
@@ -2201,7 +2024,7 @@ queue_tag_token(Parser,
       line   = Line,
       column = Col
     },
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_tag_handle,
       token  = Token,
       line   = ?CURSOR_LINE(Parser),
@@ -2299,7 +2122,7 @@ do_parse_block_scalar_header(
       column   = Col
     },
     Token1 = set_default_tag(Token),
-    Error  = #yaml_parser_error{
+    Error  = #yaml_parsing_error{
       name   = multiple_chomping_indicators,
       type   = warning,
       token  = Token1,
@@ -2351,7 +2174,7 @@ do_parse_block_scalar_header(
       column   = Col
     },
     Token1 = set_default_tag(Token),
-    Error  = #yaml_parser_error{
+    Error  = #yaml_parsing_error{
       name   = multiple_indent_indicators,
       type   = warning,
       token  = Token1,
@@ -2389,7 +2212,7 @@ do_parse_block_scalar_header(
       column   = Col
     },
     Token1 = set_default_tag(Token),
-    Error  = #yaml_parser_error{
+    Error  = #yaml_parsing_error{
       name   = invalid_block_scalar_header,
       token  = Token1,
       line   = ?CURSOR_LINE(Parser),
@@ -2540,7 +2363,7 @@ do_parse_block_scalar(
       column   = Col
     },
     Token1 = set_default_tag(Token),
-    Error  = #yaml_parser_error{
+    Error  = #yaml_parsing_error{
       type   = warning,
       name   = leading_empty_lines_too_long,
       token  = Token1,
@@ -2602,7 +2425,7 @@ do_parse_block_scalar(
       column   = Token_Col
     },
     Token1 = set_default_tag(Token),
-    Error  = #yaml_parser_error{
+    Error  = #yaml_parsing_error{
       name   = invalid_block_scalar_indentation,
       token  = Token1,
       line   = ?CURSOR_LINE(Parser),
@@ -2821,7 +2644,7 @@ do_parse_flow_scalar(
       column   = Col
     },
     Token1 = set_default_tag(Token),
-    Error  = #yaml_parser_error{
+    Error  = #yaml_parsing_error{
       name   = unexpected_eos,
       token  = Token1,
       line   = ?CURSOR_LINE(Parser),
@@ -2889,7 +2712,7 @@ do_parse_flow_scalar(
       column   = Col
     },
     Token1 = set_default_tag(Token),
-    Error  = #yaml_parser_error{
+    Error  = #yaml_parsing_error{
       name   = invalid_escaped_character,
       type   = warning,
       token  = Token1,
@@ -2918,7 +2741,7 @@ do_parse_flow_scalar(
       column   = Col
     },
     Token1 = set_default_tag(Token),
-    Error  = #yaml_parser_error{
+    Error  = #yaml_parsing_error{
       name   = unexpected_eos,
       token  = Token1,
       line   = ?CURSOR_LINE(Parser),
@@ -2988,7 +2811,7 @@ do_parse_flow_scalar(
       column   = Col
     },
     Token1 = set_default_tag(Token),
-    Error  = #yaml_parser_error{
+    Error  = #yaml_parsing_error{
       name   = invalid_escaped_character,
       type   = warning,
       token  = Token1,
@@ -3016,7 +2839,7 @@ do_parse_flow_scalar(#yaml_parser{chars = [_ | _]} = Parser,
       column   = Col
     },
     Token1 = set_default_tag(Token),
-    Error  = #yaml_parser_error{
+    Error  = #yaml_parsing_error{
       name   = invalid_surrogate_pair,
       token  = Token1,
       line   = ?CURSOR_LINE(Parser),
@@ -3044,7 +2867,7 @@ do_parse_flow_scalar(
       column   = Col
     },
     Token1 = set_default_tag(Token),
-    Error  = #yaml_parser_error{
+    Error  = #yaml_parsing_error{
       name   = unexpected_eos,
       token  = Token1,
       line   = ?CURSOR_LINE(Parser),
@@ -3083,7 +2906,7 @@ do_parse_flow_scalar(
       column   = Col
     },
     Token1 = set_default_tag(Token),
-    Error  = #yaml_parser_error{
+    Error  = #yaml_parsing_error{
       name   = invalid_escaped_character,
       type   = warning,
       token  = Token1,
@@ -3127,7 +2950,7 @@ do_parse_flow_scalar(#yaml_parser{chars = [C | Rest]} = Parser,
               column   = Col
             },
             Token1 = set_default_tag(Token),
-            Error  = #yaml_parser_error{
+            Error  = #yaml_parsing_error{
               name   = invalid_escaped_character,
               type   = warning,
               token  = Token1,
@@ -3353,7 +3176,7 @@ do_parse_flow_scalar(#yaml_parser{chars = [], raw_eos = true} = Parser,
       column   = Col
     },
     Token1 = set_default_tag(Token),
-    Error  = #yaml_parser_error{
+    Error  = #yaml_parsing_error{
       name   = unexpected_eos,
       token  = Token1,
       line   = ?CURSOR_LINE(Parser),
@@ -3466,7 +3289,7 @@ save_impl_key_pos(
             },
             Parser#yaml_parser{ik_stack = [Impl_Key | Rest]};
         Required ->
-            Error = #yaml_parser_error{
+            Error = #yaml_parsing_error{
               name   = required_implicit_key_not_allowed,
               line   = Line,
               column = Col
@@ -3482,7 +3305,7 @@ queue_impl_key(#yaml_parser{last_token_endline = Line,
     ik_stack = [#impl_key{line = Impl_Line} = Impl_Key | _]} = Parser)
   when Line > Impl_Line andalso ?IN_BLOCK_CTX(Parser) ->
     %% An implicit key must not span several lines.
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_implicit_key,
       type   = warning,
       line   = Impl_Key#impl_key.line,
@@ -3495,7 +3318,7 @@ queue_impl_key(#yaml_parser{last_token_endline = Line,
     ik_stack = [#impl_key{line = Impl_Line} = Impl_Key | _]} = Parser)
   when Line > Impl_Line andalso ?IN_FLOW_CTX(Parser) ->
     %% An implicit key must not span several lines.
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_implicit_key,
       type   = warning,
       line   = Impl_Key#impl_key.line,
@@ -3508,7 +3331,7 @@ queue_impl_key(#yaml_parser{chars_idx = Index,
     ik_stack = [#impl_key{chars_idx = Impl_Index} = Impl_Key | _]} = Parser)
   when Index > Impl_Index + 1024 ->
     %% An implicit key must not take more than 1024 characters.
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_implicit_key,
       type   = warning,
       line   = Impl_Key#impl_key.line,
@@ -3542,7 +3365,7 @@ remove_impl_key_pos(
     %%
     %% ? key
     %% unexpected-scalar
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = expected_sequence_entry_or_mapping_key_not_found,
       line   = Line,
       column = Col
@@ -3854,7 +3677,7 @@ emit_tokens2(#yaml_parser{tks_queued = Queued, tks_first_idx = First} = Parser,
   [#yaml_tag{line = Line, column = Col} = Tag | Rest], Idx, Max)
   when Idx =< Max ->
     %% Error: several tags for the same node.
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = multiple_tag_properties,
       line   = Line,
       column = Col
@@ -3886,7 +3709,7 @@ emit_tokens2(#yaml_parser{tks_queued = Queued, tks_first_idx = First} = Parser,
   [#yaml_anchor{line = Line, column = Col} = Anchor | Rest], Idx, Max)
   when Idx =< Max ->
     %% Error: several tags for the same node.
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = multiple_anchor_properties,
       line   = Line,
       column = Col
@@ -3977,7 +3800,7 @@ check_tokens_in_a_row(Parser, Token1, Token2) when
   (is_record(Token2, yaml_scalar) orelse
    is_record(Token2, yaml_collection_start)) ->
     %% Token2 can't follow Token1.
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = unpected_token,
       token  = Token2,
       line   = ?TOKEN_LINE(Token2),
@@ -4078,7 +3901,7 @@ do_emit_token(
           last_token    = Token
         }
     catch
-        throw:Error when is_record(Error, yaml_parser_error) ->
+        throw:Error when is_record(Error, yaml_parsing_error) ->
             Parser1 = add_error(Parser, Error),
             Parser2 = Parser1#yaml_parser{
               tks_queued    = Queued1,
@@ -4087,10 +3910,10 @@ do_emit_token(
               last_token    = Token
             },
             if
-                Error#yaml_parser_error.type == error -> return(Parser2);
+                Error#yaml_parsing_error.type == error -> return(Parser2);
                 true                                  -> Parser2
             end;
-        throw:{Fun2, Error} when is_record(Error, yaml_parser_error) ->
+        throw:{Fun2, Error} when is_record(Error, yaml_parsing_error) ->
             Parser1 = add_error(Parser, Error),
             Parser2 = Parser1#yaml_parser{
               token_fun     = Fun2,
@@ -4100,7 +3923,7 @@ do_emit_token(
               last_token    = Token
             },
             if
-                Error#yaml_parser_error.type == error -> return(Parser2);
+                Error#yaml_parsing_error.type == error -> return(Parser2);
                 true                                  -> Parser2
             end
     end.
@@ -4232,40 +4055,36 @@ is_option_valid(_) ->
     false.
 
 invalid_option(Option) ->
-    Error = #yaml_parser_error{
-      name  = invalid_parser_option,
-      extra = [{option, Option}]
+    Error = #yaml_invalid_option{
+      option = Option
     },
     Error1 = case Option of
         {default_tags, _} ->
-            Error#yaml_parser_error{
+            Error#yaml_invalid_option{
               text = "Invalid value for option \"default_tags\": "
               "it must be a list of {Prefix, Prefix_Value}"
             };
         {doc_version, _} ->
-            Error#yaml_parser_error{
+            Error#yaml_invalid_option{
               text = "Invalid value for option \"doc_version\": "
               "it must be a tuple of the form {Major, Minor} "
               "where Major and Minor are positive integers"
             };
         {io_blocksize, _} ->
-            Error#yaml_parser_error{
+            Error#yaml_invalid_option{
               text = "Invalid value for option \"io_blocksize\": "
               "it must be a positive interger, expressed in bytes"
             };
         {token_fun, _} ->
-            Error#yaml_parser_error{
+            Error#yaml_invalid_option{
               text = "Invalid value for option \"token_fun\": "
               "it must be a function taking the parser state "
               "as its sole argument"
             };
         _ ->
-            Error#yaml_parser_error{
-              text = lists:flatten(io_lib:format("Unknown option \"~w\"",
-                  [Option]))
-            }
+            yaml_errors:format(Error, "Unknown option \"~w\"", [Option])
     end,
-    throw_error(Error1).
+    yaml_errors:throw(Error1).
 
 next_state(Parser, State) ->
     State(Parser#yaml_parser{stream_state = State}).
@@ -4390,7 +4209,7 @@ is_uri_scheme_valid1(Parser, Token, [C | Rest]) when
   (C >= $A andalso C =< $Z) ->
     is_uri_scheme_valid2(Parser, Token, Rest);
 is_uri_scheme_valid1(Parser, Token, [_ | _]) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_uri,
       type   = warning,
       token  = Token,
@@ -4399,7 +4218,7 @@ is_uri_scheme_valid1(Parser, Token, [_ | _]) ->
     },
     add_error(Parser, Error, "Invalid character in URI scheme", []);
 is_uri_scheme_valid1(Parser, Token, []) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_uri,
       type   = warning,
       token  = Token,
@@ -4417,7 +4236,7 @@ is_uri_scheme_valid2(Parser, Token, [C | Rest]) when
 is_uri_scheme_valid2(Parser, Token, [$: | Rest]) ->
     is_uri_hier_part_valid(Parser, Token, Rest);
 is_uri_scheme_valid2(Parser, Token, [_ | _]) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_uri,
       type   = warning,
       token  = Token,
@@ -4426,7 +4245,7 @@ is_uri_scheme_valid2(Parser, Token, [_ | _]) ->
     },
     add_error(Parser, Error, "Invalid character in URI scheme", []);
 is_uri_scheme_valid2(Parser, Token, []) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_uri,
       type   = warning,
       token  = Token,
@@ -4440,7 +4259,7 @@ is_uri_hier_part_valid(Parser, Token, [C | Rest]) when ?IS_URI_CHAR(C) ->
 is_uri_hier_part_valid(Parser, _, []) ->
     Parser;
 is_uri_hier_part_valid(Parser, Token, [_ | _]) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = invalid_uri,
       type   = warning,
       token  = Token,
@@ -4452,7 +4271,7 @@ is_uri_hier_part_valid(Parser, Token, [_ | _]) ->
 warn_if_non_ascii_line_break(#yaml_parser{chars = [C | _]} = Parser)
   when ?IS_NEWLINE_11(C) ->
     %% Non-ASCII line break in a YAML 1.2 document.
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       type   = warning,
       name   = non_ascii_line_break,
       line   = ?CURSOR_LINE(Parser),
@@ -4466,32 +4285,24 @@ warn_if_non_ascii_line_break(Parser) ->
 
 add_error(Parser, Error, Format, Args) ->
     %% Format error message.
-    Text = lists:flatten(io_lib:format(Format, Args)),
-    Error1 = Error#yaml_parser_error{
-      text = Text
-    },
+    Error1 = yaml_errors:format(Error, Format, Args),
     add_error(Parser, Error1).
 
 add_error(
-  #yaml_parser{has_errors = Has_Errors, errors = Errors} = Parser,
-  #yaml_parser_error{type = Type} = Error) ->
+  #yaml_parser{has_errors = Has_Errors, errors = Errors} = Parser, Error) ->
     %% Update has_errors flag.
     Has_Errors1 = if
         Has_Errors -> Has_Errors;
-        true       -> Type == error
+        true       -> ?ERROR_TYPE(Error) == error
     end,
     Parser#yaml_parser{
       has_errors = Has_Errors1,
       errors     = [Error | Errors]
     }.
 
-return(#yaml_parser{has_errors = true} = Parser) ->
-    throw_error(Parser);
+return(#yaml_parser{has_errors = true, errors = Errors}) ->
+    yaml_errors:throw(Errors);
 return(#yaml_parser{raw_eos = true, chars_len = 0} = Parser) ->
     Parser;
 return(Parser) ->
     {continue, Parser}.
-
--spec throw_error(#yaml_parser{} | #yaml_parser_error{}) -> no_return().
-throw_error(Parser_Or_Error) ->
-    throw({yaml_parser, Parser_Or_Error}).

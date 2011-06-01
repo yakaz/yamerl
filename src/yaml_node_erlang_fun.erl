@@ -1,9 +1,9 @@
 -module(yaml_node_erlang_fun).
 
--include("yaml_parser.hrl").
+-include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
--include("yaml_repr.hrl").
 -include("yaml_nodes.hrl").
+-include("internal/yaml_repr.hrl").
 
 %% Public API.
 -export([
@@ -42,27 +42,25 @@ represent_token(#yaml_repr{simple_structs = Simple},
                     end,
                     {finished, Node};
                 {error, {Line, _, Desc}} when Line >= 1 ->
-                    Error = #yaml_parser_error{
+                    Error = #yaml_parsing_error{
                       name   = invalid_erlang_fun2,
                       token  = Token,
                       text   = lists:flatten(erl_parse:format_error(Desc)),
-                      line   = ?TOKEN_LINE(Token) + Line - 1,
-                      column = 1
+                      line   = ?TOKEN_LINE(Token) + Line - 1
                     },
                     throw(Error)
             end;
         {error, {Line, _, Desc}, _} when Line >= 1 ->
-            Error = #yaml_parser_error{
+            Error = #yaml_parsing_error{
               name   = invalid_erlang_fun1,
               token  = Token,
               text   = lists:flatten(erl_scan:format_error(Desc)),
-              line   = ?TOKEN_LINE(Token) + Line - 1,
-              column = 1
+              line   = ?TOKEN_LINE(Token) + Line - 1
             },
             throw(Error)
     end;
 represent_token(_, _, Token) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = not_an_erlang_fun,
       token  = Token,
       text   = "Invalid Erlang anonymous function",

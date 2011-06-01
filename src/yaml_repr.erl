@@ -1,9 +1,9 @@
 -module(yaml_repr).
 
--include("yaml_parser.hrl").
+-include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
--include("yaml_repr.hrl").
 -include("yaml_nodes.hrl").
+-include("internal/yaml_repr.hrl").
 
 %% Public API.
 -export([
@@ -35,10 +35,8 @@ new(Source, Options) ->
 next_chunk(Parser, More_Data, EOS) ->
     Parser = yaml_parser:next_chunk(Parser, More_Data, EOS),
     if
-        EOS ->
-            (yaml_parser:get_token_fun(Parser))(get_docs);
-        true ->
-            Parser
+        EOS  -> get_docs(Parser);
+        true -> Parser
     end.
 
 next_chunk(Parser, More_Data) ->
@@ -46,6 +44,17 @@ next_chunk(Parser, More_Data) ->
 
 last_chunk(Parser, More_Data) ->
     next_chunk(Parser, More_Data, true).
+
+get_docs(Parser) ->
+    case yaml_parser:get_token_fun(Parser) of
+        undefined ->
+            Error = #yaml_parsing_error{
+              name = token_fun_cleared
+            },
+            yaml_errors:throw(Error);
+        Token_Fun ->
+            Token_Fun(get_docs)
+    end.
 
 %% -------------------------------------------------------------------
 %% Public API: common stream sources.
@@ -57,7 +66,7 @@ string(String) ->
 string(String, Options) ->
     Parser_Options = initialize(Options),
     Parser = yaml_parser:string(String, Parser_Options),
-    (yaml_parser:get_token_fun(Parser))(get_docs).
+    get_docs(Parser).
 
 file(Filename) ->
     file(Filename, []).
@@ -65,7 +74,7 @@ file(Filename) ->
 file(Filename, Options) ->
     Parser_Options = initialize(Options),
     Parser = yaml_parser:file(Filename, Parser_Options),
-    (yaml_parser:get_token_fun(Parser))(get_docs).
+    get_docs(Parser).
 
 %% -------------------------------------------------------------------
 %% Presentation details.
@@ -159,16 +168,15 @@ represent(
                     Mod:represent_token(Repr, undefined, Token);
                 undefined ->
                     %% This tag isn't handled by anything!
-                    Text = lists:flatten(io_lib:format(
-                        "Tag \"~s\" unrecognized by any module", [URI])),
-                    Error = #yaml_parser_error{
+                    Error = #yaml_parsing_error{
                       name   = unrecognized_node,
                       token  = Tag,
-                      text   = Text,
                       line   = ?TOKEN_LINE(Tag),
                       column = ?TOKEN_COLUMN(Tag)
                     },
-                    yaml_parser:throw_error(Error)
+                    Error1 = yaml_errors:format(Error,
+                      "Tag \"~s\" unrecognized by any module", [URI]),
+                    yaml_errors:throw(Error1)
             end
     end,
     handle_represent_return(Repr, Doc, Ret);
@@ -188,14 +196,14 @@ try_represent(Repr, [Mod | Rest], Token) ->
         Ret          -> Ret
     end;
 try_represent(_, [], Token) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = unrecognized_node,
       token  = Token,
       text   = "No module found to handle node",
       line   = ?TOKEN_LINE(Token),
       column = ?TOKEN_COLUMN(Token)
     },
-    throw(Error).
+    yaml_errors:throw(Error).
 
 represent_parent(#yaml_repr{docs = Docs, docs_count = Count} = Repr,
   [#yaml_doc{} = Doc], Root) ->
@@ -289,7 +297,6 @@ index_tags2(Tags, [], _) ->
 
 initialize(Options) ->
     {Repr_Options, Parser_Options} = filter_options(Options),
-    check_options(Repr_Options),
     Repr = #yaml_repr{
       options        = Repr_Options,
       simple_structs = proplists:get_value(simple_structs, Repr_Options, true)
@@ -303,7 +310,9 @@ filter_options(Options) ->
         ({Name, _}) -> not lists:member(Name, Parser_Options);
         (_)         -> true
     end,
-    lists:partition(Fun, Options).
+    {Repr_Options, _} = Filtered_Opts = lists:partition(Fun, Options),
+    check_options(Repr_Options),
+    Filtered_Opts.
 
 check_options([Option | Rest]) ->
     case is_option_valid(Option) of
@@ -319,20 +328,16 @@ is_option_valid(_) ->
     false.
 
 invalid_option(Option) ->
-    Error = #yaml_parser_error{
-      name  = invalid_repr_option,
-      extra = [{option, Option}]
+    Error = #yaml_invalid_option{
+      option = Option
     },
     Error1 = case Option of
         {simple_structs, _} ->
-            Error#yaml_parser_error{
+            Error#yaml_invalid_option{
               text = "Invalid value for option \"simple_structs\": "
               "it must be a boolean"
             };
         _ ->
-            Error#yaml_parser_error{
-              text = lists:flatten(io_lib:format("Unknown option \"~w\"",
-                  [Option]))
-            }
+            yaml_errors:format(Error, "Unknown option \"~w\"", [Option])
     end,
-    yaml_parser:throw_error(Error1).
+    yaml_errors:throw(Error1).
