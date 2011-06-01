@@ -1,9 +1,9 @@
 -module(yaml_node_size).
 
--include("yaml_parser.hrl").
+-include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
--include("yaml_repr.hrl").
 -include("yaml_nodes.hrl").
+-include("internal/yaml_repr.hrl").
 
 %% Public API.
 -export([
@@ -28,7 +28,7 @@ try_represent_token(Repr, Node,
     try
         represent_token(Repr, Node, Token)
     catch
-        _:#yaml_parser_error{name = not_a_size} ->
+        _:#yaml_parsing_error{name = not_a_size} ->
             unrecognized
     end;
 try_represent_token(_, _, _) ->
@@ -92,7 +92,7 @@ string_to_size(Text) ->
     end.
 
 exception(Token) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = not_a_size,
       token  = Token,
       text   = "Invalid size",

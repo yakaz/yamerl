@@ -1,10 +1,10 @@
 -module(yaml_node_ipaddr).
 
--include("yaml_parser.hrl").
+-include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
--include("yaml_repr.hrl").
 -include("yaml_nodes.hrl").
 -include("yaml_nodes_yakaz.hrl").
+-include("internal/yaml_repr.hrl").
 
 %% Public API.
 -export([
@@ -28,7 +28,7 @@ try_represent_token(Repr, Node,
     try
         represent_token(Repr, Node, Token)
     catch
-        _:#yaml_parser_error{name = not_an_ip_address} ->
+        _:#yaml_parsing_error{name = not_an_ip_address} ->
             unrecognized
     end;
 try_represent_token(_, _, _) ->
@@ -96,7 +96,7 @@ string_to_ip(Token, Text) ->
               string_to_ip3(Token, Start),
               string_to_ip3(Token, End)};
         _ ->
-            Error = #yaml_parser_error{
+            Error = #yaml_parsing_error{
               name   = not_an_ip_address,
               token  = Token,
               text   = "Invalid IP addresses range",
@@ -119,7 +119,7 @@ string_to_ip2(Token, Text) ->
                   list_to_integer(Mask)}
             catch
                 _:badarg ->
-                    Error = #yaml_parser_error{
+                    Error = #yaml_parsing_error{
                       name   = not_an_ip_address,
                       token  = Token,
                       text   = "Invalid netmask",
@@ -129,7 +129,7 @@ string_to_ip2(Token, Text) ->
                     throw(Error)
             end;
         _ ->
-            Error = #yaml_parser_error{
+            Error = #yaml_parsing_error{
               name   = not_an_ip_address,
               token  = Token,
               text   = "Invalid netmask",
@@ -144,7 +144,7 @@ string_to_ip3(Token, Text) ->
         {ok, Address} ->
             Address;
         _ ->
-            Error = #yaml_parser_error{
+            Error = #yaml_parsing_error{
               name   = not_an_ip_address,
               token  = Token,
               text   = "Invalid IP address",
@@ -161,7 +161,7 @@ parse(Text) ->
     end.
 
 exception(Token) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = not_an_ip_address,
       token  = Token,
       text   = "Invalid IP address",

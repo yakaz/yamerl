@@ -1,8 +1,8 @@
 -module(yaml_node_bool).
 
 -include("yaml_tokens.hrl").
--include("yaml_repr.hrl").
 -include("yaml_nodes.hrl").
+-include("internal/yaml_repr.hrl").
 
 %% Public API.
 -export([

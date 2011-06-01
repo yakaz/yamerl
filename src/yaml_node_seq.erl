@@ -1,9 +1,9 @@
 -module(yaml_node_seq).
 
--include("yaml_parser.hrl").
+-include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
--include("yaml_repr.hrl").
 -include("yaml_nodes.hrl").
+-include("internal/yaml_repr.hrl").
 
 %% Public API.
 -export([
@@ -61,7 +61,7 @@ represent_token(#yaml_repr{simple_structs = false},
     {finished, Node};
 
 represent_token(_, _, Token) ->
-    Error = #yaml_parser_error{
+    Error = #yaml_parsing_error{
       name   = not_a_sequence,
       token  = Token,
       text   = "Invalid sequence",
