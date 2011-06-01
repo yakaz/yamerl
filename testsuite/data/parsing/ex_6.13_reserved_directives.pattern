@@ -39,8 +39,9 @@
     _,
     false,
     [
-      {yaml_parser_error,1,1,warning,reserved_directive,
+      {yaml_parsing_error,warning,
         "Reserved directive \"FOO\" ignored",
+        1,1,reserved_directive,
         {yaml_reserved_directive,1,1,"FOO",["bar","baz"],2},
         []}
     ],

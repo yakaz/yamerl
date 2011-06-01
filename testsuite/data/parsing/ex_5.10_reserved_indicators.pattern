@@ -39,11 +39,13 @@
     _,
     false,
     [
-      {yaml_parser_error,2,15,warning,reserved_indicator,
+      {yaml_parsing_error,warning,
         "The reserved indicator \"`\" is not allowed at the beginning of a plain scalar",
+        2,15,reserved_indicator,
         undefined,[]},
-      {yaml_parser_error,1,16,warning,reserved_indicator,
+      {yaml_parsing_error,warning,
         "The reserved indicator \"@\" is not allowed at the beginning of a plain scalar",
+        1,16,reserved_indicator,
         undefined,[]}
     ],
     [

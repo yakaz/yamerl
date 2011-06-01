@@ -2,58 +2,12 @@
 
 %% TEST
 ?_assertThrow(
-  {yaml_parser,
-    {yaml_parser,
-      {file,"${FILENAME}"},
-      [],
-      <<>>,
-      6,
-      true,
-      [],
-      0,
-      7,
-      4,
-      1,
-      false,
-      3,
-      2,
-      utf8,
-      false,
-      undefined,
-      _,
-      _,
-      [],
-      {bcoll,root,0,-1,1,1,-1,1,1},
-      false,
-      false,
-      false,
-      [{impl_key,false,undefined,undefined,undefined,undefined,undefined}],
-      false,
-      false,
-      _,
-      [],
-      0,
-      7,
-      6,
-      undefined,
-      undefined,
-      _,
-      true,
-      [
-        {yaml_parser_error,2,1,error,flow_collection_entry_not_allowed,
-          "Empty flow collection entry not allowed",undefined,[]}
-      ],
-      [
-        {yaml_stream_end,3,2},
-        {yaml_doc_end,3,2},
-        {yaml_collection_end,3,1,flow,mapping},
-        {yaml_collection_start,1,1,
-          {yaml_tag,1,1,{non_specific,"?"}},
-          flow,mapping},
-        {yaml_doc_start,1,1,{1,2},_},
-        {yaml_stream_start,1,1,utf8}
-      ]
-    }
+  {yaml_exception,
+    [
+      {yaml_parsing_error,error,
+        "Empty flow collection entry not allowed",
+        2,1,flow_collection_entry_not_allowed,undefined,[]}
+    ]
   },
   yaml_parser:file("${FILENAME}")
 )

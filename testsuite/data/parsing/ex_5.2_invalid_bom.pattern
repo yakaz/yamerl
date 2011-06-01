@@ -39,7 +39,9 @@
     _,
     false,
     [
-      {yaml_parser_error,2,1,warning,bom_after_doc_start,_,undefined,[]}
+      {yaml_parsing_error,warning,
+        _,
+        2,1,bom_after_doc_start,undefined,[]}
     ],
     [
       {yaml_stream_end,3,21},

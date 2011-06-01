@@ -2,53 +2,14 @@
 
 %% TEST
 ?_assertThrow(
-  {yaml_parser,
-    {yaml_parser,
-      {file,"${FILENAME}"},
-      [{doc_version, {0,9}}],
-      <<>>,
-      4,
-      true,
-      "---\n",
-      4,
-      1,
-      1,
-      1,
-      false,
-      1,
-      1,
-      utf8,
-      false,
-      undefined,
-      _,
-      _,
-      [],
-      {bcoll,root,0,-1,1,1,-1,1,1},
-      false,
-      false,
-      false,
-      [{impl_key,false,undefined,undefined,undefined,undefined,undefined}],
-      false,
-      false,
-      _,
-      [],
-      0,
-      2,
-      1,
-      undefined,
-      undefined,
-      _,
-      true,
-      [
-        {yaml_parser_error,1,1,error,version_not_supported,
-          "Version 0.9 not supported (minimum version 1.1)",
-          {yaml_doc_start,1,1,{0,9},_},
-          []}
-      ],
-      [
-        {yaml_stream_start,1,1,utf8}
-      ]
-    }
+  {yaml_exception,
+    [
+      {yaml_parsing_error,error,
+        "Version 0.9 not supported (minimum version 1.1)",
+        1,1,version_not_supported,
+        {yaml_doc_start,1,1,{0,9},_},
+        []}
+    ]
   },
   yaml_parser:file("${FILENAME}", [{doc_version, {0,9}}])
 )

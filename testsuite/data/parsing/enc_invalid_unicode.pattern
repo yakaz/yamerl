@@ -2,52 +2,12 @@
 
 %% TEST
 ?_assertThrow(
-  {yaml_parser,
-    {yaml_parser,
-      {file,"${FILENAME}"},
-      [{io_blocksize, 1}],
-      <<233, $\n>>,
-      3,
-      false,
-      "Rat",
-      3,
-      1,
-      1,
-      1,
-      false,
-      1,
-      1,
-      utf8,
-      false,
-      undefined,
-      _,
-      _,
-      [],
-      {bcoll,root,0,-1,1,1,-1,1,1},
-      false,
-      false,
-      true,
-      [{impl_key,false,undefined,undefined,undefined,undefined,undefined}],
-      false,
-      false,
-      _,
-      [],
-      0,
-      2,
-      1,
-      undefined,
-      undefined,
-      _,
-      true,
-      [
-        {yaml_parser_error,undefined,undefined,error,
-          invalid_unicode, "Invalid Unicode character at byte #4", undefined,
-          [{byte,4}]}
-      ],
-      [
-        {yaml_stream_start,1,1,utf8}
-      ]
-    }
+  {yaml_exception, [
+      {yaml_parsing_error,error,
+        "Invalid Unicode character at byte #4",
+        undefined,undefined,invalid_unicode,undefined,
+        [{byte,4}]}
+    ]
   },
   yaml_parser:file("${FILENAME}", [{io_blocksize, 1}])
 )

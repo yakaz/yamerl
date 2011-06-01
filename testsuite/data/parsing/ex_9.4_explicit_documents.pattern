@@ -39,8 +39,9 @@
     _,
     false,
     [
-      {yaml_parser_error,2,3,warning,invalid_implicit_key,
+      {yaml_parsing_error,warning,
         "An implicit key must not span several lines",
+        2,3,invalid_implicit_key,
         undefined,[]}
     ],
     [

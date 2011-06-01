@@ -39,12 +39,14 @@
     _,
     false,
     [
-      {yaml_parser_error,3,3,warning,invalid_escaped_character,
+      {yaml_parsing_error,warning,
         "Invalid escaped character",
+        3,3,invalid_escaped_character,
         {yaml_scalar,2,3,{yaml_tag,2,3,{non_specific,"!"}},flow,double_quoted,"c "},
         []},
-      {yaml_parser_error,2,4,warning,invalid_escaped_character,
+      {yaml_parsing_error,warning,
         "Invalid escaped character",
+        2,4,invalid_escaped_character,
         {yaml_scalar,2,3,{yaml_tag,2,3,{non_specific,"!"}},flow,double_quoted,""},
         []}
     ],

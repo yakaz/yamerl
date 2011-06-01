@@ -39,14 +39,17 @@
     _,
     false,
     [
-      {yaml_parser_error,3,45,warning,non_ascii_line_break,
+      {yaml_parsing_error,warning,
         "Use of non-ASCII line break is not supported anymore starting with YAML 1.2; treated as non-break character",
+        3,45,non_ascii_line_break,
         undefined,[]},
-      {yaml_parser_error,3,25,warning,non_ascii_line_break,
+      {yaml_parsing_error,warning,
         "Use of non-ASCII line break is not supported anymore starting with YAML 1.2; treated as non-break character",
+        3,25,non_ascii_line_break,
         undefined,[]},
-      {yaml_parser_error,3,10,warning,non_ascii_line_break,
+      {yaml_parsing_error,warning,
         "Use of non-ASCII line break is not supported anymore starting with YAML 1.2; treated as non-break character",
+        3,10,non_ascii_line_break,
         undefined,[]}
     ],
     [

@@ -39,8 +39,9 @@
     _,
     false,
     [
-      {yaml_parser_error,2,1,warning,version_not_supported,
+      {yaml_parsing_error,warning,
         "Version 1.3 not supported (maximum version 1.2); parsing may fail",
+        2,1,version_not_supported,
         {yaml_doc_start,2,1,{1,3},_},
         []}
     ],

@@ -39,8 +39,9 @@
     _,
     false,
     [
-      {yaml_parser_error,2,1,warning,multiple_yaml_directives,
+      {yaml_parsing_error,warning,
         "Multiple YAML directives found: the last one will be used",
+        2,1,multiple_yaml_directives,
         {yaml_yaml_directive,2,1,{1,1}},
         []}
     ],

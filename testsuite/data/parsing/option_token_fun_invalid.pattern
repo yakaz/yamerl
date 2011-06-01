@@ -2,12 +2,11 @@
 
 %% TEST
 ?_assertThrow(
-  {yaml_parser,
-    {yaml_parser_error,undefined,undefined,error,
-      invalid_parser_option,
-      "Invalid value for option \"token_fun\": it must be a function taking the parser state as its sole argument",
-      undefined,
-      [{option,{token_fun,invalid}}]
-    }},
+  {yaml_exception, [
+      {yaml_invalid_option,error,
+        "Invalid value for option \"token_fun\": it must be a function taking the parser state as its sole argument",
+        {token_fun,invalid}}
+    ]
+  },
   yaml_parser:string(<<>>, [{token_fun, invalid}])
 )

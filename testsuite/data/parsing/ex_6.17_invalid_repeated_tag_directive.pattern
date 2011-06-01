@@ -39,9 +39,9 @@
     _,
     false,
     [
-      {yaml_parser_error,2,1,warning,
-        multiple_tag_handle_declarations,
+      {yaml_parsing_error,warning,
         "Multiple declarations of the same handle found: the last one will be used",
+        2,1,multiple_tag_handle_declarations,
         {yaml_tag_directive,2,1,"!","!foo"},
         []}
     ],
