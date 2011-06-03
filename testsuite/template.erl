@@ -29,12 +29,12 @@ setup() ->
     cover:start(),
     Covered_Mods  = case file:consult(Mods_List) of
         {ok, [ML]} ->
-            Fun = fun(M) ->
-                F = filename:join([Src_Dir, M]) ++ ".erl",
-                cover:compile_module(F, [{i, Include_Dir}])
+            Fun = fun(F, Acc) ->
+                F1 = filename:join([Src_Dir, F]),
+                {ok, M} = cover:compile_module(F1, [{i, Include_Dir}]),
+                [M | Acc]
             end,
-            lists:foreach(Fun, ML),
-            ML;
+            lists:foldl(Fun, [], ML);
         _ ->
             []
     end,

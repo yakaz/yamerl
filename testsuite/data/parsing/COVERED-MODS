@@ -1,5 +1,5 @@
 %% vim:ft=erlang:
 
 [
-  yaml_parser
+  "yaml_parser.erl"
 ].
