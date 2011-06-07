@@ -21,6 +21,7 @@ main_test_() ->
 setup() ->
     %% Setup coverity checking.
     Dir           = os:getenv("srcdir"),
+    Pkg_Name      = list_to_atom(os:getenv("PACKAGE_NAME")),
     Include_Dir   = filename:join([Dir, "..", "include"]),
     Src_Dir       = filename:join([Dir, "..", "src"]),
     Cover_To_Html = filename:join([Dir, "cover_to_html.sh"]),
@@ -31,8 +32,11 @@ setup() ->
         {ok, [ML]} ->
             Fun = fun(F, Acc) ->
                 F1 = filename:join([Src_Dir, F]),
-                {ok, M} = cover:compile_module(F1,
-                  [{i, Src_Dir}, {i, Include_Dir}]),
+                {ok, M} = cover:compile_module(F1, [
+                    {i, Src_Dir},
+                    {i, Include_Dir},
+                    {d, 'APPLICATION', Pkg_Name}
+                  ]),
                 [M | Acc]
             end,
             lists:foldl(Fun, [], lists:reverse(ML));

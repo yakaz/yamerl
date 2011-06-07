@@ -10,7 +10,7 @@ ERL_TESTS = parsing representation
 
 TESTS = dialyzer $(ERL_TESTS)
 
-TESTS_ENVIRONMENT = ERL_LIBS=$(ERL_LIBS)
+TESTS_ENVIRONMENT = ERL_LIBS=$(ERL_LIBS) PACKAGE_NAME=$(PACKAGE_NAME)
 
 EXTRA_DIST = $(TPL_PL) $(TPL_ERL) $(ERL_FILES) eunit_lib.erl 		\
 	     eunit_tty.erl cover_to_html.sh data
