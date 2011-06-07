@@ -35,7 +35,7 @@ setup() ->
                   [{i, Src_Dir}, {i, Include_Dir}]),
                 [M | Acc]
             end,
-            lists:foldl(Fun, [], ML);
+            lists:foldl(Fun, [], lists:reverse(ML));
         _ ->
             []
     end,
