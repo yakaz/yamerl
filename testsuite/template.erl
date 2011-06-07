@@ -31,7 +31,8 @@ setup() ->
         {ok, [ML]} ->
             Fun = fun(F, Acc) ->
                 F1 = filename:join([Src_Dir, F]),
-                {ok, M} = cover:compile_module(F1, [{i, Include_Dir}]),
+                {ok, M} = cover:compile_module(F1,
+                  [{i, Src_Dir}, {i, Include_Dir}]),
                 [M | Acc]
             end,
             lists:foldl(Fun, [], ML);
