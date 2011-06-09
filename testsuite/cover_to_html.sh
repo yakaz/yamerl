@@ -119,6 +119,10 @@ h1 {
   font-style: italic;
   border-bottom: solid 1px #000;
 }
+.testsuite {
+  float: left;
+  margin-right: 30px;
+}
 table {
   border: 1px solid #999;
   border-collapse: collapse;
@@ -164,6 +168,7 @@ EOF
 		test_name=${test_name%.erl}
 		pretty_name=`echo $test_name | tr "_" " "`
 		cat << EOF >> "$out"
+<div class="testsuite">
 <h2 style="text-transform: capitalize;">$pretty_name</h2>
 <table>
 <tr>
@@ -192,6 +197,7 @@ EOF
 
 		cat << EOF >> "$out"
 </table>
+</div>
 EOF
 	done
 
