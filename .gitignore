@@ -8,3 +8,11 @@ config.h.in
 config.h.in~
 configure
 REPOREV
+
+build-stamp
+configure-stamp
+debian/build
+debian/erlang-yaml.debhelper.log
+debian/erlang-yaml.substvars
+debian/erlang-yaml
+debian/files
