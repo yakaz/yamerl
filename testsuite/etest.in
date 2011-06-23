@@ -1,7 +1,7 @@
 #!@ESCRIPT@
 % -*-erlang-*-
 % vim:ft=erlang:
-% $Id: etest.in 2912 2010-05-10 09:57:32Z jean.sebastien.pedron $
+% $Id: etest.in 9860 2011-03-11 17:41:54Z jean.sebastien.pedron $
 
 %% @doc
 %% When this script is called without arguments, it'll run the EUnit
@@ -20,7 +20,10 @@ main([]) ->
 
 main([Test]) ->
     code:add_patha(filename:join(["@top_builddir@", "ebin"])),
-    Ret = run_test(Test, [@EMKOPTS@]),
+    Test1 = filename:join(
+      filename:dirname(Test),
+      filename:basename(Test)),
+    Ret = run_test(Test1, [@EMKOPTS@]),
     stop(Ret);
 
 %% @doc
@@ -142,7 +145,7 @@ print_load_error(Test, Module, Reason) ->
 
 version() ->
     io:format("~s testsuite - ~s~n",
-      ["@PACKAGE_STRING@", "$Revision: 2912 $"]).
+      ["@PACKAGE_STRING@", "$Revision: 9860 $"]).
 
 usage(Prog_Name) ->
     version(),

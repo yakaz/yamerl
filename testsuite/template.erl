@@ -3,6 +3,13 @@
 -module('${MODULE}').
 
 -include_lib("eunit/include/eunit.hrl").
+${include_lib}
+${include}
+
+-define(srcdir,       "${srcdir}").
+-define(builddir,     "${builddir}").
+-define(top_srcdir,   "${top_srcdir}").
+-define(top_builddir, "${top_builddir}").
 
 %% -------------------------------------------------------------------
 %% Testsuite entry point.
@@ -19,64 +26,35 @@ main_test_() ->
 %% -------------------------------------------------------------------
 
 setup() ->
-    %% Setup coverity checking.
-    Dir           = os:getenv("srcdir"),
-    Pkg_Name      = list_to_atom(os:getenv("PACKAGE_NAME")),
-    Include_Dir   = filename:join([Dir, "..", "include"]),
-    Src_Dir       = filename:join([Dir, "..", "src"]),
-    Cover_To_Html = filename:join([Dir, "cover_to_html.sh"]),
-    Mods_List     = filename:join([Dir, "data", ?MODULE_STRING,
-        "COVERED-MODS"]),
+    %% Setup coverity checking. To know what module to compile and the
+    %% options to use, we look at the Emakefile.
+    {ok, Emakefile} = file:consult(
+      filename:join([?top_builddir, "src", "Emakefile"])),
     cover:start(),
-    Covered_Mods  = case file:consult(Mods_List) of
-        {ok, [ML]} ->
-            Fun = fun(F, Acc) ->
-                F1 = filename:join([Src_Dir, F]),
-                {ok, M} = cover:compile_module(F1, [
-                    {i, Src_Dir},
-                    {i, Include_Dir},
-                    {d, 'APPLICATION', Pkg_Name}
-                  ]),
-                [M | Acc]
-            end,
-            lists:foldl(Fun, [], lists:reverse(ML));
-        _ ->
-            []
-    end,
-    {Covered_Mods, Cover_To_Html}.
+    cover_compile(Emakefile).
 
-cleanup({Covered_Mods, Cover_To_Html}) ->
-    print_coverage(Cover_To_Html, Covered_Mods),
-    cover:stop().
-
-print_coverage(Cover_To_Html, Modules) ->
-    Name  = string:to_upper([hd(?MODULE_STRING)]) ++ tl(?MODULE_STRING),
-    Name1 = string:join(string:tokens(Name, "_"), " "),
-    io:format(standard_error, "  ~s / Coverage:~n", [Name1]),
-    print_coverage2(Cover_To_Html, Modules).
-
-print_coverage2(Cover_To_Html, [Mod | Rest]) ->
-    {ok, {_Module, {Cov, Not_Cov}}} = cover:analyse(Mod, module),
-    Mod_S = atom_to_list(Mod),
-    if
-        Cov > 0 orelse Not_Cov > 0 ->
-            file:write_file("cover_" ?MODULE_STRING "_" ++ Mod_S ++ ".percent",
-              list_to_binary(io_lib:format("~.1f~n",
-                  [Cov * 100 / (Cov + Not_Cov)]))),
-            io:format(standard_error, "   - ~s: ~.1f%~n",
-              [Mod, Cov * 100 / (Cov + Not_Cov)]);
-        true ->
-            file:write_file("cover_" ?MODULE_STRING "_" ++ Mod_S ++ ".percent",
-              list_to_binary(io_lib:format("0.0~n",
-                  []))),
-            io:format(standard_error, "   - ~s: n/a~n", [Mod])
-    end,
-    cover:analyse_to_file(Mod,
-      "cover_" ?MODULE_STRING "_" ++ Mod_S ++ ".out", []),
-    os:cmd(Cover_To_Html ++ " " ?MODULE_STRING " " ++ Mod_S),
-    print_coverage2(Cover_To_Html, Rest);
-print_coverage2(_, []) ->
+cover_compile([{Mods, Options} | Rest]) ->
+    cover_compile2(Mods, Options),
+    cover_compile(Rest);
+cover_compile([]) ->
     ok.
+
+cover_compile2([Mod | Rest], Options) ->
+    File = filename:join([?top_srcdir, "src", atom_to_list(Mod) ++ ".erl"]),
+    case cover:compile(File, Options) of
+        {ok, _} ->
+            ok;
+        {error, Reason} ->
+            io:format(standard_error,
+              "Failed to compile \"~s\": ~p~n", [File, Reason])
+    end,
+    cover_compile2(Rest, Options);
+cover_compile2([], _) ->
+    ok.
+
+cleanup(_) ->
+    cover:export(?MODULE_STRING ".coverdata"),
+    cover:stop().
 
 %% -------------------------------------------------------------------
 %% Tests listing and construction.
