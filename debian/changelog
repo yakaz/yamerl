@@ -1,5 +1,5 @@
-yaml (0.1.0-1) unstable; urgency=low
+erlang-yaml (0.1.0-1) experimental; urgency=low
 
   * Initial release.
 
- -- Jean-Sébastien Pédron <jean-sebastien@yakaz.com>  Wed, 16 Feb 2011 11:38:39 +0100
+ -- Jean-Sébastien Pédron <jean-sebastien@yakaz.com>  Thu, 23 Jun 2011 17:56:47 +0200

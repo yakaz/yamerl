@@ -10,7 +10,7 @@
 #export DH_VERBOSE=1
 
 WORKDIR=$(CURDIR)/debian/build
-DESTDIR=$(CURDIR)/debian/yaml
+DESTDIR=$(CURDIR)/debian/erlang-yaml
 
 ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
 		DEBUG = yes
