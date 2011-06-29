@@ -1,6 +1,8 @@
 -module('${MODULE}').
 
 -include_lib("eunit/include/eunit.hrl").
+${include_lib}
+${include}
 
 -define(srcdir,       "${srcdir}").
 -define(builddir,     "${builddir}").
@@ -36,7 +38,7 @@ cover_compile([]) ->
     ok.
 
 cover_compile2([Mod | Rest], Options) ->
-    File = atom_to_list(Mod) ++ ".erl",
+    File = filename:join([?top_builddir, "src", atom_to_list(Mod) ++ ".erl"]),
     case cover:compile(File, Options) of
         {ok, _} ->
             ok;
