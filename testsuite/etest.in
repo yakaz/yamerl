@@ -143,8 +143,7 @@ print_load_error(Test, Module, Reason) ->
 % --------------------------------------------------------------------
 
 version() ->
-    io:format("~s testsuite - ~s~n",
-      ["@PACKAGE_STRING@", "$Revision$"]).
+    io:format("~s testsuite~n", ["@PACKAGE_STRING@"]).
 
 usage(Prog_Name) ->
     version(),
