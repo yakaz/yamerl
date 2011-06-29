@@ -7,4 +7,6 @@ EXTRA_DIST = debian/changelog						\
 	     debian/compat						\
 	     debian/control						\
 	     debian/copyright						\
-	     debian/rules
+	     debian/rules						\
+	     debian/source/format					\
+	     debian/source/options
