@@ -7,12 +7,13 @@ autom4te.cache/
 config.h.in
 config.h.in~
 configure
-REPOREV
 
+# Files produced by Debian package.
 build-stamp
 configure-stamp
-debian/build
-debian/erlang-yaml.debhelper.log
-debian/erlang-yaml.substvars
-debian/erlang-yaml
+debian/*.debhelper.log
+debian/*.substvars
+debian/*/
+debian/build/
 debian/files
+!debian/source/

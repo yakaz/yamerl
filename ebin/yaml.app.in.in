@@ -1,6 +1,5 @@
 %% -*-erlang-*-
 %% vim:ft=erlang:
-%% $Id: yaml.app.in.in 2994 2010-05-12 15:23:39Z jean.sebastien.pedron $
 
 {application, @PACKAGE_NAME@, [
     {description,

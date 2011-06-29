@@ -1,5 +1,4 @@
 #!/bin/sh -e
-# vim:sw=4:et:
 
 if [ -z "$1" ]; then
 	echo "Syntax: $0 <test_name> [<test_name> ...]"
@@ -71,16 +70,12 @@ EOF
     # For each module of this test:
     #     o  Write its source code with cover results.
     #     o  Update index block.
-    avg_count=0
-    avg_total=0
     for module in `cat $covered_mods | sort`; do
         in=${prefix}_${module}.out
         pct=${prefix}_${module}.percent
         out=${prefix}_${module}.html
 
         percent=`cat $pct`
-	avg_count=$((avg_count + 1))
-	avg_total=`echo "scale = 1; $avg_total + $percent" | bc`
 
         color=`echo $percent | sed -e 's/\..*$//'`
         if [ $((color % 5)) -gt 0 ]; then
@@ -184,24 +179,8 @@ EOF
         rm -f $in $pct
     done
 
-    # Add average.
-    avg=0
-    if [ $avg_count > 0 ]; then
-	    avg=`echo "scale = 1; $avg_total / $avg_count" | bc | sed 's/^\./0./'`
-    fi
-    color=`echo $avg | sed -e 's/\..*$//'`
-    if [ $((color % 5)) -gt 0 ]; then
-	    color=$((color + (5 - color % 5)))
-    fi
-    color=`eval echo \\${color_$color}`
-
     # End index block.
     cat << EOF >> "$index"
-<tr class="average">
-<td class="average_label">Average</td>
-<td class="average_value" style="text-align: right;">$avg %</td>
-<td style="width: 5px; padding: 0px; background-color: #$color;"></td>
-</tr>
 </table>
 </div>
 EOF
@@ -267,12 +246,6 @@ h1 {
   border-bottom: 1px solid #999;
   background-color: #ebebeb;
 }
-.average_label, .average_value {
-  font-weight: bold;
-}
-.average_value {
-  border-top: solid 1px #999;
-}
 </style>
 </head>
 <body>
@@ -333,11 +306,9 @@ done
 output_index $test_names
 
 # Clean files.
-if [ -z "$NO_CLEANFILES" ]; then
-    for test_name in $test_names; do
-        cleanfiles=$scriptdir/data/$test_name/CLEANFILES
-        if [ -s $cleanfiles ]; then
-            rm -f `cat $cleanfiles`
-        fi
-    done
-fi
+for test_name in $test_names; do
+    cleanfiles=$scriptdir/data/$test_name/CLEANFILES
+    if [ -s $cleanfiles ]; then
+        rm -f `cat $cleanfiles`
+    fi
+done

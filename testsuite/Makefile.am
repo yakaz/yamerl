@@ -1,5 +1,3 @@
-# $Id: Makefile.am 11510 2011-05-31 07:28:27Z jean.sebastien.pedron $
-
 ETEST         = etest
 TPL_PL        = template.pl
 TPL_ERL       = template.erl
@@ -18,7 +16,7 @@ EXTRA_DIST = $(TPL_PL) $(TPL_ERL) $(COVER_TO_HTML)			\
 
 CLEANFILES = $(ERL_TESTS) $(TPL_FILES) eunit_lib.beam eunit_tty.beam 	\
 	     erl_crash.dump cover_*.html cover_*.out cover_*.percent	\
-	     index*.html *.coverdata
+	     index*.html *.coverdata dialyzer.log
 
 eunit_lib.beam: eunit_lib.erl
 	$(ERLC) $(srcdir)/eunit_lib.erl

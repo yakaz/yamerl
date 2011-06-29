@@ -2,14 +2,14 @@ Source: erlang-yaml
 Section: devel
 Priority: optional
 Maintainer: Jean-Sébastien Pédron <jean-sebastien@yakaz.com>
-Build-Depends: debhelper (>= 5.0.0), autotools-dev, erlang-dev (>= 1:13.b.1-3)
-Standards-Version: 3.8.4
+Build-Depends: debhelper (>= 8), autotools-dev, erlang-dev (>= 1:14.b.2), erlang-tools
+Standards-Version: 3.9.1
 
 Package: erlang-yaml
 Architecture: all
 Section: devel
 Priority: optional
-Depends: ${erlang:Depends}
+Depends: ${misc:Depends}, ${erlang:Depends}
 Description: YAML parser
  YAML is a human-friendly, cross language, Unicode based data
  serialization language designed around the common native data types of

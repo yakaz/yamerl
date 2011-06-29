@@ -45,7 +45,7 @@ clean-stamp:
 install: build
 		dh_testdir
 		dh_testroot
-		dh_clean -k
+		dh_prep
 		dh_installdirs -i
 		cd $(WORKDIR) && $(MAKE) install DESTDIR=$(DESTDIR)
 

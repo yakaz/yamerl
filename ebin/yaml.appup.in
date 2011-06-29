@@ -1,6 +1,5 @@
 %% -*-erlang-*-
 %% vim:ft=erlang:
-%% $Id: yaml.appup.in 2994 2010-05-12 15:23:39Z jean.sebastien.pedron $
 
 { "@VERSION@",
   [

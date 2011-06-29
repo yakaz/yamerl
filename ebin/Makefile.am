@@ -1,5 +1,3 @@
-# $Id: Makefile.am 5147 2010-09-13 13:58:57Z jean.sebastien.pedron $
-
 beamdir = $(ERLANG_INSTALL_LIB_DIR_yaml)/ebin
 
 APP_NAME  = $(PACKAGE_NAME)

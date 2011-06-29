@@ -1,10 +1,27 @@
 #!/bin/sh
-# $Id: dialyzer.in 11510 2011-05-31 07:28:27Z jean.sebastien.pedron $
 
+if [ "@DIALYZER@" = '' ]; then
+	# Dialyzer not available; skip.
+	exit 77
+fi
 if [ "$SKIP_DIALYZER" ]; then
+	# The caller wants to bypass dialyzer.
 	exit 77
 fi
 
-dialyzer -n -r @top_builddir@/ebin
+log=dialyzer.log
+@DIALYZER@ -n -r @top_builddir@/ebin | tee $log
+ret=$?
 
-exit 0
+if [ "`grep 'dialyzer: Could not read PLT file' $log`" != '' ]; then
+	# The PLT isn't built; consider the test as skipped.
+	exit 77
+elif [ "`grep 'dialyzer: Old PLT file' $log`" != '' ]; then
+	# The PLT wasn't updated after Erlang update; consider the test
+	# as skipped.
+	exit 77
+elif [ "`grep 'warnings were emitted' $log`" != '' ]; then
+	exit 1
+fi
+
+exit $ret

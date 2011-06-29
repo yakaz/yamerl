@@ -1,5 +1,3 @@
-# $Id: Makefile.am 5090 2010-09-09 08:50:13Z jean.sebastien.pedron $
-
 erlsrcdir = $(ERLANG_INSTALL_LIB_DIR_yaml)/src
 
 dist_erlsrc_DATA = yaml_app.erl						\
