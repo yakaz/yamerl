@@ -63,7 +63,7 @@ run_test(Test, Compiler_Options) ->
             print_load_error(Test, Module, Reason),
             error;
         {ok, Module, []} ->
-            Module:test();
+            eunit:test([Module], [{report, {eunit_surefire, [{dir,"."}]}}]);
         {ok, _Module, Warnings} ->
             print_compile_errors(Test, [], Warnings),
             error
