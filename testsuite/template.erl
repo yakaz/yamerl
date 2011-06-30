@@ -42,7 +42,6 @@ cover_compile([{Mods, Options} | Rest]) ->
       end
       || Option <- Options
     ],
-    io:format(standard_error, "Options1 = ~p~n", [Options1]),
     cover_compile2(Mods, Options1),
     cover_compile(Rest);
 cover_compile([]) ->
