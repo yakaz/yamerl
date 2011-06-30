@@ -32,7 +32,18 @@ setup() ->
     cover_compile(Emakefile).
 
 cover_compile([{Mods, Options} | Rest]) ->
-    cover_compile2(Mods, Options),
+    %% Include directories are relative to $top_builddir/src in
+    %% src/Emakefile. We must prepend this path to each directory. If
+    %% "Dir" is an absolute directory, filename:join/1 won't change it.
+    Options1 = [
+      case Option of
+          {i, Dir} -> {i, filename:join([?top_builddir, "src", Dir])};
+          _        -> Option
+      end
+      || Option <- Options
+    ],
+    io:format(standard_error, "Options1 = ~p~n", [Options1]),
+    cover_compile2(Mods, Options1),
     cover_compile(Rest);
 cover_compile([]) ->
     ok.
