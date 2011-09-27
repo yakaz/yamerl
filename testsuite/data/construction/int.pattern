@@ -17,41 +17,42 @@
           "Not an int"
         ]
       ],
-      yaml_constr:file("${FILENAME}", [{simple_structs, true}])
+      yaml_constr:file("${FILENAME}",
+        [{simple_structs, true}, {node_mods, [yaml_node_ext_int]}])
     ),
     ?_assertMatch(
       [
         {yaml_doc,
           {yaml_seq,yaml_node_seq,"tag:yaml.org,2002:seq",
             [{line,1},{column,1}],
-            [{yaml_int,yaml_node_int,"tag:yaml.org,2002:int",
+            [{yaml_int,yaml_node_ext_int,"tag:yaml.org,2002:int",
                 [{line,1},{column,3}],
                 123},
-              {yaml_int,yaml_node_int,"tag:yaml.org,2002:int",
+              {yaml_int,yaml_node_ext_int,"tag:yaml.org,2002:int",
                 [{line,2},{column,3}],
                 -123},
-              {yaml_int,yaml_node_int,"tag:yaml.org,2002:int",
+              {yaml_int,yaml_node_ext_int,"tag:yaml.org,2002:int",
                 [{line,4},{column,3}],
                 5},
-              {yaml_int,yaml_node_int,"tag:yaml.org,2002:int",
+              {yaml_int,yaml_node_ext_int,"tag:yaml.org,2002:int",
                 [{line,5},{column,3}],
                 -5},
-              {yaml_int,yaml_node_int,"tag:yaml.org,2002:int",
+              {yaml_int,yaml_node_ext_int,"tag:yaml.org,2002:int",
                 [{line,7},{column,3}],
                 83},
-              {yaml_int,yaml_node_int,"tag:yaml.org,2002:int",
+              {yaml_int,yaml_node_ext_int,"tag:yaml.org,2002:int",
                 [{line,8},{column,3}],
                 -83},
-              {yaml_int,yaml_node_int,"tag:yaml.org,2002:int",
+              {yaml_int,yaml_node_ext_int,"tag:yaml.org,2002:int",
                 [{line,10},{column,3}],
                 427},
-              {yaml_int,yaml_node_int,"tag:yaml.org,2002:int",
+              {yaml_int,yaml_node_ext_int,"tag:yaml.org,2002:int",
                 [{line,11},{column,3}],
                 -427},
-              {yaml_int,yaml_node_int,"tag:yaml.org,2002:int",
+              {yaml_int,yaml_node_ext_int,"tag:yaml.org,2002:int",
                 [{line,13},{column,3}],
                 442883},
-              {yaml_int,yaml_node_int,"tag:yaml.org,2002:int",
+              {yaml_int,yaml_node_ext_int,"tag:yaml.org,2002:int",
                 [{line,14},{column,3}],
                 -442883},
 
@@ -61,7 +62,8 @@
             11}
         }
       ],
-      yaml_constr:file("${FILENAME}", [{simple_structs, false}])
+      yaml_constr:file("${FILENAME}",
+        [{simple_structs, false}, {node_mods, [yaml_node_ext_int]}])
     )
   ]
 }
