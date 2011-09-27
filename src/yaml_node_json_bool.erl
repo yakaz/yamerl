@@ -1,4 +1,4 @@
--module(yaml_node_bool).
+-module(yaml_node_json_bool).
 
 -include("yaml_tokens.hrl").
 -include("yaml_nodes.hrl").
@@ -15,10 +15,10 @@
 -define(TAG, "tag:yaml.org,2002:bool").
 
 -define(IS_TRUE(S),
-  S == "true" orelse S == "True" orelse S == "TRUE").
+  S == "true").
 
 -define(IS_FALSE(S),
-  S == "false" orelse S == "False" orelse S == "FALSE").
+  S == "false").
 
 %% -------------------------------------------------------------------
 %% Public API.

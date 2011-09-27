@@ -1,4 +1,4 @@
--module(yaml_node_int).
+-module(yaml_node_json_int).
 
 -include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
@@ -67,18 +67,15 @@ node_pres(Node) ->
 %% Internal functions.
 %% -------------------------------------------------------------------
 
-%% Sign.
-string_to_integer([$+ | Text]) -> string_to_integer2(Text);
-string_to_integer([$- | Text]) -> -string_to_integer2(Text);
-string_to_integer(Text)        -> string_to_integer2(Text).
-
-%% Base.
-string_to_integer2("0x" ++ Text) ->
-    yaml_node_ext_int:base16_to_integer(Text, 0);
-string_to_integer2("0o" ++ Text) ->
-    yaml_node_ext_int:base8_to_integer(Text, 0);
-string_to_integer2(Text) ->
-    yaml_node_ext_int:base10_to_integer(Text, 0).
+%% Zero and sign.
+string_to_integer("0") ->
+    0;
+string_to_integer([$-, C | Text]) when C >= $1 andalso C =< $9 ->
+    -yaml_node_ext_int:base10_to_integer(Text, C - $0);
+string_to_integer([C | Text]) when C >= $1 andalso C =< $9 ->
+    yaml_node_ext_int:base10_to_integer(Text, C - $0);
+string_to_integer(_) ->
+    error.
 
 exception(Token) ->
     Error = #yaml_parsing_error{

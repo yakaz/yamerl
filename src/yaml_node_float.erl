@@ -1,4 +1,4 @@
--module(yaml_node_int).
+-module(yaml_node_float).
 
 -include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
@@ -11,10 +11,10 @@
     try_construct_token/3,
     construct_token/3,
     node_pres/1,
-    string_to_integer/1
+    string_to_float/1
   ]).
 
--define(TAG, "tag:yaml.org,2002:int").
+-define(TAG, "tag:yaml.org,2002:float").
 
 %% -------------------------------------------------------------------
 %% Public API.
@@ -27,7 +27,7 @@ try_construct_token(Repr, Node,
     try
         construct_token(Repr, Node, Token)
     catch
-        _:#yaml_parsing_error{name = not_an_integer} ->
+        _:#yaml_parsing_error{name = not_an_float} ->
             unrecognized
     end;
 try_construct_token(_, _, _) ->
@@ -35,7 +35,7 @@ try_construct_token(_, _, _) ->
 
 construct_token(#yaml_constr{simple_structs = true},
   undefined, #yaml_scalar{text = Text} = Token) ->
-    case string_to_integer(Text) of
+    case string_to_float(Text) of
         error ->
             exception(Token);
         Int ->
@@ -43,7 +43,7 @@ construct_token(#yaml_constr{simple_structs = true},
     end;
 construct_token(#yaml_constr{simple_structs = false},
   undefined, #yaml_scalar{text = Text} = Token) ->
-    case string_to_integer(Text) of
+    case string_to_float(Text) of
         error ->
             exception(Token);
         Int ->
@@ -67,24 +67,41 @@ node_pres(Node) ->
 %% Internal functions.
 %% -------------------------------------------------------------------
 
-%% Sign.
-string_to_integer([$+ | Text]) -> string_to_integer2(Text);
-string_to_integer([$- | Text]) -> -string_to_integer2(Text);
-string_to_integer(Text)        -> string_to_integer2(Text).
+string_to_float(".nan")      -> 'nan';
+string_to_float(".Nan")      -> 'nan';
+string_to_float(".NAN")      -> 'nan';
+string_to_float(".inf")      -> '+inf';
+string_to_float(".Inf")      -> '+inf';
+string_to_float(".INF")      -> '+inf';
+string_to_float("+.inf")     -> '+inf';
+string_to_float("+.Inf")     -> '+inf';
+string_to_float("+.INF")     -> '+inf';
+string_to_float("-.inf")     -> '-inf';
+string_to_float("-.Inf")     -> '-inf';
+string_to_float("-.INF")     -> '-inf';
+string_to_float([$+ | Text]) -> string_to_float2(Text);
+string_to_float([$- | Text]) -> -string_to_float2(Text);
+string_to_float(Text)        -> string_to_float2(Text).
 
-%% Base.
-string_to_integer2("0x" ++ Text) ->
-    yaml_node_ext_int:base16_to_integer(Text, 0);
-string_to_integer2("0o" ++ Text) ->
-    yaml_node_ext_int:base8_to_integer(Text, 0);
-string_to_integer2(Text) ->
-    yaml_node_ext_int:base10_to_integer(Text, 0).
+string_to_float2(Text) ->
+    Opts = [{capture, none}],
+    case re:run(Text, "(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?", Opts) of
+        match   -> string_to_float3(Text);
+        nomatch -> error
+    end.
+
+string_to_float3(Text) ->
+    try
+        erlang:list_to_float(Text)
+    catch
+        error:badarg -> error
+    end.
 
 exception(Token) ->
     Error = #yaml_parsing_error{
-      name   = not_an_integer,
+      name   = not_a_float,
       token  = Token,
-      text   = "Invalid integer",
+      text   = "Invalid float",
       line   = ?TOKEN_LINE(Token),
       column = ?TOKEN_COLUMN(Token)
     },

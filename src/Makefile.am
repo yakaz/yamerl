@@ -9,8 +9,15 @@ dist_erlsrc_DATA = yaml_app.erl						\
 		   yaml_node_map.erl					\
 		   yaml_node_str.erl					\
 		   yaml_node_null.erl					\
+		   yaml_node_json_null.erl				\
 		   yaml_node_bool.erl					\
+		   yaml_node_json_bool.erl				\
 		   yaml_node_int.erl					\
+		   yaml_node_json_int.erl				\
+		   yaml_node_ext_int.erl				\
+		   yaml_node_float.erl					\
+		   yaml_node_json_float.erl				\
+		   yaml_node_ext_float.erl				\
 		   yaml_node_size.erl					\
 		   yaml_node_timestamp.erl				\
 		   yaml_node_ipaddr.erl					\
