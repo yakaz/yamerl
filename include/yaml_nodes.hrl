@@ -193,10 +193,27 @@
 %% List of modules implementing the Core Schema nodes.
 %% -------------------------------------------------------------------
 
+-define(FAILSAFE_SCHEMA_MODS, [
+    yaml_node_str,
+    yaml_node_seq,
+    yaml_node_map
+  ]).
+
+-define(JSON_SCHEMA_MODS, [
+    yaml_node_json_null,
+    yaml_node_json_bool,
+    yaml_node_json_int,
+    yaml_node_json_float,
+    yaml_node_str,
+    yaml_node_seq,
+    yaml_node_map
+  ]).
+
 -define(CORE_SCHEMA_MODS, [
     yaml_node_null,
     yaml_node_bool,
     yaml_node_int,
+    yaml_node_float,
     yaml_node_str,
     yaml_node_seq,
     yaml_node_map
