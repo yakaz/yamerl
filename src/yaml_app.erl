@@ -13,7 +13,8 @@
     check_and_set_param/2,
     show_params/0,
     check_params/0,
-    log_param_errors/1
+    log_param_errors/1,
+    is_node_mod/1
   ]).
 
 %% application(3erl) callbacks.
@@ -46,16 +47,7 @@ is_param_valid(_Param, '$MANDATORY') ->
     false;
 is_param_valid(node_mods, Mods) ->
     Fun = fun(Mod) ->
-        try
-            Mod:module_info(),
-            true = erlang:function_exported(Mod, tags, 0),
-            true = erlang:function_exported(Mod, construct_token, 3),
-            true = erlang:function_exported(Mod, node_pres, 1),
-            false
-        catch
-            _:_ ->
-                true
-        end
+        not is_node_mod(Mod)
     end,
     case lists:filter(Fun, Mods) of
         [] -> true;
@@ -120,6 +112,18 @@ log_param_errors([Param | Rest]) ->
       "~s: unknown parameter \"~s\".~n",
       [?APPLICATION, Param]),
     log_param_errors(Rest).
+
+is_node_mod(Mod) ->
+    try
+        Mod:module_info(),
+        true = erlang:function_exported(Mod, tags, 0),
+        true = erlang:function_exported(Mod, construct_token, 3),
+        true = erlang:function_exported(Mod, node_pres, 1),
+        true
+    catch
+        _:_ ->
+            false
+    end.
 
 %% -------------------------------------------------------------------
 %% application(3erl) callbacks.
