@@ -1,5 +1,5 @@
--ifndef(internal_yaml_repr_hrl).
--define(internal_yaml_repr_hrl, true).
+-ifndef(internal_yaml_constr_hrl).
+-define(internal_yaml_constr_hrl, true).
 
 -include("yaml_nodes.hrl").
 
@@ -7,7 +7,7 @@
 %% Options.
 %% -------------------------------------------------------------------
 
--type yaml_repr_option() :: {simple_structs, boolean()}.
+-type yaml_constr_option() :: {simple_structs, boolean()}.
 
 %% -------------------------------------------------------------------
 %% Representation state.
@@ -20,8 +20,8 @@
     priv
   }).
 
--record(yaml_repr, {
-    options              = []         :: [yaml_repr_option()],
+-record(yaml_constr, {
+    options              = []         :: [yaml_constr_option()],
     simple_structs       = true       :: boolean(),
     mods                 = []         :: [atom()],
     tags                 = []         :: [{tag_uri(), atom()}],

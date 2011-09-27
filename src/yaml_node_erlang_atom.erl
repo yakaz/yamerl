@@ -3,12 +3,12 @@
 -include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
 -include("yaml_nodes.hrl").
--include("internal/yaml_repr.hrl").
+-include("internal/yaml_constr.hrl").
 
 %% Public API.
 -export([
     tags/0,
-    represent_token/3,
+    construct_token/3,
     node_pres/1
   ]).
 
@@ -20,12 +20,12 @@
 
 tags() -> [?TAG].
 
-represent_token(#yaml_repr{simple_structs = true},
+construct_token(#yaml_constr{simple_structs = true},
   undefined, #yaml_scalar{text = Text}) ->
     {finished, list_to_atom(Text)};
-represent_token(#yaml_repr{simple_structs = false},
+construct_token(#yaml_constr{simple_structs = false},
   undefined, #yaml_scalar{text = Text} = Token) ->
-    Pres = yaml_repr:get_pres_details(Token),
+    Pres = yaml_constr:get_pres_details(Token),
     Node = #yaml_erlang_atom{
       module   = ?MODULE,
       tag      = ?TAG,
@@ -34,7 +34,7 @@ represent_token(#yaml_repr{simple_structs = false},
     },
     {finished, Node};
 
-represent_token(_, _, Token) ->
+construct_token(_, _, Token) ->
     Error = #yaml_parsing_error{
       name   = not_an_erlang_atom,
       token  = Token,

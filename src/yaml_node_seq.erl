@@ -3,14 +3,14 @@
 -include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
 -include("yaml_nodes.hrl").
--include("internal/yaml_repr.hrl").
+-include("internal/yaml_constr.hrl").
 
 %% Public API.
 -export([
     tags/0,
-    try_represent_token/3,
-    represent_token/3,
-    represent_node/3,
+    try_construct_token/3,
+    construct_token/3,
+    construct_node/3,
     node_pres/1
   ]).
 
@@ -22,21 +22,21 @@
 
 tags() -> [?TAG].
 
-try_represent_token(Repr, Node,
+try_construct_token(Repr, Node,
   #yaml_collection_start{kind = sequence} = Token) ->
-    represent_token(Repr, Node, Token);
-try_represent_token(_, _, _) ->
+    construct_token(Repr, Node, Token);
+try_construct_token(_, _, _) ->
     unrecognized.
 
-represent_token(_, undefined, #yaml_collection_start{} = Token) ->
-    Pres = yaml_repr:get_pres_details(Token),
+construct_token(_, undefined, #yaml_collection_start{} = Token) ->
+    Pres = yaml_constr:get_pres_details(Token),
     Node = #unfinished_node{
       path = {seq, 0},
       pres = Pres,
       priv = []
     },
     {unfinished, Node, false};
-represent_token(_, #unfinished_node{path = {seq, Count}, priv = Entries} = Node,
+construct_token(_, #unfinished_node{path = {seq, Count}, priv = Entries} = Node,
   #yaml_sequence_entry{}) ->
     Node1 = Node#unfinished_node{
       path = {seq, Count + 1},
@@ -44,11 +44,11 @@ represent_token(_, #unfinished_node{path = {seq, Count}, priv = Entries} = Node,
     },
     {unfinished, Node1, false};
 
-represent_token(#yaml_repr{simple_structs = true},
+construct_token(#yaml_constr{simple_structs = true},
   #unfinished_node{priv = Entries}, #yaml_collection_end{}) ->
     Node = lists:reverse(Entries),
     {finished, Node};
-represent_token(#yaml_repr{simple_structs = false},
+construct_token(#yaml_constr{simple_structs = false},
   #unfinished_node{path = {_, Count}, pres = Pres, priv = Entries},
   #yaml_collection_end{}) ->
     Node = #yaml_seq{
@@ -60,7 +60,7 @@ represent_token(#yaml_repr{simple_structs = false},
     },
     {finished, Node};
 
-represent_token(_, _, Token) ->
+construct_token(_, _, Token) ->
     Error = #yaml_parsing_error{
       name   = not_a_sequence,
       token  = Token,
@@ -70,7 +70,7 @@ represent_token(_, _, Token) ->
     },
     throw(Error).
 
-represent_node(_, #unfinished_node{priv = [_ | Entries]} = Node, Entry) ->
+construct_node(_, #unfinished_node{priv = [_ | Entries]} = Node, Entry) ->
     Node1 = Node#unfinished_node{
       priv = [Entry | Entries]
     },

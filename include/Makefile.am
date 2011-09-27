@@ -6,4 +6,4 @@ nobase_dist_headers_DATA = yaml_types.hrl				\
 			   yaml_nodes.hrl				\
 			   yaml_nodes_yakaz.hrl				\
 			   internal/yaml_parser.hrl			\
-			   internal/yaml_repr.hrl
+			   internal/yaml_constr.hrl

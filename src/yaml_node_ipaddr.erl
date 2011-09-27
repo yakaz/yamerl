@@ -4,13 +4,13 @@
 -include("yaml_tokens.hrl").
 -include("yaml_nodes.hrl").
 -include("yaml_nodes_yakaz.hrl").
--include("internal/yaml_repr.hrl").
+-include("internal/yaml_constr.hrl").
 
 %% Public API.
 -export([
     tags/0,
-    try_represent_token/3,
-    represent_token/3,
+    try_construct_token/3,
+    construct_token/3,
     node_pres/1,
     parse/1
   ]).
@@ -23,18 +23,18 @@
 
 tags() -> [?TAG].
 
-try_represent_token(Repr, Node,
+try_construct_token(Repr, Node,
   #yaml_scalar{tag = #yaml_tag{uri = {non_specific, "?"}}} = Token) ->
     try
-        represent_token(Repr, Node, Token)
+        construct_token(Repr, Node, Token)
     catch
         _:#yaml_parsing_error{name = not_an_ip_address} ->
             unrecognized
     end;
-try_represent_token(_, _, _) ->
+try_construct_token(_, _, _) ->
     unrecognized.
 
-represent_token(#yaml_repr{simple_structs = true},
+construct_token(#yaml_constr{simple_structs = true},
   undefined, #yaml_scalar{text = Text} = Token) ->
     case string_to_ip(Token, Text) of
         {range, IP1, IP2} ->
@@ -44,9 +44,9 @@ represent_token(#yaml_repr{simple_structs = true},
         IP ->
             {finished, IP}
     end;
-represent_token(#yaml_repr{simple_structs = false},
+construct_token(#yaml_constr{simple_structs = false},
   undefined, #yaml_scalar{text = Text} = Token) ->
-    Pres = yaml_repr:get_pres_details(Token),
+    Pres = yaml_constr:get_pres_details(Token),
     Node = case string_to_ip(Token, Text) of
         {range, IP1, IP2} ->
             #yaml_ip_range{
@@ -74,7 +74,7 @@ represent_token(#yaml_repr{simple_structs = false},
     end,
     {finished, Node};
 
-represent_token(_, _, Token) ->
+construct_token(_, _, Token) ->
     exception(Token).
 
 node_pres(Node) ->

@@ -49,7 +49,7 @@ is_param_valid(node_mods, Mods) ->
         try
             Mod:module_info(),
             true = erlang:function_exported(Mod, tags, 0),
-            true = erlang:function_exported(Mod, represent_token, 3),
+            true = erlang:function_exported(Mod, construct_token, 3),
             true = erlang:function_exported(Mod, node_pres, 1),
             false
         catch

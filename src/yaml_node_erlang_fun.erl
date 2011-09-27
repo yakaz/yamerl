@@ -3,12 +3,12 @@
 -include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
 -include("yaml_nodes.hrl").
--include("internal/yaml_repr.hrl").
+-include("internal/yaml_constr.hrl").
 
 %% Public API.
 -export([
     tags/0,
-    represent_token/3,
+    construct_token/3,
     node_pres/1
   ]).
 
@@ -20,7 +20,7 @@
 
 tags() -> [?TAG].
 
-represent_token(#yaml_repr{simple_structs = Simple},
+construct_token(#yaml_constr{simple_structs = Simple},
   undefined, #yaml_scalar{text = Text} = Token) ->
     case erl_scan:string(Text) of
         {ok, Tokens, _} ->
@@ -31,7 +31,7 @@ represent_token(#yaml_repr{simple_structs = Simple},
                         Simple ->
                             Fun;
                         true ->
-                            Pres = yaml_repr:get_pres_details(Token),
+                            Pres = yaml_constr:get_pres_details(Token),
                             #yaml_erlang_fun{
                               module   = ?MODULE,
                               tag      = ?TAG,
@@ -59,7 +59,7 @@ represent_token(#yaml_repr{simple_structs = Simple},
             },
             throw(Error)
     end;
-represent_token(_, _, Token) ->
+construct_token(_, _, Token) ->
     Error = #yaml_parsing_error{
       name   = not_an_erlang_fun,
       token  = Token,

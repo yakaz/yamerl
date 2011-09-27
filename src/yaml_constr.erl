@@ -1,9 +1,9 @@
--module(yaml_repr).
+-module(yaml_constr).
 
 -include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
 -include("yaml_nodes.hrl").
--include("internal/yaml_repr.hrl").
+-include("internal/yaml_constr.hrl").
 
 %% Public API.
 -export([
@@ -126,15 +126,15 @@ node_pres(Node) when is_tuple(Node) ->
 %% Representation.
 %% -------------------------------------------------------------------
 
-represent(Repr, #yaml_doc_start{}) ->
+construct(Repr, #yaml_doc_start{}) ->
     %% Prepare a document node.
     Doc = #yaml_doc{},
-    Repr1 = Repr#yaml_repr{
+    Repr1 = Repr#yaml_constr{
       current_doc = [Doc]
     },
     return_new_fun(Repr1);
 
-represent(_, Token) when
+construct(_, Token) when
   is_record(Token, yaml_stream_start) orelse
   is_record(Token, yaml_stream_end) orelse
   is_record(Token, yaml_yaml_directive) orelse
@@ -144,14 +144,14 @@ represent(_, Token) when
     %% This token doesn't start a node: ignore it.
     ok;
 
-represent(
-  #yaml_repr{current_doc = Doc, current_node_is_leaf = false,
+construct(
+  #yaml_constr{current_doc = Doc, current_node_is_leaf = false,
     mods = Mods, tags = Tags} = Repr,
   Token) when Doc /= undefined andalso
   (is_record(Token, yaml_collection_start) orelse
    is_record(Token, yaml_scalar)) ->
     %% This token starts a node. We must determine the module to use to
-    %% represent this node.
+    %% construct this node.
     Tag = case Token of
         #yaml_collection_start{tag = T} -> T;
         #yaml_scalar{tag = T}           -> T
@@ -159,13 +159,13 @@ represent(
     Ret = case Tag of
         #yaml_tag{uri = {non_specific, _}} ->
             %% The node has a non-specific tag. We let each module
-            %% decides if they want to represent the node.
-            try_represent(Repr, Mods, Token);
+            %% decides if they want to construct the node.
+            try_construct(Repr, Mods, Token);
         #yaml_tag{uri = URI} ->
             %% We look up this URI in the tag's index.
             case proplists:get_value(URI, Tags) of
                 Mod when Mod /= undefined ->
-                    Mod:represent_token(Repr, undefined, Token);
+                    Mod:construct_token(Repr, undefined, Token);
                 undefined ->
                     %% This tag isn't handled by anything!
                     Error = #yaml_parsing_error{
@@ -179,23 +179,23 @@ represent(
                     yaml_errors:throw(Error1)
             end
     end,
-    handle_represent_return(Repr, Doc, Ret);
+    handle_construct_return(Repr, Doc, Ret);
 
-represent(
-  #yaml_repr{current_doc =
+construct(
+  #yaml_constr{current_doc =
     [#unfinished_node{module = Mod} = Node | Doc]} = Repr,
   Token) ->
     %% This token continues a node. We call the current node's module to
     %% handle it.
-    Ret = Mod:represent_token(Repr, Node, Token),
-    handle_represent_return(Repr, Doc, Ret).
+    Ret = Mod:construct_token(Repr, Node, Token),
+    handle_construct_return(Repr, Doc, Ret).
 
-try_represent(Repr, [Mod | Rest], Token) ->
-    case Mod:try_represent_token(Repr, undefined, Token) of
-        unrecognized -> try_represent(Repr, Rest, Token);
+try_construct(Repr, [Mod | Rest], Token) ->
+    case Mod:try_construct_token(Repr, undefined, Token) of
+        unrecognized -> try_construct(Repr, Rest, Token);
         Ret          -> Ret
     end;
-try_represent(_, [], Token) ->
+try_construct(_, [], Token) ->
     Error = #yaml_parsing_error{
       name   = unrecognized_node,
       token  = Token,
@@ -205,13 +205,13 @@ try_represent(_, [], Token) ->
     },
     yaml_errors:throw(Error).
 
-represent_parent(#yaml_repr{docs = Docs, docs_count = Count} = Repr,
+construct_parent(#yaml_constr{docs = Docs, docs_count = Count} = Repr,
   [#yaml_doc{} = Doc], Root) ->
     %% This node is the root of the document.
     Doc1 = Doc#yaml_doc{
       root = Root
     },
-    Repr1 = Repr#yaml_repr{
+    Repr1 = Repr#yaml_constr{
       docs                 = Docs ++ [Doc1],
       docs_count           = Count + 1,
       current_doc          = undefined,
@@ -219,32 +219,32 @@ represent_parent(#yaml_repr{docs = Docs, docs_count = Count} = Repr,
       anchors              = dict:new()
     },
     return_new_fun(Repr1);
-represent_parent(Repr, [#unfinished_node{module = Mod} = Node | Doc], Child) ->
+construct_parent(Repr, [#unfinished_node{module = Mod} = Node | Doc], Child) ->
     %% We call the parent node's module to handle this new child node.
-    Ret = Mod:represent_node(Repr, Node, Child),
-    handle_represent_return(Repr, Doc, Ret).
+    Ret = Mod:construct_node(Repr, Node, Child),
+    handle_construct_return(Repr, Doc, Ret).
 
-handle_represent_return(Repr, Doc, {finished, Node}) ->
+handle_construct_return(Repr, Doc, {finished, Node}) ->
     %% Give this node to the parent node.
-    represent_parent(Repr, Doc, Node);
-handle_represent_return(Repr, Doc, {unfinished, Node, Is_Leaf}) ->
+    construct_parent(Repr, Doc, Node);
+handle_construct_return(Repr, Doc, {unfinished, Node, Is_Leaf}) ->
     %% Unfinished node, wait for the next tokens.
-    Repr1 = Repr#yaml_repr{
+    Repr1 = Repr#yaml_constr{
       current_doc          = [Node | Doc],
       current_node_is_leaf = Is_Leaf
     },
     return_new_fun(Repr1).
 
-return_new_fun(#yaml_repr{simple_structs = Simple} = Repr) ->
+return_new_fun(#yaml_constr{simple_structs = Simple} = Repr) ->
     Fun = fun
         (get_docs) when Simple ->
-            [Doc#yaml_doc.root || Doc <- Repr#yaml_repr.docs];
+            [Doc#yaml_doc.root || Doc <- Repr#yaml_constr.docs];
         (get_docs) ->
-            Repr#yaml_repr.docs;
-        (get_repr) ->
+            Repr#yaml_constr.docs;
+        (get_constr) ->
             Repr;
         (T) ->
-            represent(Repr, T)
+            construct(Repr, T)
     end,
     {ok, Fun}.
 
@@ -256,14 +256,14 @@ setup_node_mods(Repr) ->
     Mods  = yaml_app:get_param(node_mods) ++ ?CORE_SCHEMA_MODS,
     Auto  = filter_autodetected_node_mods(Mods, []),
     Tags  = index_tags(Mods, []),
-    Repr1 = Repr#yaml_repr{
+    Repr1 = Repr#yaml_constr{
       mods = Auto,
       tags = Tags
     },
     return_new_fun(Repr1).
 
 filter_autodetected_node_mods([Mod | Rest], Auto) ->
-    Auto1 = case erlang:function_exported(Mod, try_represent_token, 3) of
+    Auto1 = case erlang:function_exported(Mod, try_construct_token, 3) of
         true  -> [Mod | Auto];
         false -> Auto
     end,
@@ -297,7 +297,7 @@ index_tags2(Tags, [], _) ->
 
 initialize(Options) ->
     {Repr_Options, Parser_Options} = filter_options(Options),
-    Repr = #yaml_repr{
+    Repr = #yaml_constr{
       options        = Repr_Options,
       simple_structs = proplists:get_value(simple_structs, Repr_Options, true)
     },
