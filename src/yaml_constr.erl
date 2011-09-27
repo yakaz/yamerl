@@ -253,8 +253,16 @@ return_new_fun(#yaml_constr{simple_structs = Simple} = Repr) ->
 %% -------------------------------------------------------------------
 
 setup_node_mods(Repr) ->
-    Mods  = yaml_app:get_param(node_mods) ++ ?CORE_SCHEMA_MODS,
-    Auto  = filter_autodetected_node_mods(Mods, []),
+    Mods1 = umerge_unsorted(
+      proplists:get_value(node_mods, Repr#yaml_constr.options, []),
+      yaml_app:get_param(node_mods)
+    ),
+    Mods  = case proplists:get_value(schema, Repr#yaml_constr.options, core) of
+        failsafe -> umerge_unsorted(Mods1, ?FAILSAFE_SCHEMA_MODS);
+        json     -> umerge_unsorted(Mods1, ?JSON_SCHEMA_MODS);
+        core     -> umerge_unsorted(Mods1, ?CORE_SCHEMA_MODS)
+    end,
+    Auto  = filter_autodetection_capable_mods(Mods, []),
     Tags  = index_tags(Mods, []),
     Repr1 = Repr#yaml_constr{
       mods = Auto,
@@ -262,13 +270,22 @@ setup_node_mods(Repr) ->
     },
     return_new_fun(Repr1).
 
-filter_autodetected_node_mods([Mod | Rest], Auto) ->
+umerge_unsorted(List1, List2) ->
+    Fun = fun(Mod, List) ->
+        case lists:member(Mod, List) of
+            true  -> List;
+            false -> List ++ [Mod]
+        end
+    end,
+    lists:foldl(Fun, List1, List2).
+
+filter_autodetection_capable_mods([Mod | Rest], Auto) ->
     Auto1 = case erlang:function_exported(Mod, try_construct_token, 3) of
         true  -> [Mod | Auto];
         false -> Auto
     end,
-    filter_autodetected_node_mods(Rest, Auto1);
-filter_autodetected_node_mods([], Auto) ->
+    filter_autodetection_capable_mods(Rest, Auto1);
+filter_autodetection_capable_mods([], Auto) ->
     lists:reverse(Auto).
 
 index_tags([Mod | Rest], Tags) ->
@@ -324,6 +341,17 @@ check_options([]) ->
 
 is_option_valid({simple_structs, Flag}) when is_boolean(Flag) ->
     true;
+is_option_valid({node_mods, Mods}) when is_list(Mods) ->
+    Fun = fun(Mod) ->
+        not yaml_app:is_node_mod(Mod)
+    end,
+    case lists:filter(Fun, Mods) of
+        [] -> true;
+        _  -> false
+    end;
+is_option_valid({schema, Schema})
+  when Schema == failsafe orelse Schema == json orelse Schema == core ->
+    true;
 is_option_valid(_) ->
     false.
 
@@ -336,6 +364,11 @@ invalid_option(Option) ->
             Error#yaml_invalid_option{
               text = "Invalid value for option \"simple_structs\": "
               "it must be a boolean"
+            };
+        {node_mods, _} ->
+            Error#yaml_invalid_option{
+              text = "Invalid value for option \"node_mods\": "
+              "it must be a list of modules"
             };
         _ ->
             yaml_errors:format(Error, "Unknown option \"~w\"", [Option])
