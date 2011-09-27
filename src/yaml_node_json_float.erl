@@ -27,7 +27,7 @@ try_construct_token(Constr, Node,
     try
         construct_token(Constr, Node, Token)
     catch
-        _:#yaml_parsing_error{name = not_an_float} ->
+        _:#yaml_parsing_error{name = not_a_float} ->
             unrecognized
     end;
 try_construct_token(_, _, _) ->
@@ -71,8 +71,14 @@ string_to_float("0")         -> 0.0;
 string_to_float(".nan")      -> 'nan';
 string_to_float(".inf")      -> '+inf';
 string_to_float("-.inf")     -> '-inf';
-string_to_float([$- | Text]) -> -string_to_float2(Text);
-string_to_float(Text)        -> string_to_float2(Text).
+
+string_to_float([$- | Text]) ->
+    case string_to_float2(Text) of
+        error -> error;
+        Float -> -Float
+    end;
+string_to_float(Text) ->
+    string_to_float2(Text).
 
 string_to_float2(Text) ->
     Opts = [{capture, none}],

@@ -73,9 +73,15 @@ node_pres(Node) ->
 %% -------------------------------------------------------------------
 
 %% Sign.
-string_to_integer([$+ | Text]) -> string_to_integer2(Text);
-string_to_integer([$- | Text]) -> -string_to_integer2(Text);
-string_to_integer(Text)        -> string_to_integer2(Text).
+string_to_integer([$+ | Text]) ->
+    string_to_integer2(Text);
+string_to_integer([$- | Text]) ->
+    case string_to_integer2(Text) of
+        error -> error;
+        Int   -> -Int
+    end;
+string_to_integer(Text) ->
+    string_to_integer2(Text).
 
 %% Base.
 string_to_integer2("0b" ++ Text) ->
