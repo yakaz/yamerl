@@ -20,7 +20,7 @@
 
 tags() -> [?TAG].
 
-try_construct_token(Repr, Node,
+try_construct_token(Constr, Node,
   #yaml_scalar{tag = #yaml_tag{uri = {non_specific, "?"}},
   text = Text} = Token) when
   Text == "" orelse
@@ -28,7 +28,7 @@ try_construct_token(Repr, Node,
   Text == "Null" orelse
   Text == "NULL" orelse
   Text == "~" ->
-    construct_token(Repr, Node, Token);
+    construct_token(Constr, Node, Token);
 try_construct_token(_, _, _) ->
     unrecognized.
 

@@ -15,7 +15,7 @@
           "Not a size"
         ]
       ],
-      yaml_repr:file("${FILENAME}", [{simple_structs, true}])
+      yaml_constr:file("${FILENAME}", [{simple_structs, true}])
     ),
     ?_assertMatch(
       [
@@ -51,7 +51,7 @@
                 "Not a size"}],
             9}}
       ],
-      yaml_repr:file("${FILENAME}", [{simple_structs, false}])
+      yaml_constr:file("${FILENAME}", [{simple_structs, false}])
     )
   ]
 }

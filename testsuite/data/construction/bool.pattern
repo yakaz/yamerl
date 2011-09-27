@@ -20,7 +20,7 @@
           "Not a bool"
         ]
       ],
-      yaml_repr:file("${FILENAME}", [{simple_structs, true}])
+      yaml_constr:file("${FILENAME}", [{simple_structs, true}])
     ),
     ?_assertMatch(
       [
@@ -101,7 +101,7 @@
             23}
         }
       ],
-      yaml_repr:file("${FILENAME}", [{simple_structs, false}])
+      yaml_constr:file("${FILENAME}", [{simple_structs, false}])
     )
   ]
 }

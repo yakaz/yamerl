@@ -10,7 +10,7 @@
       [
         [null, null, null, null, null, "Not a null"]
       ],
-      yaml_repr:file("${FILENAME}", [{simple_structs, true}])
+      yaml_constr:file("${FILENAME}", [{simple_structs, true}])
     ),
     ?_assertMatch(
       [
@@ -33,7 +33,7 @@
                 "Not a null"}],
             6}}
       ],
-      yaml_repr:file("${FILENAME}", [{simple_structs, false}])
+      yaml_constr:file("${FILENAME}", [{simple_structs, false}])
     )
   ]
 }

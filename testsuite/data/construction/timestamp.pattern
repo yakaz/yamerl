@@ -18,7 +18,7 @@
           "Not a timestamp"
         ]
       ],
-      yaml_repr:file("${FILENAME}", [{simple_structs, true}])
+      yaml_constr:file("${FILENAME}", [{simple_structs, true}])
     ),
     ?_assertMatch(
       [
@@ -55,7 +55,7 @@
                 "Not a timestamp"}],
             6}}
       ],
-      yaml_repr:file("${FILENAME}", [{simple_structs, false}])
+      yaml_constr:file("${FILENAME}", [{simple_structs, false}])
     )
   ]
 }

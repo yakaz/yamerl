@@ -3,9 +3,9 @@ TPL_PL        = template.pl
 TPL_ERL       = template.erl
 COVER_TO_HTML = cover_to_html.sh
 
-TPL_FILES = parsing.erl representation.erl
+TPL_FILES = parsing.erl construction.erl
 
-ERL_TESTS = parsing representation
+ERL_TESTS = parsing construction
 
 TESTS = dialyzer $(ERL_TESTS)
 

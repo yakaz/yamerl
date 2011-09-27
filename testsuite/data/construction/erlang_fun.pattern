@@ -9,7 +9,7 @@
   [
     {generator,
       fun() ->
-          [Erlang_Fun_Simple] = yaml_repr:file("${FILENAME}",
+          [Erlang_Fun_Simple] = yaml_constr:file("${FILENAME}",
             [{simple_structs, true}]),
           ?_assertMatch(
             "Hello World!",
@@ -24,7 +24,7 @@
                 [{line,1},{column,28}],
                 Erlang_Fun_Normal,
                 "fun() -> \"Hello World!\" end.\n"}}
-          ] = yaml_repr:file("${FILENAME}",
+          ] = yaml_constr:file("${FILENAME}",
             [{simple_structs, false}]),
           ?_assertMatch(
             "Hello World!",

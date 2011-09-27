@@ -22,9 +22,9 @@
 
 tags() -> [?TAG].
 
-try_construct_token(Repr, Node,
+try_construct_token(Constr, Node,
   #yaml_collection_start{kind = sequence} = Token) ->
-    construct_token(Repr, Node, Token);
+    construct_token(Constr, Node, Token);
 try_construct_token(_, _, _) ->
     unrecognized.
 

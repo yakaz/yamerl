@@ -22,10 +22,10 @@
 
 tags() -> [?TAG].
 
-try_construct_token(Repr, Node,
+try_construct_token(Constr, Node,
   #yaml_scalar{tag = #yaml_tag{uri = {non_specific, "?"}}} = Token) ->
     try
-        construct_token(Repr, Node, Token)
+        construct_token(Constr, Node, Token)
     catch
         _:#yaml_parsing_error{name = not_an_integer} ->
             unrecognized

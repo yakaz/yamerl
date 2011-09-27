@@ -21,8 +21,8 @@
 
 tags() -> [?TAG].
 
-try_construct_token(Repr, Node, #yaml_scalar{} = Token) ->
-    construct_token(Repr, Node, Token);
+try_construct_token(Constr, Node, #yaml_scalar{} = Token) ->
+    construct_token(Constr, Node, Token);
 try_construct_token(_, _, _) ->
     unrecognized.
 

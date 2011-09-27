@@ -17,7 +17,7 @@
           "Not an int"
         ]
       ],
-      yaml_repr:file("${FILENAME}", [{simple_structs, true}])
+      yaml_constr:file("${FILENAME}", [{simple_structs, true}])
     ),
     ?_assertMatch(
       [
@@ -61,7 +61,7 @@
             11}
         }
       ],
-      yaml_repr:file("${FILENAME}", [{simple_structs, false}])
+      yaml_constr:file("${FILENAME}", [{simple_structs, false}])
     )
   ]
 }

@@ -123,16 +123,16 @@ node_pres(Node) when is_tuple(Node) ->
     end.
 
 %% -------------------------------------------------------------------
-%% Representation.
+%% Construction.
 %% -------------------------------------------------------------------
 
-construct(Repr, #yaml_doc_start{}) ->
+construct(Constr, #yaml_doc_start{}) ->
     %% Prepare a document node.
     Doc = #yaml_doc{},
-    Repr1 = Repr#yaml_constr{
+    Constr1 = Constr#yaml_constr{
       current_doc = [Doc]
     },
-    return_new_fun(Repr1);
+    return_new_fun(Constr1);
 
 construct(_, Token) when
   is_record(Token, yaml_stream_start) orelse
@@ -146,7 +146,7 @@ construct(_, Token) when
 
 construct(
   #yaml_constr{current_doc = Doc, current_node_is_leaf = false,
-    mods = Mods, tags = Tags} = Repr,
+    mods = Mods, tags = Tags} = Constr,
   Token) when Doc /= undefined andalso
   (is_record(Token, yaml_collection_start) orelse
    is_record(Token, yaml_scalar)) ->
@@ -160,12 +160,12 @@ construct(
         #yaml_tag{uri = {non_specific, _}} ->
             %% The node has a non-specific tag. We let each module
             %% decides if they want to construct the node.
-            try_construct(Repr, Mods, Token);
+            try_construct(Constr, Mods, Token);
         #yaml_tag{uri = URI} ->
             %% We look up this URI in the tag's index.
             case proplists:get_value(URI, Tags) of
                 Mod when Mod /= undefined ->
-                    Mod:construct_token(Repr, undefined, Token);
+                    Mod:construct_token(Constr, undefined, Token);
                 undefined ->
                     %% This tag isn't handled by anything!
                     Error = #yaml_parsing_error{
@@ -179,20 +179,20 @@ construct(
                     yaml_errors:throw(Error1)
             end
     end,
-    handle_construct_return(Repr, Doc, Ret);
+    handle_construct_return(Constr, Doc, Ret);
 
 construct(
   #yaml_constr{current_doc =
-    [#unfinished_node{module = Mod} = Node | Doc]} = Repr,
+    [#unfinished_node{module = Mod} = Node | Doc]} = Constr,
   Token) ->
     %% This token continues a node. We call the current node's module to
     %% handle it.
-    Ret = Mod:construct_token(Repr, Node, Token),
-    handle_construct_return(Repr, Doc, Ret).
+    Ret = Mod:construct_token(Constr, Node, Token),
+    handle_construct_return(Constr, Doc, Ret).
 
-try_construct(Repr, [Mod | Rest], Token) ->
-    case Mod:try_construct_token(Repr, undefined, Token) of
-        unrecognized -> try_construct(Repr, Rest, Token);
+try_construct(Constr, [Mod | Rest], Token) ->
+    case Mod:try_construct_token(Constr, undefined, Token) of
+        unrecognized -> try_construct(Constr, Rest, Token);
         Ret          -> Ret
     end;
 try_construct(_, [], Token) ->
@@ -205,46 +205,46 @@ try_construct(_, [], Token) ->
     },
     yaml_errors:throw(Error).
 
-construct_parent(#yaml_constr{docs = Docs, docs_count = Count} = Repr,
+construct_parent(#yaml_constr{docs = Docs, docs_count = Count} = Constr,
   [#yaml_doc{} = Doc], Root) ->
     %% This node is the root of the document.
     Doc1 = Doc#yaml_doc{
       root = Root
     },
-    Repr1 = Repr#yaml_constr{
+    Constr1 = Constr#yaml_constr{
       docs                 = Docs ++ [Doc1],
       docs_count           = Count + 1,
       current_doc          = undefined,
       current_node_is_leaf = false,
       anchors              = dict:new()
     },
-    return_new_fun(Repr1);
-construct_parent(Repr, [#unfinished_node{module = Mod} = Node | Doc], Child) ->
+    return_new_fun(Constr1);
+construct_parent(Constr, [#unfinished_node{module = Mod} = Node | Doc], Child) ->
     %% We call the parent node's module to handle this new child node.
-    Ret = Mod:construct_node(Repr, Node, Child),
-    handle_construct_return(Repr, Doc, Ret).
+    Ret = Mod:construct_node(Constr, Node, Child),
+    handle_construct_return(Constr, Doc, Ret).
 
-handle_construct_return(Repr, Doc, {finished, Node}) ->
+handle_construct_return(Constr, Doc, {finished, Node}) ->
     %% Give this node to the parent node.
-    construct_parent(Repr, Doc, Node);
-handle_construct_return(Repr, Doc, {unfinished, Node, Is_Leaf}) ->
+    construct_parent(Constr, Doc, Node);
+handle_construct_return(Constr, Doc, {unfinished, Node, Is_Leaf}) ->
     %% Unfinished node, wait for the next tokens.
-    Repr1 = Repr#yaml_constr{
+    Constr1 = Constr#yaml_constr{
       current_doc          = [Node | Doc],
       current_node_is_leaf = Is_Leaf
     },
-    return_new_fun(Repr1).
+    return_new_fun(Constr1).
 
-return_new_fun(#yaml_constr{simple_structs = Simple} = Repr) ->
+return_new_fun(#yaml_constr{simple_structs = Simple} = Constr) ->
     Fun = fun
         (get_docs) when Simple ->
-            [Doc#yaml_doc.root || Doc <- Repr#yaml_constr.docs];
+            [Doc#yaml_doc.root || Doc <- Constr#yaml_constr.docs];
         (get_docs) ->
-            Repr#yaml_constr.docs;
+            Constr#yaml_constr.docs;
         (get_constr) ->
-            Repr;
+            Constr;
         (T) ->
-            construct(Repr, T)
+            construct(Constr, T)
     end,
     {ok, Fun}.
 
@@ -252,23 +252,24 @@ return_new_fun(#yaml_constr{simple_structs = Simple} = Repr) ->
 %% Node modules.
 %% -------------------------------------------------------------------
 
-setup_node_mods(Repr) ->
+setup_node_mods(Constr) ->
     Mods1 = umerge_unsorted(
-      proplists:get_value(node_mods, Repr#yaml_constr.options, []),
+      proplists:get_value(node_mods, Constr#yaml_constr.options, []),
       yaml_app:get_param(node_mods)
     ),
-    Mods  = case proplists:get_value(schema, Repr#yaml_constr.options, core) of
+    Schema = proplists:get_value(schema, Constr#yaml_constr.options, core),
+    Mods   = case Schema of
         failsafe -> umerge_unsorted(Mods1, ?FAILSAFE_SCHEMA_MODS);
         json     -> umerge_unsorted(Mods1, ?JSON_SCHEMA_MODS);
         core     -> umerge_unsorted(Mods1, ?CORE_SCHEMA_MODS)
     end,
-    Auto  = filter_autodetection_capable_mods(Mods, []),
-    Tags  = index_tags(Mods, []),
-    Repr1 = Repr#yaml_constr{
+    Auto    = filter_autodetection_capable_mods(Mods, []),
+    Tags    = index_tags(Mods, []),
+    Constr1 = Constr#yaml_constr{
       mods = Auto,
       tags = Tags
     },
-    return_new_fun(Repr1).
+    return_new_fun(Constr1).
 
 umerge_unsorted(List1, List2) ->
     Fun = fun(Mod, List) ->
@@ -313,12 +314,12 @@ index_tags2(Tags, [], _) ->
 %% -------------------------------------------------------------------
 
 initialize(Options) ->
-    {Repr_Options, Parser_Options} = filter_options(Options),
-    Repr = #yaml_constr{
-      options        = Repr_Options,
-      simple_structs = proplists:get_value(simple_structs, Repr_Options, true)
+    {Constr_Options, Parser_Options} = filter_options(Options),
+    Constr = #yaml_constr{
+      options        = Constr_Options,
+      simple_structs = proplists:get_value(simple_structs, Constr_Options, true)
     },
-    {ok, Token_Fun} = setup_node_mods(Repr),
+    {ok, Token_Fun} = setup_node_mods(Constr),
     [{token_fun, Token_Fun} | Parser_Options].
 
 filter_options(Options) ->
@@ -327,8 +328,8 @@ filter_options(Options) ->
         ({Name, _}) -> not lists:member(Name, Parser_Options);
         (_)         -> true
     end,
-    {Repr_Options, _} = Filtered_Opts = lists:partition(Fun, Options),
-    check_options(Repr_Options),
+    {Constr_Options, _} = Filtered_Opts = lists:partition(Fun, Options),
+    check_options(Constr_Options),
     Filtered_Opts.
 
 check_options([Option | Rest]) ->

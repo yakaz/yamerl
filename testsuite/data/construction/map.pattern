@@ -13,7 +13,7 @@
           {"second", [{"item", 2}]}
         ]
       ],
-      yaml_repr:file("${FILENAME}", [{simple_structs, true}])
+      yaml_constr:file("${FILENAME}", [{simple_structs, true}])
     ),
     ?_assertMatch(
       [
@@ -47,7 +47,7 @@
                         [{line,2},{column,17}],
                         2}}]}}]}}
       ],
-      yaml_repr:file("${FILENAME}", [{simple_structs, false}])
+      yaml_constr:file("${FILENAME}", [{simple_structs, false}])
     )
   ]
 }
