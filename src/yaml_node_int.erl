@@ -11,7 +11,12 @@
     try_construct_token/3,
     construct_token/3,
     node_pres/1,
-    string_to_integer/1
+    string_to_integer/1,
+    base2_to_integer/2,
+    base8_to_integer/2,
+    base10_to_integer/2,
+    base16_to_integer/2,
+    base60_to_integer/3
   ]).
 
 -define(TAG, "tag:yaml.org,2002:int").
@@ -80,11 +85,59 @@ string_to_integer(Text) ->
 
 %% Base.
 string_to_integer2("0x" ++ Text) ->
-    yaml_node_ext_int:base16_to_integer(Text, 0);
+    base16_to_integer(Text, 0);
 string_to_integer2("0o" ++ Text) ->
-    yaml_node_ext_int:base8_to_integer(Text, 0);
+    base8_to_integer(Text, 0);
 string_to_integer2(Text) ->
-    yaml_node_ext_int:base10_to_integer(Text, 0).
+    base10_to_integer(Text, 0).
+
+%% Parsing.
+base10_to_integer([C | Rest], Int) when C >= $0 andalso C =< $9 ->
+    Int1 = (Int * 10) + (C - $0),
+    base10_to_integer(Rest, Int1);
+base10_to_integer([], Int) ->
+    Int;
+base10_to_integer(_, _) ->
+    error.
+
+base2_to_integer([C | Rest], Int) when C == $0 orelse C == $1 ->
+    Int1 = (Int * 2) + (C - $0),
+    base2_to_integer(Rest, Int1);
+base2_to_integer([], Int) ->
+    Int;
+base2_to_integer(_, _) ->
+    error.
+
+base8_to_integer([C | Rest], Int) when C >= $0 andalso C =< $7 ->
+    Int1 = (Int * 8) + (C - $0),
+    base8_to_integer(Rest, Int1);
+base8_to_integer([], Int) ->
+    Int;
+base8_to_integer(_, _) ->
+    error.
+
+base16_to_integer([C | Rest], Int) when C >= $0 andalso C =< $9 ->
+    Int1 = (Int * 16) + (C - $0),
+    base16_to_integer(Rest, Int1);
+base16_to_integer([C | Rest], Int) when C >= $a andalso C =< $f ->
+    Int1 = (Int * 16) + (C - $a + 10),
+    base16_to_integer(Rest, Int1);
+base16_to_integer([C | Rest], Int) when C >= $A andalso C =< $F ->
+    Int1 = (Int * 16) + (C - $A + 10),
+    base16_to_integer(Rest, Int1);
+base16_to_integer([], Int) ->
+    Int;
+base16_to_integer(_, _) ->
+    error.
+
+base60_to_integer([C | Rest], Current, Int) when C >= $0 andalso C =< $9 ->
+    Current1 = (Current * 10) + (C - $0),
+    base60_to_integer(Rest, Current1, Int);
+base60_to_integer([$: | Rest], Current, Int) ->
+    Int1 = (Int * 60) + Current,
+    base60_to_integer(Rest, 0, Int1);
+base60_to_integer([], Current, Int) ->
+    (Int * 60) + Current.
 
 exception(Token) ->
     Error = #yaml_parsing_error{
