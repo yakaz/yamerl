@@ -3,7 +3,7 @@
 %% TEST
 {setup,
   fun() ->
-          application:start(yaml)
+      application:start(yaml)
   end,
   [
     ?_assertMatch(
