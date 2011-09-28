@@ -8,9 +8,80 @@
   [
     ?_assertMatch(
       [
+        ["~", "null", "Null", "NULL", "", "Not a null"]
+      ],
+      yaml_constr:file("${FILENAME}",
+        [{simple_structs, true}, {schema, failsafe}])
+    ),
+    ?_assertMatch(
+      [
+        ["~", null, "Null", "NULL", "", "Not a null"]
+      ],
+      yaml_constr:file("${FILENAME}",
+        [{simple_structs, true}, {schema, json}])
+    ),
+    ?_assertMatch(
+      [
         [null, null, null, null, null, "Not a null"]
       ],
-      yaml_constr:file("${FILENAME}", [{simple_structs, true}])
+      yaml_constr:file("${FILENAME}",
+        [{simple_structs, true}, {schema, core}])
+    ),
+    ?_assertMatch(
+      [
+        {yaml_doc,
+          {yaml_seq,yaml_node_seq,"tag:yaml.org,2002:seq",
+            [{line,1},{column,1}],
+            [{yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+                [{line,1},{column,3}],
+                "~"},
+              {yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+                [{line,2},{column,3}],
+                "null"},
+              {yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+                [{line,3},{column,3}],
+                "Null"},
+              {yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+                [{line,4},{column,3}],
+                "NULL"},
+              {yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+                [{line,5},{column,1}],
+                ""},
+              {yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+                [{line,7},{column,3}],
+                "Not a null"}],
+            6}}
+      ],
+      yaml_constr:file("${FILENAME}",
+        [{simple_structs, false}, {schema, failsafe}])
+    ),
+    ?_assertMatch(
+      [
+        {yaml_doc,
+          {yaml_seq,yaml_node_seq,"tag:yaml.org,2002:seq",
+            [{line,1},{column,1}],
+            [{yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+                [{line,1},{column,3}],
+                "~"},
+              {yaml_null,yaml_node_json_null,
+                "tag:yaml.org,2002:null",
+                [{line,2},{column,3}]},
+              {yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+                [{line,3},{column,3}],
+                "Null"},
+              {yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+                [{line,4},{column,3}],
+                "NULL"},
+              {yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+                [{line,5},{column,1}],
+                ""},
+              {yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+                [{line,7},{column,3}],
+                "Not a null"}],
+            6}}
+      ],
+      yaml_constr:file("${FILENAME}",
+        [{simple_structs, false}, {schema, json}])
     ),
     ?_assertMatch(
       [
@@ -33,7 +104,8 @@
                 "Not a null"}],
             6}}
       ],
-      yaml_constr:file("${FILENAME}", [{simple_structs, false}])
+      yaml_constr:file("${FILENAME}",
+        [{simple_structs, false}, {schema, core}])
     )
   ]
 }
