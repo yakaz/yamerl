@@ -70,13 +70,15 @@ node_pres(Node) ->
 %% Zero and sign.
 string_to_integer("0") ->
     0;
+string_to_integer("-0") ->
+    0;
 string_to_integer([$-, C | Text]) when C >= $1 andalso C =< $9 ->
-    case yaml_node_ext_int:base10_to_integer(Text, C - $0) of
+    case yaml_node_int:base10_to_integer(Text, C - $0) of
         error -> error;
         Int   -> -Int
     end;
 string_to_integer([C | Text]) when C >= $1 andalso C =< $9 ->
-    yaml_node_ext_int:base10_to_integer(Text, C - $0);
+    yaml_node_int:base10_to_integer(Text, C - $0);
 string_to_integer(_) ->
     error.
 
