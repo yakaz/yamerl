@@ -1,4 +1,4 @@
--module(yaml_node_ext_float).
+-module(yaml_node_float_ext).
 
 -include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
@@ -103,7 +103,7 @@ string_to_float2(Text) ->
               Opts2),
             case Ret of
                 {match, [P1, P2, Dec]} ->
-                    case yaml_node_ext_int:base60_to_integer(P1 ++ P2, 0, 0) of
+                    case yaml_node_int_ext:base60_to_integer(P1 ++ P2, 0, 0) of
                         error ->
                             error;
                         Int ->

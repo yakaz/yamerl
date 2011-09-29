@@ -1,4 +1,4 @@
--module(yaml_node_json_int).
+-module(yaml_node_int_json).
 
 -include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").

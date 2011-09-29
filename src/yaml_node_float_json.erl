@@ -1,4 +1,4 @@
--module(yaml_node_json_float).
+-module(yaml_node_float_json).
 
 -include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").

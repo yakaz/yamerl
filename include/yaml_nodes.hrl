@@ -200,10 +200,10 @@
   ]).
 
 -define(JSON_SCHEMA_MODS, [
-    yaml_node_json_null,
-    yaml_node_json_bool,
-    yaml_node_json_int,
-    yaml_node_json_float,
+    yaml_node_null_json,
+    yaml_node_bool_json,
+    yaml_node_int_json,
+    yaml_node_float_json,
     yaml_node_str,
     yaml_node_seq,
     yaml_node_map

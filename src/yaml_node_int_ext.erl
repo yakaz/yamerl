@@ -1,4 +1,4 @@
--module(yaml_node_ext_int).
+-module(yaml_node_int_ext).
 
 -include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").

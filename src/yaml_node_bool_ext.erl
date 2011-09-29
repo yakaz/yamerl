@@ -1,4 +1,4 @@
--module(yaml_node_ext_bool).
+-module(yaml_node_bool_ext).
 
 -include("yaml_tokens.hrl").
 -include("yaml_nodes.hrl").
