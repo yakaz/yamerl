@@ -11,7 +11,8 @@
     try_construct_token/3,
     construct_token/3,
     node_pres/1,
-    string_to_float/1
+    string_to_float/1,
+    erlang_list_to_float/1
   ]).
 
 -define(TAG, "tag:yaml.org,2002:float").
@@ -97,9 +98,11 @@ string_to_float2(Text) ->
         nomatch -> error
     end.
 
-string_to_float3(Text) ->
+erlang_list_to_float(Text) ->
     try
-        erlang:list_to_float(Text)
+        Text1 = re:replace(Text, "^([-+]?[0-9]+)([eE]|$)", "\\1.0\\2",
+          [{return, list}]),
+        erlang:list_to_float(Text1)
     catch
         error:badarg -> error
     end.
