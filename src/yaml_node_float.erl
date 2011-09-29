@@ -69,7 +69,7 @@ node_pres(Node) ->
 %% -------------------------------------------------------------------
 
 string_to_float(".nan")      -> 'nan';
-string_to_float(".Nan")      -> 'nan';
+string_to_float(".NaN")      -> 'nan';
 string_to_float(".NAN")      -> 'nan';
 string_to_float(".inf")      -> '+inf';
 string_to_float(".Inf")      -> '+inf';
