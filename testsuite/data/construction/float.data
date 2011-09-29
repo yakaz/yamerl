@@ -17,6 +17,20 @@
 - 1.0e10
 - 1.0E10
 
+-  .inf
+- +.inf
+- -.inf
+-  .nan
+
+- .Inf
+- .INF
+- .iNF
+
+- .NaN
+- .NAN
+- .Nan
+- .nAN
+
 -  Not a float.0e+10
 - +Not a float.0e+10
 - -Not a float.0e+10
