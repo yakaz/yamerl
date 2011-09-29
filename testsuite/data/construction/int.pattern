@@ -38,7 +38,8 @@
         ]
       ],
       yaml_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, json}]) %% yaml_node_json_int
+        [{simple_structs, true}, {schema, failsafe},
+          {node_mods, [yaml_node_json_int]}])
     ),
     ?_assertMatch(
       [
@@ -55,7 +56,8 @@
         ]
       ],
       yaml_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, core}]) %% yaml_node_int
+        [{simple_structs, true}, {schema, core},
+          {node_mods, [yaml_node_int]}])
     ),
     ?_assertMatch(
       [
@@ -174,7 +176,7 @@
         }
       ],
       yaml_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, failsafe}])
+        [{simple_structs, false}, {schema, failsafe}]) %% No integer parsing
     ),
     ?_assertMatch(
       [
@@ -279,7 +281,8 @@
         }
       ],
       yaml_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, json}])
+        [{simple_structs, false}, {schema, failsafe},
+          {node_mods, [yaml_node_json_int]}])
     ),
     ?_assertMatch(
       [
@@ -380,7 +383,8 @@
         }
       ],
       yaml_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, core}])
+        [{simple_structs, false}, {schema, failsafe},
+          {node_mods, [yaml_node_int]}])
     ),
     ?_assertMatch(
       [

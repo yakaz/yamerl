@@ -32,8 +32,8 @@
         ]
       ],
       yaml_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, json}, %% yaml_node_json_float
-          {node_mods, [yaml_node_json_float]}])  %% Priority to float (!int)
+        [{simple_structs, true}, {schema, failsafe},
+          {node_mods, [yaml_node_json_float]}])
     ),
     ?_assertMatch(
       [
@@ -47,8 +47,8 @@
         ]
       ],
       yaml_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, core}, %% yaml_node_float
-          {node_mods, [yaml_node_float]}])       %% Priority to float (!int)
+        [{simple_structs, true}, {schema, failsafe},
+          {node_mods, [yaml_node_float]}])
     ),
     ?_assertMatch(
       [{yaml_doc,
@@ -177,8 +177,8 @@
                 "-Not a float.0e+10"}],
             17}}],
       yaml_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, json}, %% yaml_node_json_float
-          {node_mods, [yaml_node_json_float]}])   %% Priority to float (!int)
+        [{simple_structs, false}, {schema, failsafe},
+          {node_mods, [yaml_node_json_float]}])
     ),
     ?_assertMatch(
       [{yaml_doc,
@@ -237,8 +237,8 @@
                 "-Not a float.0e+10"}],
             17}}],
       yaml_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, core}, %% yaml_node_float
-          {node_mods, [yaml_node_float]}])        %% Priority to float (!int)
+        [{simple_structs, false}, {schema, failsafe},
+          {node_mods, [yaml_node_float]}])
     )
   ]
 }
