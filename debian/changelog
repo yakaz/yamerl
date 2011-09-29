@@ -1,3 +1,11 @@
+erlang-yaml (0.1.1-1) experimental; urgency=low
+
+  * Add float support
+  * Add YAML failsafe/json/core schemas
+  * Bugfixes
+
+ -- Jean-Sébastien Pédron <jean-sebastien@yakaz.com>  Thu, 29 Sep 2011 14:05:05 +0200
+
 erlang-yaml (0.1.0-1) experimental; urgency=low
 
   * Initial release.

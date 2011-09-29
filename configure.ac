@@ -2,7 +2,7 @@ dnl ------------------------------------------------------------------
 dnl Autoconf initialization.
 dnl ------------------------------------------------------------------
 
-AC_INIT([yaml], [0.1.0])
+AC_INIT([yaml], [0.1.1])
 
 AC_CONFIG_SRCDIR([src/yaml_app.erl])
 AC_CONFIG_MACRO_DIR([m4])
