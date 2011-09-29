@@ -68,6 +68,7 @@ node_pres(Node) ->
 %% -------------------------------------------------------------------
 
 string_to_float("0")         -> 0.0;
+string_to_float("-0")        -> 0.0;
 string_to_float(".nan")      -> 'nan';
 string_to_float(".inf")      -> '+inf';
 string_to_float("-.inf")     -> '-inf';
