@@ -83,16 +83,9 @@ string_to_float(Text) ->
 
 string_to_float2(Text) ->
     Opts = [{capture, none}],
-    case re:run(Text, "(0|[1-9][0-9]*)(\.[0-9]*)?([eE][-+]?[0-9]+)?", Opts) of
-        match   -> string_to_float3(Text);
+    case re:run(Text, "^(0|[1-9][0-9]*)(\.[0-9]*)?([eE][-+]?[0-9]+)?$", Opts) of
+        match   -> yaml_node_float:erlang_list_to_float(Text);
         nomatch -> error
-    end.
-
-string_to_float3(Text) ->
-    try
-        erlang:list_to_float(Text)
-    catch
-        error:badarg -> error
     end.
 
 exception(Token) ->

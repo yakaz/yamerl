@@ -92,14 +92,16 @@ string_to_float(Text) ->
 
 string_to_float2(Text) ->
     %% Try base 10.
-    O1 = [{capture, none}],
-    case re:run(Text, "([0-9][0-9_]*)?\.[0-9.]*([eE][-+][0-9]+)?", O1) of
+    Opts1 = [{capture, none}],
+    case re:run(Text, "^([0-9][0-9_]*)?\.[0-9.]*([eE][-+][0-9]+)?$", Opts1) of
         match ->
             string_to_float3(Text);
         nomatch ->
             %% Try base 60.
-            O2 = [{capture, all_but_first, list}],
-            case re:run(Text, "([0-9][0-9_]*)(:[0-5]?[0-9])+\.([0-9_]*)", O2) of
+            Opts2 = [{capture, all_but_first, list}],
+            Ret = re:run(Text, "^([0-9][0-9_]*)(:[0-5]?[0-9])+\.([0-9_]*)$",
+              Opts2),
+            case Ret of
                 {match, [P1, P2, Dec]} ->
                     case yaml_node_ext_int:base60_to_integer(P1 ++ P2, 0, 0) of
                         error ->

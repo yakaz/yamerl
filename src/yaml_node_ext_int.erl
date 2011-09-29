@@ -92,7 +92,7 @@ string_to_integer2("0" ++ Text) ->
     base8_to_integer(Text, 0);
 string_to_integer2(Text) ->
     Opts = [{capture, none}],
-    case re:run(Text, "[1-9][0-9_]*(:[0-5]?[0-9])+", Opts) of
+    case re:run(Text, "^[1-9][0-9_]*(:[0-5]?[0-9])+$", Opts) of
         match   -> base60_to_integer(Text, 0, 0);
         nomatch -> base10_to_integer(Text, 0)
     end.
