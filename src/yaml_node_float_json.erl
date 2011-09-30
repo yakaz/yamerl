@@ -48,7 +48,7 @@ construct_token(#yaml_constr{simple_structs = false},
             exception(Token);
         Int ->
             Pres = yaml_constr:get_pres_details(Token),
-            Node = #yaml_int{
+            Node = #yaml_float{
               module = ?MODULE,
               tag    = ?TAG,
               pres   = Pres,

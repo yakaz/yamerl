@@ -137,7 +137,9 @@ base60_to_integer([$: | Rest], Current, Int) ->
     Int1 = (Int * 60) + Current,
     base60_to_integer(Rest, 0, Int1);
 base60_to_integer([], Current, Int) ->
-    (Int * 60) + Current.
+    (Int * 60) + Current;
+base60_to_integer(_, _, _) ->
+    error.
 
 exception(Token) ->
     Error = #yaml_parsing_error{

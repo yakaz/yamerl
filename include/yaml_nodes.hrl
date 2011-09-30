@@ -52,6 +52,16 @@
 -type yaml_int()               :: #yaml_int{}.
 -type yaml_simple_int()        :: integer().
 
+%% Float (Core Schema).
+-record(yaml_float, {
+    module = undefined         :: atom(),
+    tag    = "!"               :: tag_uri(),
+    pres   = []                :: list(),
+    value  = 0.0               :: float() | '+inf' | '-inf' | 'nan'
+  }).
+-type yaml_float()             :: #yaml_float{}.
+-type yaml_simple_float()      :: float().
+
 %% Erlang atom.
 -record(yaml_erlang_atom, {
     module = undefined         :: atom(),
@@ -146,6 +156,7 @@
                            | yaml_null()
                            | yaml_bool()
                            | yaml_int()
+                           | yaml_float()
                            | yaml_timestamp()
                            | yaml_erlang_atom()
                            | yaml_erlang_fun()
@@ -157,6 +168,7 @@
                            | yaml_simple_null()
                            | yaml_simple_bool()
                            | yaml_simple_int()
+                           | yaml_simple_float()
                            | yaml_simple_timestamp()
                            | yaml_simple_erlang_atom()
                            | yaml_simple_erlang_fun()
@@ -168,6 +180,7 @@
                            | yaml_null()
                            | yaml_bool()
                            | yaml_int()
+                           | yaml_float()
                            | yaml_timestamp()
                            | yaml_erlang_atom()
                            | yaml_erlang_fun()
@@ -176,6 +189,7 @@
                            | yaml_simple_null()
                            | yaml_simple_bool()
                            | yaml_simple_int()
+                           | yaml_simple_float()
                            | yaml_simple_timestamp()
                            | yaml_simple_erlang_atom()
                            | yaml_simple_erlang_fun()
