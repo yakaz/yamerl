@@ -253,7 +253,7 @@ file2(#yaml_parser{source = {file, Filename}} = Parser, FD, Blocksize) ->
         {ok, Data} ->
             %% If the chunk is smaller than the requested size, we
             %% reached EOS.
-            EOS = size(Data) < Blocksize,
+            EOS = byte_size(Data) < Blocksize,
             if
                 EOS  -> file:close(FD);
                 true -> ok
@@ -308,7 +308,8 @@ decode_unicode(#yaml_parser{stream_state = State,
     Parser2 = case unicode:characters_to_list(Data, Encoding) of
         {Reason, New_Chars, Remaining_Data} ->
             %% Ok, we have more characters to scan!
-            Raw_Index1 = Raw_Index + (size(Data) - size(Remaining_Data)),
+            Raw_Index1 = Raw_Index +
+              (byte_size(Data) - byte_size(Remaining_Data)),
             Parser1    = Parser#yaml_parser{
               raw_data   = Remaining_Data,
               raw_idx    = Raw_Index1,
@@ -329,7 +330,7 @@ decode_unicode(#yaml_parser{stream_state = State,
             end;
         New_Chars ->
             %% Ok, we have more characters to scan!
-            Raw_Index1 = Raw_Index + size(Data),
+            Raw_Index1 = Raw_Index + byte_size(Data),
             Parser#yaml_parser{
               raw_data   = <<>>,
               raw_idx    = Raw_Index1,
@@ -339,7 +340,7 @@ decode_unicode(#yaml_parser{stream_state = State,
     end,
     State(Parser2);
 decode_unicode(#yaml_parser{raw_data = Data, raw_eos = EOS} = Parser)
-  when ((EOS == false andalso size(Data) >= 4) orelse EOS == true) ->
+  when ((EOS == false andalso byte_size(Data) >= 4) orelse EOS == true) ->
     %% We have enough (maybe even all) data to determine the encoding.
     %% Let's check if the stream starts with a BOM.
     {Encoding, Length} = get_encoding(Data),
