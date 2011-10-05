@@ -145,9 +145,6 @@
 -define(IS_HIGH_SURROGATE(C), (C >= 16#d800 andalso C =< 16#dbff)).
 -define(IS_LOW_SURROGATE(C),  (C >= 16#dc00 andalso C =< 16#dfff)).
 
--define(CURSOR_LINE(P),   P#yaml_parser.line).
--define(CURSOR_COLUMN(P), P#yaml_parser.col).
-
 -define(MISSING_ENTRY(S), (
     S#yaml_parser.pending_entry andalso
     S#yaml_parser.last_tag == undefined
@@ -172,10 +169,29 @@
     column = C
   }).
 
--define(SUSPEND_SUBPARSING(S, C, F),
-  return(S#yaml_parser{
-      stream_state = fun(S1) -> F(S1, C) end
-    })).
+%%
+%% We use macros instead of functions for a few #yaml_parser updates
+%% to take advantage of the optimization described in §3.5 in the
+%% Efficiency Guide.
+%%
+
+-define(PUSH_FAKE_IMPL_KEY(P),
+  P#yaml_parser{ik_stack = [?FAKE_IMPL_KEY | P#yaml_parser.ik_stack]}).
+
+-define(POP_IMPL_KEY(P),
+  P#yaml_parser{ik_stack = tl(P#yaml_parser.ik_stack)}).
+
+-define(ALLOW_IMPL_KEY(P, F),
+  P#yaml_parser{ik_allowed = F}).
+
+-define(FLUSH_TO_PARSER(Ch, Li, Co, De, P),
+  P#yaml_parser{
+    chars     = Ch,
+    chars_len = P#yaml_parser.chars_len - De,
+    chars_idx = P#yaml_parser.chars_idx + De,
+    line      = Li,
+    col       = Co
+  }).
 
 %% -------------------------------------------------------------------
 %% Public API: chunked stream scanning.
@@ -343,7 +359,8 @@ decode_unicode(#yaml_parser{stream_state = State,
             Chars1 = Chars ++ New_Chars,
             {Parser1, Chars1}
     end,
-    State(Chars2, Parser2#yaml_parser.line, Parser2#yaml_parser.col, 0, Parser2);
+    State(Chars2, Parser2#yaml_parser.line, Parser2#yaml_parser.col, 0,
+      Parser2);
 decode_unicode(#yaml_parser{raw_data = Data, raw_eos = EOS} = Parser)
   when ((EOS == false andalso byte_size(Data) >= 4) orelse EOS == true) ->
     %% We have enough (maybe even all) data to determine the encoding.
@@ -388,8 +405,8 @@ start_stream(Chars, Line, Col, Delta,
     %% encoding is provided as an attribute. The encoding may appear at
     %% the start of each document but can't be changed: all documents
     %% must have the same encoding!
-    Parser1 = push_fake_impl_key(Parser),
-    Parser2 = allow_impl_key(Parser1, true),
+    Parser1 = ?PUSH_FAKE_IMPL_KEY(Parser),
+    Parser2 = ?ALLOW_IMPL_KEY(Parser1, true),
     Parser3 = setup_default_tags(Parser2),
     Token   = #yaml_stream_start{
       encoding = Encoding,
@@ -397,7 +414,7 @@ start_stream(Chars, Line, Col, Delta,
       column   = Col
     },
     Parser4 = queue_token(Parser3, Token),
-    next_state(Chars, Line, Col, Delta, Parser4, fun find_next_token/5).
+    find_next_token(Chars, Line, Col, Delta, Parser4).
 
 end_stream(Chars, Line, Col, Delta, #yaml_parser{last_token_endline = Last_Line,
   last_token_endcol = Last_Col} = Parser) ->
@@ -405,7 +422,7 @@ end_stream(Chars, Line, Col, Delta, #yaml_parser{last_token_endline = Last_Line,
     Parser1 = check_for_closed_block_collections(Chars, Line, Col, Delta,
       Parser, 0),
     Parser2 = remove_impl_key_pos(Parser1),
-    Parser3 = allow_impl_key(Parser2, false),
+    Parser3 = ?ALLOW_IMPL_KEY(Parser2, false),
     %% Set the line and column number to the last token endline/endcol
     %% number. This is useful when parsing a file: the last line is
     %% often terminated by a newline character. Thanks to this, the
@@ -428,7 +445,7 @@ find_next_token(Chars, Line, Col, Delta,
     Parser1 = Parser#yaml_parser{
       endpos_set_by_token = false
     },
-    next_state(Chars, Line, Col, Delta, Parser1, fun do_find_next_token/5);
+    do_find_next_token(Chars, Line, Col, Delta, Parser1);
 find_next_token(Chars, Line, Col, Delta, Parser) ->
     %% Record the line and columns numbers where the last token ends.
     %% It's used to determine if an implicit key would span several
@@ -438,7 +455,7 @@ find_next_token(Chars, Line, Col, Delta, Parser) ->
       last_token_endline  = Line,
       last_token_endcol   = Col
     },
-    next_state(Chars, Line, Col, Delta, Parser1, fun do_find_next_token/5).
+    do_find_next_token(Chars, Line, Col, Delta, Parser1).
 
 %% Skip spaces.
 do_find_next_token([$\s | Rest], Line, Col, Delta, Parser) ->
@@ -454,7 +471,7 @@ do_find_next_token([$\t | Rest], Line, Col, Delta,
 
 %% Skip comments.
 do_find_next_token([$# | _] = Chars, Line, Col, Delta, Parser) ->
-    next_state(Chars, Line, Col, Delta, Parser, fun parse_comment/5);
+    parse_comment(Chars, Line, Col, Delta, Parser);
 
 %% Continue with next line.
 do_find_next_token(Chars, Line, Col, Delta,
@@ -463,7 +480,7 @@ do_find_next_token(Chars, Line, Col, Delta,
       missed_nl = false
     },
     Parser2 = if
-        ?IN_BLOCK_CTX(Parser1) -> allow_impl_key(Parser1, true);
+        ?IN_BLOCK_CTX(Parser1) -> ?ALLOW_IMPL_KEY(Parser1, true);
         true                   -> Parser1
     end,
     do_find_next_token(Chars, Line, Col, Delta, Parser2);
@@ -471,13 +488,13 @@ do_find_next_token(Chars, Line, Col, Delta,
 do_find_next_token([$\r] = Chars, Line, Col, Delta,
   #yaml_parser{raw_eos = false} = Parser) ->
     %% Can't be sure it's a newline. It may be followed by a LF.
-    return(Chars, Line, Col, Delta, Parser);
+    suspend_parsing(Chars, Line, Col, Delta, Parser, fun do_find_next_token/5);
 do_find_next_token([C | _] = Chars, Line, _, Delta,
   #yaml_parser{doc_version = Version} = Parser)
   when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     {Chars1, Line1, Col1, Delta1} = next_line(Chars, Line, Delta, Parser),
     Parser1 = if
-        ?IN_BLOCK_CTX(Parser) -> allow_impl_key(Parser, true);
+        ?IN_BLOCK_CTX(Parser) -> ?ALLOW_IMPL_KEY(Parser, true);
         true                  -> Parser
     end,
     do_find_next_token(Chars1, Line1, Col1, Delta1, Parser1);
@@ -485,18 +502,18 @@ do_find_next_token([C | _] = Chars, Line, _, Delta,
 %% End-of-stream reached.
 do_find_next_token([] = Chars, Line, Col, Delta,
   #yaml_parser{raw_eos = true} = Parser) ->
-    next_state(Chars, Line, Col, Delta, Parser, fun end_stream/5);
+    end_stream(Chars, Line, Col, Delta, Parser);
 
 %% Wait for more data.
 do_find_next_token([] = Chars, Line, Col, Delta, Parser) ->
-    return(Chars, Line, Col, Delta, Parser);
+    suspend_parsing(Chars, Line, Col, Delta, Parser, fun do_find_next_token/5);
 
 %% Next token found!
 do_find_next_token(Chars, Line, Col, Delta, Parser) ->
     Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
     Parser2 = check_for_closed_block_collections(Chars, Line, Col, Delta,
       Parser1, Col),
-    next_state(Chars, Line, Col, Delta, Parser2, fun determine_token_type/5).
+    determine_token_type(Chars, Line, Col, Delta, Parser2).
 
 %%
 %% Token type.
@@ -506,14 +523,15 @@ do_find_next_token(Chars, Line, Col, Delta, Parser) ->
 determine_token_type(Chars, Line, Col, Delta,
   #yaml_parser{chars_len = Len, raw_eos = false} = Parser)
   when (Len - Delta) < 4 ->
-    return(Chars, Line, Col, Delta, Parser);
+    suspend_parsing(Chars, Line, Col, Delta, Parser,
+      fun determine_token_type/5);
 
 %% BOM, before a document only!
 determine_token_type([C | Rest], Line, Col, Delta,
   #yaml_parser{doc_started = false} = Parser)
   when ?IS_BOM(C) ->
     {Col1, Delta1} = next_col(Col, Delta, 1),
-    next_state(Rest, Line, Col1, Delta1, Parser, fun find_next_token/5);
+    find_next_token(Rest, Line, Col1, Delta1, Parser);
 determine_token_type([C | Rest], Line, Col, Delta,
   #yaml_parser{doc_started = true} = Parser)
   when ?IS_BOM(C) ->
@@ -529,129 +547,93 @@ determine_token_type([C | Rest], Line, Col, Delta,
     Parser1 = add_error(Parser, Error,
       "A BOM must not appear inside a document", []),
     {Col1, Delta1} = next_col(Col, Delta, 1),
-    next_state(Rest, Line, Col1, Delta1, Parser1, fun find_next_token/5);
+    find_next_token(Rest, Line, Col1, Delta1, Parser1);
 
 %% Directives end indicator.
 determine_token_type([$-, $-, $-, C | _] = Chars, Line, 1 = Col, Delta,
   #yaml_parser{doc_version = Version} = Parser)
   when ?IS_NEWLINE(C) orelse ?IS_SPACE(C) orelse
   (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_document_sep(Ch, Li, Co, De, P, directives_end)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser, Fun);
+    parse_document_sep(Chars, Line, Col, Delta, Parser, directives_end);
 
 %% Document end indicator.
 determine_token_type([$., $., $., C | _] = Chars, Line, 1 = Col, Delta,
   #yaml_parser{doc_version = Version} = Parser)
   when ?IS_NEWLINE(C) orelse ?IS_SPACE(C) orelse
   (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_document_sep(Ch, Li, Co, De, P, document_end)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser, Fun);
+    parse_document_sep(Chars, Line, Col, Delta, Parser, document_end);
 
 %% Directive indicator.
 determine_token_type([$% | _] = Chars, Line, 1 = Col, Delta,
   #yaml_parser{doc_started = false} = Parser) ->
-    next_state(Chars, Line, Col, Delta, Parser, fun parse_directive/5);
+    parse_directive(Chars, Line, Col, Delta, Parser);
 
 %% Flow sequence indicators.
 determine_token_type([$[ | _] = Chars, Line, Col, Delta, Parser) ->
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_flow_collection_start(Ch, Li, Co, De, P, sequence)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser, Fun);
+    parse_flow_collection_start(Chars, Line, Col, Delta, Parser, sequence);
 determine_token_type([$] | _] = Chars, Line, Col, Delta, Parser) ->
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_flow_collection_end(Ch, Li, Co, De, P, sequence)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser, Fun);
+    parse_flow_collection_end(Chars, Line, Col, Delta, Parser, sequence);
 
 %% Flow mapping indicators.
 determine_token_type([${ | _] = Chars, Line, Col, Delta, Parser) ->
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_flow_collection_start(Ch, Li, Co, De, P, mapping)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser, Fun);
+    parse_flow_collection_start(Chars, Line, Col, Delta, Parser, mapping);
 determine_token_type([$} | _] = Chars, Line, Col, Delta, Parser) ->
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_flow_collection_end(Ch, Li, Co, De, P, mapping)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser, Fun);
+    parse_flow_collection_end(Chars, Line, Col, Delta, Parser, mapping);
 
 %% Flow collection entry indicator.
 determine_token_type([$, | _] = Chars, Line, Col, Delta, Parser) ->
-    next_state(Chars, Line, Col, Delta, Parser, fun parse_flow_entry/5);
+    parse_flow_entry(Chars, Line, Col, Delta, Parser);
 
 %% Block collection entry indicator.
 determine_token_type([$-, C | _] = Chars, Line, Col, Delta,
   #yaml_parser{doc_version = Version} = Parser)
   when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse
   (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    next_state(Chars, Line, Col, Delta, Parser, fun parse_block_entry/5);
+    parse_block_entry(Chars, Line, Col, Delta, Parser);
 
 %% Mapping key indicator.
 determine_token_type([$?, C | _] = Chars, Line, Col, Delta,
   #yaml_parser{doc_version = Version} = Parser)
   when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse
   (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    next_state(Chars, Line, Col, Delta, Parser, fun parse_mapping_key/5);
+    parse_mapping_key(Chars, Line, Col, Delta, Parser);
 
 %% Mapping value indicator.
 determine_token_type([$:, C | _] = Chars, Line, Col, Delta,
   #yaml_parser{doc_version = Version} = Parser)
   when ?IS_SPACE(C) orelse ?IS_NEWLINE(C) orelse ?IS_FLOW_INDICATOR(C) orelse
   (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    next_state(Chars, Line, Col, Delta, Parser, fun parse_mapping_value/5);
+    parse_mapping_value(Chars, Line, Col, Delta, Parser);
 determine_token_type([$: | _] = Chars, Line, Col, Delta,
   #yaml_parser{last_is_json_like = true} = Parser)
   when ?IN_FLOW_CTX(Parser) ->
     %% This is a key: value pair indicator only when the last token is
     %% JSON-like and we're in flow context.
-    next_state(Chars, Line, Col, Delta, Parser, fun parse_mapping_value/5);
+    parse_mapping_value(Chars, Line, Col, Delta, Parser);
 
 %% Anchor and alias indicator.
 determine_token_type([$& | _] = Chars, Line, Col, Delta, Parser) ->
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_anchor_or_alias(Ch, Li, Co, De, P, anchor)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser, Fun);
+    parse_anchor_or_alias(Chars, Line, Col, Delta, Parser, anchor);
 determine_token_type([$* | _] = Chars, Line, Col, Delta, Parser) ->
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_anchor_or_alias(Ch, Li, Co, De, P, alias)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser, Fun);
+    parse_anchor_or_alias(Chars, Line, Col, Delta, Parser, alias);
 
 %% Tag indicator.
 determine_token_type([$! | _] = Chars, Line, Col, Delta, Parser) ->
-    next_state(Chars, Line, Col, Delta, Parser, fun parse_tag/5);
+    parse_tag(Chars, Line, Col, Delta, Parser);
 
 %% Block scalar.
 determine_token_type([$| | _] = Chars, Line, Col, Delta, Parser) ->
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_block_scalar(Ch, Li, Co, De, P, literal)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser, Fun);
+    parse_block_scalar(Chars, Line, Col, Delta, Parser, literal);
 determine_token_type([$> | _] = Chars, Line, Col, Delta, Parser) ->
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_block_scalar(Ch, Li, Co, De, P, folded)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser, Fun);
+    parse_block_scalar(Chars, Line, Col, Delta, Parser, folded);
 
 %% Single-quoted flow scalar.
 determine_token_type([$' | _] = Chars, Line, Col, Delta, Parser) ->
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_flow_scalar(Ch, Li, Co, De, P, single_quoted)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser, Fun);
+    parse_flow_scalar(Chars, Line, Col, Delta, Parser, single_quoted);
 
 %% Double-quoted flow scalar.
 determine_token_type([$" | _] = Chars, Line, Col, Delta, Parser) ->
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_flow_scalar(Ch, Li, Co, De, P, double_quoted)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser, Fun);
+    parse_flow_scalar(Chars, Line, Col, Delta, Parser, double_quoted);
 
 %% Reserved indicators.
 %% We add a warning and parse it as a plain scalar.
@@ -666,17 +648,11 @@ determine_token_type([C | _] = Chars, Line, Col, Delta, Parser)
     Parser1 = add_error(Parser, Error,
       "The reserved indicator \"~c\" is not allowed at the "
       "beginning of a plain scalar", [C]),
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_flow_scalar(Ch, Li, Co, De, P, plain)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser1, Fun);
+    parse_flow_scalar(Chars, Line, Col, Delta, Parser1, plain);
 
 %% Plain flow scalar.
 determine_token_type(Chars, Line, Col, Delta, Parser) ->
-    Fun = fun(Ch, Li, Co, De, P) ->
-        parse_flow_scalar(Ch, Li, Co, De, P, plain)
-    end,
-    next_state(Chars, Line, Col, Delta, Parser, Fun).
+    parse_flow_scalar(Chars, Line, Col, Delta, Parser, plain).
 
 %% -------------------------------------------------------------------
 %% Directives and document ends.
@@ -687,13 +663,13 @@ parse_document_sep([_, _, _ | Rest] = Chars, Line, Col, Delta, Parser, Type) ->
     Parser1 = check_for_closed_block_collections(Chars, Line, Col, Delta,
       Parser, 0),
     Parser2 = remove_impl_key_pos(Parser1),
-    Parser3 = allow_impl_key(Parser2, false),
+    Parser3 = ?ALLOW_IMPL_KEY(Parser2, false),
     Parser4 = case Type of
         directives_end -> start_doc(Parser3, Line, Col, tail);
         document_end   -> end_doc(Parser3, Line, Col, tail)
     end,
     {Col1, Delta1} = next_col(Col, Delta, 3),
-    next_state(Rest, Line, Col1, Delta1, Parser4, fun find_next_token/5).
+    find_next_token(Rest, Line, Col1, Delta1, Parser4).
 
 start_doc(#yaml_parser{doc_started = true} = Parser,
   Line, Col, Insert_At) ->
@@ -820,7 +796,7 @@ parse_directive([_ | Rest] = Chars, Line, Col, Delta, Parser) ->
     Parser1 = check_for_closed_block_collections(Chars, Line, Col, Delta,
       Parser, 0),
     Parser2 = remove_impl_key_pos(Parser1),
-    Parser3 = allow_impl_key(Parser2, false),
+    Parser3 = ?ALLOW_IMPL_KEY(Parser2, false),
     {Col1, Delta1} = next_col(Col, Delta, 1),
     do_parse_directive(Rest, Line, Col1, Delta1, Parser3, Ctx).
 
@@ -868,9 +844,10 @@ skip_directive_trailing_ws([C | _] = Chars, Line, Col, Delta,
   #yaml_parser{doc_version = Version} = Parser)
   when ?IS_NEWLINE(C) orelse C == $# orelse
   (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    next_state(Chars, Line, Col, Delta, Parser, fun find_next_token/5);
+    find_next_token(Chars, Line, Col, Delta, Parser);
 skip_directive_trailing_ws([] = Chars, Line, Col, Delta, Parser) ->
-    return(Chars, Line, Col, Delta, Parser);
+    suspend_parsing(Chars, Line, Col, Delta, Parser,
+      fun skip_directive_trailing_ws/5);
 
 skip_directive_trailing_ws([_ | _] = Chars, Line, Col, Delta, Parser) ->
     Error = #yaml_parsing_error{
@@ -1018,8 +995,7 @@ queue_yaml_directive(Chars, Line, Col, Delta,
     Parser2 = Parser1#yaml_parser{
       doc_version = Version
     },
-    next_state(Chars, Line, Col, Delta, Parser2,
-      fun skip_directive_trailing_ws/5);
+    skip_directive_trailing_ws(Chars, Line, Col, Delta, Parser2);
 queue_yaml_directive(Chars, Line, Col, Delta, Parser,
   #yaml_directive_ctx{major = Major, minor = Minor,
   line = Dir_Line, col = Dir_Col} = Ctx) ->
@@ -1231,8 +1207,7 @@ queue_tag_directive(Chars, Line, Col, Delta, #yaml_parser{tags = Tags} = Parser,
     Parser4 = Parser3#yaml_parser{
       tags = Tags1
     },
-    next_state(Chars, Line, Col, Delta, Parser4,
-      fun skip_directive_trailing_ws/5).
+    skip_directive_trailing_ws(Chars, Line, Col, Delta, Parser4).
 
 %%
 %% Reserved directive.
@@ -1320,8 +1295,7 @@ queue_reserved_directive(Chars, Line, Col, Delta, Parser,
     Parser1 = add_error(Parser, Error,
       "Reserved directive \"~s\" ignored", [Name]),
     Parser2 = queue_token(Parser1, Token),
-    next_state(Chars, Line, Col, Delta, Parser2,
-      fun skip_directive_trailing_ws/5).
+    skip_directive_trailing_ws(Chars, Line, Col, Delta, Parser2).
 
 %% -------------------------------------------------------------------
 %% Block sequences.
@@ -1354,14 +1328,14 @@ parse_block_entry(Chars, Line, Col, Delta, Parser) when ?IN_FLOW_CTX(Parser) ->
 queue_block_sequence_entry_token([_ | Rest], Line, Col, Delta, Parser)
   when ?IN_BLOCK_CTX(Parser) ->
     Parser1 = remove_impl_key_pos(Parser),
-    Parser2 = allow_impl_key(Parser1, true),
+    Parser2 = ?ALLOW_IMPL_KEY(Parser1, true),
     Token   = #yaml_sequence_entry{
       line   = Line,
       column = Col
     },
     Parser3 = queue_token(Parser2, Token),
     {Col1, Delta1} = next_col(Col, Delta, 1),
-    next_state(Rest, Line, Col1, Delta1, Parser3, fun find_next_token/5).
+    find_next_token(Rest, Line, Col1, Delta1, Parser3).
 
 %% -------------------------------------------------------------------
 %% Flow collections.
@@ -1371,8 +1345,8 @@ parse_flow_collection_start([_ | Rest] = Chars, Line, Col, Delta,
   #yaml_parser{cur_coll = Cur_Coll, parent_colls = Colls} = Parser,
   Kind) ->
     Parser1 = save_impl_key_pos(Chars, Line, Col, Delta, Parser),
-    Parser2 = push_fake_impl_key(Parser1),
-    Parser3 = allow_impl_key(Parser2, true),
+    Parser2 = ?PUSH_FAKE_IMPL_KEY(Parser1),
+    Parser3 = ?ALLOW_IMPL_KEY(Parser2, true),
     Token = #yaml_collection_start{
       style  = flow,
       kind   = Kind,
@@ -1397,7 +1371,7 @@ parse_flow_collection_start([_ | Rest] = Chars, Line, Col, Delta,
             }
     end,
     {Col1, Delta1} = next_col(Col, Delta, 1),
-    next_state(Rest, Line, Col1, Delta1, Parser5, fun find_next_token/5).
+    find_next_token(Rest, Line, Col1, Delta1, Parser5).
 
 parse_flow_collection_end(Chars, Line, Col, Delta,
   #yaml_parser{cur_coll = #fcoll{kind = single_mapping}} = Parser,
@@ -1410,14 +1384,14 @@ parse_flow_collection_end([_ | Rest], Line, Col, Delta,
   Kind) ->
     Parser1 = finish_incomplete_flow_entries(Line, Col, Delta, Parser),
     Parser2 = remove_impl_key_pos(Parser1),
-    Parser3 = pop_impl_key(Parser2),
+    Parser3 = ?POP_IMPL_KEY(Parser2),
     Parser4 = Parser3#yaml_parser{
       cur_coll           = Coll,
       parent_colls       = Colls,
       pending_entry      = false,
       waiting_for_kvpair = false
     },
-    Parser5 = allow_impl_key(Parser4, false),
+    Parser5 = ?ALLOW_IMPL_KEY(Parser4, false),
     Token    = #yaml_collection_end{
       style  = flow,
       kind   = Kind,
@@ -1426,7 +1400,7 @@ parse_flow_collection_end([_ | Rest], Line, Col, Delta,
     },
     Parser6 = queue_token(Parser5, Token),
     {Col1, Delta1} = next_col(Col, Delta, 1),
-    next_state(Rest, Line, Col1, Delta1, Parser6, fun find_next_token/5);
+    find_next_token(Rest, Line, Col1, Delta1, Parser6);
 parse_flow_collection_end(Chars, Line, Col, Delta,
   #yaml_parser{cur_coll = #fcoll{kind = Expected}} = Parser, Kind) ->
     %% Closing a different-type collection.
@@ -1451,7 +1425,7 @@ parse_flow_collection_end([_ | Rest], Line, Col, Delta,
       "The ~s closing character doesn't match any opening character",
       [Kind]),
     {Col1, Delta1} = next_col(Col, Delta, 1),
-    next_state(Rest, Line, Col1, Delta1, Parser1, fun find_next_token/5).
+    find_next_token(Rest, Line, Col1, Delta1, Parser1).
 
 parse_flow_entry(Chars, Line, Col, Delta,
   #yaml_parser{cur_coll = #fcoll{kind = single_mapping}} = Parser) ->
@@ -1472,12 +1446,12 @@ parse_flow_entry([_ | Rest], Line, Col, Delta,
     Parser1 = add_error(Parser, Error,
       "Empty flow collection entry not allowed", []),
     {Col1, Delta1} = next_col(Col, Delta, 1),
-    next_state(Rest, Line, Col1, Delta1, Parser1, fun find_next_token/5);
+    find_next_token(Rest, Line, Col1, Delta1, Parser1);
 parse_flow_entry([_ | Rest], Line, Col, Delta,
   #yaml_parser{cur_coll = #fcoll{kind = Kind}} = Parser) ->
     Parser1 = finish_incomplete_flow_entries(Line, Col, Delta, Parser),
     Parser2 = remove_impl_key_pos(Parser1),
-    Parser3 = allow_impl_key(Parser2, true),
+    Parser3 = ?ALLOW_IMPL_KEY(Parser2, true),
     Parser4 = case Kind of
         sequence ->
             Parser3#yaml_parser{
@@ -1489,7 +1463,7 @@ parse_flow_entry([_ | Rest], Line, Col, Delta,
             }
     end,
     {Col1, Delta1} = next_col(Col, Delta, 1),
-    next_state(Rest, Line, Col1, Delta1, Parser4, fun find_next_token/5);
+    find_next_token(Rest, Line, Col1, Delta1, Parser4);
 parse_flow_entry(Chars, Line, Col, Delta, Parser) when ?IN_BLOCK_CTX(Parser) ->
     Error = #yaml_parsing_error{
       name   = flow_collection_entry_not_allowed,
@@ -1527,14 +1501,14 @@ parse_mapping_key(Chars, Line, Col, Delta, Parser) ->
 
 queue_mapping_key_token([_ | Rest], Line, Col, Delta, Parser) ->
     Parser1 = remove_impl_key_pos(Parser),
-    Parser2 = allow_impl_key(Parser1, ?IN_BLOCK_CTX(Parser1)),
+    Parser2 = ?ALLOW_IMPL_KEY(Parser1, ?IN_BLOCK_CTX(Parser1)),
     Token   = #yaml_mapping_key{
       line   = Line,
       column = Col
     },
     Parser3 = queue_token(Parser2, Token),
     {Col1, Delta1} = next_col(Col, Delta, 1),
-    next_state(Rest, Line, Col1, Delta1, Parser3, fun find_next_token/5).
+    find_next_token(Rest, Line, Col1, Delta1, Parser3).
 
 %% -------------------------------------------------------------------
 %% Block or flow mapping value.
@@ -1574,7 +1548,7 @@ parse_mapping_value(Chars, Line, Col, Delta,
   when ?IN_BLOCK_CTX(Parser) andalso KIdx > VIdx ->
     %% The key of this mapping is an explicit key, already queued.
     %% In block context, an implicit key may follow.
-    Parser1 = allow_impl_key(Parser, true),
+    Parser1 = ?ALLOW_IMPL_KEY(Parser, true),
     queue_mapping_value_token(Chars, Line, Col, Delta, Parser1);
 parse_mapping_value(Chars, Line, Col, Delta,
   #yaml_parser{ik_allowed = true,
@@ -1588,7 +1562,7 @@ parse_mapping_value(Chars, Line, Col, Delta,
     },
     Parser1 = queue_token(Parser, Token),
     %% In block context, an implicit key may follow.
-    Parser2 = allow_impl_key(Parser1, true),
+    Parser2 = ?ALLOW_IMPL_KEY(Parser1, true),
     queue_mapping_value_token(Chars, Line, Col, Delta, Parser2);
 parse_mapping_value(Chars, Line, Col, Delta,
   #yaml_parser{ik_allowed = false} = Parser) when ?IN_BLOCK_CTX(Parser) ->
@@ -1608,7 +1582,7 @@ parse_mapping_value(Chars, Line, Col, Delta,
   (Kind == mapping orelse Kind == single_mapping) andalso KIdx > VIdx ->
     %% The key of this mapping is an explicit key, already queued.
     %% In flow context, an implicit key may not follow.
-    Parser1 = allow_impl_key(Parser, false),
+    Parser1 = ?ALLOW_IMPL_KEY(Parser, false),
     queue_mapping_value_token(Chars, Line, Col, Delta, Parser1);
 parse_mapping_value(Chars, Line, Col, Delta,
   #yaml_parser{cur_coll =
@@ -1623,7 +1597,7 @@ parse_mapping_value(Chars, Line, Col, Delta,
     },
     Parser1 = queue_token(Parser, Token),
     %% In flow context, an implicit key may not follow.
-    Parser2 = allow_impl_key(Parser1, false),
+    Parser2 = ?ALLOW_IMPL_KEY(Parser1, false),
     queue_mapping_value_token(Chars, Line, Col, Delta, Parser2).
 
 queue_mapping_value_token(Chars, Line, Col, Delta,
@@ -1655,7 +1629,7 @@ queue_mapping_value_token2([_ | Rest], Line, Col, Delta, Parser) ->
     },
     Parser1 = queue_token(Parser, Token),
     {Col1, Delta1} = next_col(Col, Delta, 1),
-    next_state(Rest, Line, Col1, Delta1, Parser1, fun find_next_token/5).
+    find_next_token(Rest, Line, Col1, Delta1, Parser1).
 
 finish_incomplete_block_entries(Line, Col,
   #yaml_parser{cur_coll =
@@ -1721,7 +1695,7 @@ parse_anchor_or_alias([_ | Rest] = Chars, Line, Col, Delta, Parser, Type) ->
       col  = Col
     },
     Parser1 = save_impl_key_pos(Chars, Line, Col, Delta, Parser),
-    Parser2 = allow_impl_key(Parser1, false),
+    Parser2 = ?ALLOW_IMPL_KEY(Parser1, false),
     {Col1, Delta1} = next_col(Col, Delta, 1),
     do_parse_anchor_or_alias(Rest, Line, Col1, Delta1, Parser2, Ctx).
 
@@ -1766,7 +1740,7 @@ queue_anchor_or_alias_token(Chars, Line, Col, Delta, Parser,
             }
     end,
     Parser1 = queue_token(Parser, Token),
-    next_state(Chars, Line, Col, Delta, Parser1, fun find_next_token/5).
+    find_next_token(Chars, Line, Col, Delta, Parser1).
 
 %% -------------------------------------------------------------------
 %% Tags.
@@ -1781,7 +1755,7 @@ parse_tag([_ | Rest] = Chars, Line, Col, Delta,
       suffix = ""
     },
     Parser1 = save_impl_key_pos(Chars, Line, Col, Delta, Parser),
-    Parser2 = allow_impl_key(Parser1, false),
+    Parser2 = ?ALLOW_IMPL_KEY(Parser1, false),
     {Col1, Delta1} = next_col(Col, Delta, 1),
     determine_tag_type(Rest, Line, Col1, Delta1, Parser2, Ctx);
 parse_tag(Chars, Line, Col, Delta, #yaml_parser{last_tag = Tag} = Parser)
@@ -2080,7 +2054,7 @@ queue_tag_token2(Chars, Line, Col, Delta, Parser,
     },
     Parser1 = is_uri_valid(Parser, Token),
     Parser2 = queue_token(Parser1, Token),
-    next_state(Chars, Line, Col, Delta, Parser2, fun find_next_token/5).
+    find_next_token(Chars, Line, Col, Delta, Parser2).
 
 %% -------------------------------------------------------------------
 %% Block scalars.
@@ -2094,7 +2068,7 @@ parse_block_scalar([_ | Rest], Line, Col, Delta, Parser,
       col   = Col
     },
     Parser1 = remove_impl_key_pos(Parser),
-    Parser2 = allow_impl_key(Parser1, true),
+    Parser2 = ?ALLOW_IMPL_KEY(Parser1, true),
     {Col1, Delta1} = next_col(Col, Delta, 1),
     do_parse_block_scalar_header(Rest, Line, Col1, Delta1, Parser2, Ctx).
 
@@ -2579,7 +2553,7 @@ queue_block_scalar_token(Chars, Line, Col, Delta, Parser,
       last_token_endcol   = Endcol1,
       missed_nl           = Newline
     },
-    next_state(Chars, Line, Col, Delta, Parser2, fun find_next_token/5).
+    find_next_token(Chars, Line, Col, Delta, Parser2).
 
 %% -------------------------------------------------------------------
 %% Flow scalars.
@@ -2593,7 +2567,7 @@ parse_flow_scalar([C | Rest] = Chars, Line, Col, Delta, Parser, Style) ->
       col   = Col
     },
     Parser1 = save_impl_key_pos(Chars, Line, Col, Delta, Parser),
-    Parser2 = allow_impl_key(Parser1, false),
+    Parser2 = ?ALLOW_IMPL_KEY(Parser1, false),
     {Rest1, {Col1, Delta1}} = case C of
         $' -> {Rest, next_col(Col, Delta, 1)};
         $" -> {Rest, next_col(Col, Delta, 1)};
@@ -3235,7 +3209,7 @@ queue_flow_scalar_token(Chars, Line, Col, Delta, Parser,
       last_token_endcol   = Endcol,
       missed_nl           = (Style == plain andalso Newline)
     },
-    next_state(Chars, Line, Col, Delta, Parser2, fun find_next_token/5).
+    find_next_token(Chars, Line, Col, Delta, Parser2).
 
 unescape_char($0)  -> 16#0;    %% \0 = NUL                        [42]
 unescape_char($a)  -> 16#7;    %% \7 = BELL                       [43]
@@ -3278,30 +3252,21 @@ parse_comment([C | _] = Chars, Line, Col, Delta,
     %% contains only \r and not \n yet). It doesn't matter because we
     %% let the next state handle the newline properly; the cursor is not
     %% moved forward.
-    next_state(Chars, Line, Col, Delta, Parser, fun find_next_token/5);
+    find_next_token(Chars, Line, Col, Delta, Parser);
 parse_comment([_ | Rest] = Chars, Line, Col, Delta, Parser) ->
     Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
     {Col1, Delta1} = next_col(Col, Delta, 1),
     parse_comment(Rest, Line, Col1, Delta1, Parser1);
 parse_comment([] = Chars, Line, Col, Delta,
   #yaml_parser{raw_eos = false} = Parser) ->
-    return(Chars, Line, Col, Delta, Parser);
+    suspend_parsing(Chars, Line, Col, Delta, Parser, fun parse_comment/5);
 parse_comment([] = Chars, Line, Col, Delta,
   #yaml_parser{raw_eos = true} = Parser) ->
-    next_state(Chars, Line, Col, Delta, Parser, fun find_next_token/5).
+    find_next_token(Chars, Line, Col, Delta, Parser).
 
 %% -------------------------------------------------------------------
 %% Implicit key handling.
 %% -------------------------------------------------------------------
-
-push_fake_impl_key(#yaml_parser{ik_stack = Stack} = Parser) ->
-    Parser#yaml_parser{ik_stack = [?FAKE_IMPL_KEY | Stack]}.
-
-pop_impl_key(#yaml_parser{ik_stack = [_ | Rest]} = Parser) ->
-    Parser#yaml_parser{ik_stack = Rest}.
-
-allow_impl_key(Parser, Flag) ->
-    Parser#yaml_parser{ik_allowed = Flag}.
 
 save_impl_key_pos(Chars, Line, Col, Delta,
   #yaml_parser{chars_idx = Chars_Index,
@@ -4114,9 +4079,6 @@ invalid_option(Option) ->
     end,
     yaml_errors:throw(Error1).
 
-next_state(Chars, Line, Col, Delta, Parser, State) ->
-    State(Chars, Line, Col, Delta, Parser#yaml_parser{stream_state = State}).
-
 next_col(Col, Delta, Count) ->
     {Col + Count, Delta + Count}.
 
@@ -4309,25 +4271,19 @@ add_error(
       errors     = [Error | Errors]
     }.
 
-flush_to_parser(Chars, Line, Col, Delta,
-  #yaml_parser{chars_idx = Idx, chars_len = Len} = Parser) ->
-    Parser#yaml_parser{
-      chars     = Chars,
-      chars_len = Len - Delta,
-      chars_idx = Idx + Delta,
-      line      = Line,
-      col       = Col
-    }.
-
-suspend_parsing(Chars, Line, Col, Delta, Parser, Func, Ctx) ->
-    Parser1 = flush_to_parser(Chars, Line, Col, Delta, Parser),
+suspend_parsing(Chars, Line, Col, Delta, Parser, Fun) ->
+    Parser1 = ?FLUSH_TO_PARSER(Chars, Line, Col, Delta, Parser),
     Parser2 = Parser1#yaml_parser{
-      stream_state = fun(Ch, Li, Co, De, P) -> Func(Ch, Li, Co, De, P, Ctx) end
+      stream_state = Fun
     },
     do_return(Parser2).
 
+suspend_parsing(Chars, Line, Col, Delta, Parser, Fun, Ctx) ->
+    Fun1 = fun(Ch, Li, Co, De, P) -> Fun(Ch, Li, Co, De, P, Ctx) end,
+    suspend_parsing(Chars, Line, Col, Delta, Parser, Fun1).
+
 return(Chars, Line, Col, Delta, Parser) ->
-    Parser1 = flush_to_parser(Chars, Line, Col, Delta, Parser),
+    Parser1 = ?FLUSH_TO_PARSER(Chars, Line, Col, Delta, Parser),
     do_return(Parser1).
 
 do_return(#yaml_parser{has_errors = true, errors = Errors}) ->
