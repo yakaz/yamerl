@@ -1396,7 +1396,7 @@ parse_flow_collection_end([_ | Rest], Line, Col, Delta,
       style  = flow,
       kind   = Kind,
       line   = Line,
-      column = Col 
+      column = Col
     },
     Parser6 = queue_token(Parser5, Token),
     {Col1, Delta1} = next_col(Col, Delta, 1),
