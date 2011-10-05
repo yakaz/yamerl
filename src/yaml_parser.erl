@@ -201,6 +201,23 @@
     col       = Co
   }).
 
+-define(WARN_IF_NON_ASCII_LINE_BREAK(Ch, Li, Co, P),
+  case Ch of
+      [NL | _] when ?IS_NEWLINE_11(NL) ->
+          %% Non-ASCII line break in a YAML 1.2 document.
+          Err = #yaml_parsing_error{
+            type   = warning,
+            name   = non_ascii_line_break,
+            line   = Li,
+            column = Co
+          },
+          add_error(P, Err,
+            "Use of non-ASCII line break is not supported anymore starting "
+            "with YAML 1.2; treated as non-break character", []);
+      _ ->
+          P
+  end).
+
 %% -------------------------------------------------------------------
 %% Public API: chunked stream scanning.
 %% -------------------------------------------------------------------
@@ -518,7 +535,7 @@ do_find_next_token([] = Chars, Line, Col, Delta, Parser) ->
 
 %% Next token found!
 do_find_next_token(Chars, Line, Col, Delta, Parser) ->
-    Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
+    Parser1 = ?WARN_IF_NON_ASCII_LINE_BREAK(Chars, Line, Col, Parser),
     Parser2 = check_for_closed_block_collections(Chars, Line, Col, Delta,
       Parser1, Col),
     determine_token_type(Chars, Line, Col, Delta, Parser2).
@@ -815,7 +832,7 @@ do_parse_directive([C | _] = Chars, Line, Col, Delta,
     parse_directive2(Chars, Line, Col, Delta, Parser, Ctx);
 
 do_parse_directive([C | Rest] = Chars, Line, Col, Delta, Parser, Ctx) ->
-    Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
+    Parser1 = ?WARN_IF_NON_ASCII_LINE_BREAK(Chars, Line, Col, Parser),
     {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#directive_ctx{
       name = [C | Ctx#directive_ctx.name]
@@ -973,7 +990,7 @@ parse_yaml_directive_minor([] = Chars, Line, Col, Delta,
 parse_yaml_directive_minor([_ | _] = Chars, Line, Col, Delta, Parser,
   #yaml_directive_ctx{line = Dir_Line, col = Dir_Col}) ->
     %% Invalid character while parsing minor version number.
-    Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
+    Parser1 = ?WARN_IF_NON_ASCII_LINE_BREAK(Chars, Line, Col, Parser),
     Token = #yaml_yaml_directive{
       line   = Dir_Line,
       column = Dir_Col
@@ -1165,7 +1182,7 @@ parse_tag_directive_prefix([_ | _] = Chars, Line, Col, Delta, Parser,
   #tag_directive_ctx{handle = Handle, prefix = Prefix,
   line = Dir_Line, col = Dir_Col}) ->
     %% Invalid character while parsing tag prefix.
-    Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
+    Parser1 = ?WARN_IF_NON_ASCII_LINE_BREAK(Chars, Line, Col, Parser),
     Token = #yaml_tag_directive{
       handle = lists:reverse(Handle),
       prefix = lists:reverse(Prefix),
@@ -1260,7 +1277,7 @@ parse_reserved_directive_arg([C | _] = Chars, Line, Col, Delta,
     parse_reserved_directive_arg(Chars, Line, Col, Delta, Parser, Ctx1);
 parse_reserved_directive_arg([C | Rest] = Chars, Line, Col, Delta, Parser,
   #reserved_directive_ctx{current = Current} = Ctx) ->
-    Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
+    Parser1 = ?WARN_IF_NON_ASCII_LINE_BREAK(Chars, Line, Col, Parser),
     {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Current1 = case Current of
         undefined -> [C];
@@ -1716,7 +1733,7 @@ do_parse_anchor_or_alias([C | _] = Chars, Line, Col, Delta,
     queue_anchor_or_alias_token(Chars, Line, Col, Delta, Parser, Ctx);
 
 do_parse_anchor_or_alias([C | Rest] = Chars, Line, Col, Delta, Parser, Ctx) ->
-    Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
+    Parser1 = ?WARN_IF_NON_ASCII_LINE_BREAK(Chars, Line, Col, Parser),
     {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#anchor_ctx{
       output = [C | Ctx#anchor_ctx.output]
@@ -1938,7 +1955,7 @@ parse_tag_shorthand([_ | Rest] = Chars, Line, Col, Delta, Parser,
   #tag_ctx{prefix = Prefix, suffix = Suffix,
   line = Tag_Line, col = Tag_Col} = Ctx) ->
     %% Character not allowed in a URI.
-    Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
+    Parser1 = ?WARN_IF_NON_ASCII_LINE_BREAK(Chars, Line, Col, Parser),
     Token = #yaml_tag{
       uri    = Prefix ++ lists:reverse(Suffix),
       line   = Tag_Line,
@@ -2211,7 +2228,7 @@ do_parse_block_scalar_header([C | Rest], Line, Col, Delta, Parser, Ctx)
 %% Invalid characters.
 do_parse_block_scalar_header([_ | Rest] = Chars, Line, Col, Delta, Parser,
   #block_scalar_hd_ctx{style = Style, line = Sc_Line, col = Sc_Col} = Ctx) ->
-    Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
+    Parser1 = ?WARN_IF_NON_ASCII_LINE_BREAK(Chars, Line, Col, Parser),
     Token = #yaml_scalar{
       style    = block,
       substyle = Style,
@@ -2470,7 +2487,7 @@ do_parse_block_scalar([$., $., $.] = Chars, Line, 1 = Col, Delta,
 %% Literal style: everything after the indentation spaces is kept.
 do_parse_block_scalar([C | Rest] = Chars, Line, Col, Delta, Parser,
   #block_scalar_ctx{style = literal, spaces = Spaces} = Ctx) ->
-    Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
+    Parser1 = ?WARN_IF_NON_ASCII_LINE_BREAK(Chars, Line, Col, Parser),
     {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Output1 = case Spaces of
         "" -> [C | Ctx#block_scalar_ctx.output];
@@ -2863,7 +2880,7 @@ do_parse_flow_scalar([] = Chars, Line, Col, Delta,
 do_parse_flow_scalar([C | Rest] = Chars, Line, Col, Delta, Parser,
   #flow_scalar_ctx{spaces = Spaces} = Ctx)
   when C == 16#9 orelse (C >= 16#20 andalso C =< 16#10FFFF) ->
-    Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
+    Parser1 = ?WARN_IF_NON_ASCII_LINE_BREAK(Chars, Line, Col, Parser),
     {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Output1 = case Spaces of
         "" -> [C | Ctx#flow_scalar_ctx.output];
@@ -3171,7 +3188,7 @@ do_parse_flow_scalar_escaped([C | _] = Chars, Line, _, Delta,
 do_parse_flow_scalar_escaped([C | Rest] = Chars, Line, Col, Delta, Parser,
   #flow_scalar_ctx{line = Sc_Line, col = Sc_Col, style = Style,
   output = Output} = Ctx) ->
-    Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
+    Parser1 = ?WARN_IF_NON_ASCII_LINE_BREAK(Chars, Line, Col, Parser),
     case unescape_char(C) of
         undefined ->
             %% Invalid escaped character.
@@ -3294,7 +3311,7 @@ parse_comment([C | _] = Chars, Line, Col, Delta,
     %% moved forward.
     find_next_token(Chars, Line, Col, Delta, Parser);
 parse_comment([_ | Rest] = Chars, Line, Col, Delta, Parser) ->
-    Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
+    Parser1 = ?WARN_IF_NON_ASCII_LINE_BREAK(Chars, Line, Col, Parser),
     {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     parse_comment(Rest, Line, Col1, Delta1, Parser1);
 parse_comment([] = Chars, Line, Col, Delta,
@@ -4270,20 +4287,20 @@ is_uri_hier_part_valid(Parser, Token, [_ | _]) ->
     },
     add_error(Parser, Error, "Invalid character in URI scheme", []).
 
-warn_if_non_ascii_line_break([C | _], Line, Col, Parser)
-  when ?IS_NEWLINE_11(C) ->
-    %% Non-ASCII line break in a YAML 1.2 document.
-    Error = #yaml_parsing_error{
-      type   = warning,
-      name   = non_ascii_line_break,
-      line   = Line,
-      column = Col
-    },
-    add_error(Parser, Error,
-      "Use of non-ASCII line break is not supported anymore starting "
-      "with YAML 1.2; treated as non-break character", []);
-warn_if_non_ascii_line_break(_, _, _, Parser) ->
-    Parser.
+%?WARN_IF_NON_ASCII_LINE_BREAK([C | _], Line, Col, Parser)
+%  when ?IS_NEWLINE_11(C) ->
+%    %% Non-ASCII line break in a YAML 1.2 document.
+%    Error = #yaml_parsing_error{
+%      type   = warning,
+%      name   = non_ascii_line_break,
+%      line   = Line,
+%      column = Col
+%    },
+%    add_error(Parser, Error,
+%      "Use of non-ASCII line break is not supported anymore starting "
+%      "with YAML 1.2; treated as non-break character", []);
+%?WARN_IF_NON_ASCII_LINE_BREAK(_, _, _, Parser) ->
+%    Parser.
 
 add_error(Parser, Error, Format, Args) ->
     %% Format error message.
