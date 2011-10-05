@@ -168,6 +168,15 @@
     column = C
   }).
 
+-define(NEXT_COL(Co, De, Count),
+  {Co + Count, De + Count}).
+
+-define(NEXT_LINE(Ch, Li, De, P),
+  case Ch of
+      [$\r, $\n | R] -> {R, Li + 1, 1, De + 2};
+      [_ | R]        -> {R, Li + 1, 1, De + 1}
+  end).
+
 %%
 %% We use macros instead of functions for a few #yaml_parser updates
 %% to take advantage of the optimization described in §3.5 in the
@@ -458,14 +467,14 @@ find_next_token(Chars, Line, Col, Delta, Parser) ->
 
 %% Skip spaces.
 do_find_next_token([$\s | Rest], Line, Col, Delta, Parser) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     do_find_next_token(Rest, Line, Col1, Delta1, Parser);
 
 %% Skip tabs only when they're separation spaces, not indentation.
 do_find_next_token([$\t | Rest], Line, Col, Delta,
   #yaml_parser{ik_allowed = IK_Allowed} = Parser)
   when ?IN_FLOW_CTX(Parser) orelse not IK_Allowed ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     do_find_next_token(Rest, Line, Col1, Delta1, Parser);
 
 %% Skip comments.
@@ -491,7 +500,7 @@ do_find_next_token([$\r] = Chars, Line, Col, Delta,
 do_find_next_token([C | _] = Chars, Line, _, Delta,
   #yaml_parser{doc_version = Version} = Parser)
   when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    {Chars1, Line1, Col1, Delta1} = next_line(Chars, Line, Delta, Parser),
+    {Chars1, Line1, Col1, Delta1} = ?NEXT_LINE(Chars, Line, Delta, Parser),
     Parser1 = if
         ?IN_BLOCK_CTX(Parser) -> ?ALLOW_IMPL_KEY(Parser, true);
         true                  -> Parser
@@ -529,7 +538,7 @@ determine_token_type(Chars, Line, Col, Delta,
 determine_token_type([C | Rest], Line, Col, Delta,
   #yaml_parser{doc_started = false} = Parser)
   when ?IS_BOM(C) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     find_next_token(Rest, Line, Col1, Delta1, Parser);
 determine_token_type([C | Rest], Line, Col, Delta,
   #yaml_parser{doc_started = true} = Parser)
@@ -545,7 +554,7 @@ determine_token_type([C | Rest], Line, Col, Delta,
     },
     Parser1 = add_error(Parser, Error,
       "A BOM must not appear inside a document", []),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     find_next_token(Rest, Line, Col1, Delta1, Parser1);
 
 %% Directives end indicator.
@@ -667,7 +676,7 @@ parse_document_sep([_, _, _ | Rest] = Chars, Line, Col, Delta, Parser, Type) ->
         directives_end -> start_doc(Parser3, Line, Col, tail);
         document_end   -> end_doc(Parser3, Line, Col, tail)
     end,
-    {Col1, Delta1} = next_col(Col, Delta, 3),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 3),
     find_next_token(Rest, Line, Col1, Delta1, Parser4).
 
 start_doc(#yaml_parser{doc_started = true} = Parser,
@@ -796,7 +805,7 @@ parse_directive([_ | Rest] = Chars, Line, Col, Delta, Parser) ->
       Parser, 0),
     Parser2 = remove_impl_key_pos(Parser1),
     Parser3 = ?ALLOW_IMPL_KEY(Parser2, false),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     do_parse_directive(Rest, Line, Col1, Delta1, Parser3, Ctx).
 
 do_parse_directive([C | _] = Chars, Line, Col, Delta,
@@ -807,7 +816,7 @@ do_parse_directive([C | _] = Chars, Line, Col, Delta,
 
 do_parse_directive([C | Rest] = Chars, Line, Col, Delta, Parser, Ctx) ->
     Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#directive_ctx{
       name = [C | Ctx#directive_ctx.name]
     },
@@ -837,7 +846,7 @@ parse_directive2(Chars, Line, Col, Delta, Parser, Ctx) ->
 
 skip_directive_trailing_ws([C | Rest], Line, Col, Delta, Parser)
   when ?IS_SPACE(C) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     skip_directive_trailing_ws(Rest, Line, Col1, Delta1, Parser);
 skip_directive_trailing_ws([C | _] = Chars, Line, Col, Delta,
   #yaml_parser{doc_version = Version} = Parser)
@@ -877,20 +886,20 @@ parse_yaml_directive_major([C | Rest], Line, Col, Delta, Parser,
         undefined -> C - $0;
         _         -> Major * 10 + C - $0
     end,
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#yaml_directive_ctx{
       major = Major1
     },
     parse_yaml_directive_major(Rest, Line, Col1, Delta1, Parser, Ctx1);
 parse_yaml_directive_major([$. | Rest], Line, Col, Delta, Parser,
   #yaml_directive_ctx{major = Major} = Ctx) when is_integer(Major) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     %% End of the major part. Continue with the minor version number.
     parse_yaml_directive_minor(Rest, Line, Col1, Delta1, Parser, Ctx);
 parse_yaml_directive_major([C | Rest], Line, Col, Delta, Parser,
   #yaml_directive_ctx{major = undefined} = Ctx) when ?IS_SPACE(C) ->
     %% Skip leading white spaces.
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     parse_yaml_directive_major(Rest, Line, Col1, Delta1, Parser, Ctx);
 parse_yaml_directive_major([] = Chars, Line, Col, Delta,
   #yaml_parser{raw_eos = false} = Parser, Ctx) ->
@@ -939,7 +948,7 @@ parse_yaml_directive_minor([C | Rest], Line, Col, Delta, Parser,
         undefined -> C - $0;
         _         -> Minor * 10 + C - $0
     end,
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#yaml_directive_ctx{
       minor = Minor1
     },
@@ -1034,7 +1043,7 @@ parse_tag_directive(Chars, Line, Col, Delta, Parser,
 %% Tag handle.
 parse_tag_directive_handle([$! | Rest], Line, Col, Delta, Parser,
   #tag_directive_ctx{handle = undefined} = Ctx) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#tag_directive_ctx{
       handle = "!"
     },
@@ -1046,14 +1055,14 @@ parse_tag_directive_handle([C | Rest], Line, Col, Delta, Parser,
    (C >= $A andalso C =< $Z) orelse
    (C >= $0 andalso C =< $9) orelse
    (C == $-)) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#tag_directive_ctx{
       handle = [C | Handle]
     },
     parse_tag_directive_handle(Rest, Line, Col1, Delta1, Parser, Ctx1);
 parse_tag_directive_handle([$! | Rest], Line, Col, Delta, Parser,
   #tag_directive_ctx{handle = Handle} = Ctx) when is_list(Handle) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#tag_directive_ctx{
       handle = [$! | Handle]
     },
@@ -1064,7 +1073,7 @@ parse_tag_directive_handle([C | _] = Chars, Line, Col, Delta, Parser,
 parse_tag_directive_handle([C | Rest], Line, Col, Delta,  Parser,
   #tag_directive_ctx{handle = undefined} = Ctx) when ?IS_SPACE(C) ->
     %% Skip leading white spaces.
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     parse_tag_directive_handle(Rest, Line, Col1, Delta1, Parser, Ctx);
 parse_tag_directive_handle([] = Chars, Line, Col, Delta,
   #yaml_parser{raw_eos = false} = Parser, Ctx) ->
@@ -1119,7 +1128,7 @@ parse_tag_directive_handle([] = Chars, Line, Col, Delta,
 parse_tag_directive_prefix([C | Rest], Line, Col, Delta, Parser,
   #tag_directive_ctx{prefix = Prefix} = Ctx)
   when is_list(Prefix) andalso ?IS_URI_CHAR(C) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#tag_directive_ctx{
       prefix = [C | Prefix]
     },
@@ -1127,7 +1136,7 @@ parse_tag_directive_prefix([C | Rest], Line, Col, Delta, Parser,
 parse_tag_directive_prefix([C | Rest], Line, Col, Delta, Parser,
   #tag_directive_ctx{prefix = undefined} = Ctx) when ?IS_SPACE(C) ->
     %% Skip leading white spaces.
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#tag_directive_ctx{
       prefix = ""
     },
@@ -1135,7 +1144,7 @@ parse_tag_directive_prefix([C | Rest], Line, Col, Delta, Parser,
 parse_tag_directive_prefix([C | Rest], Line, Col, Delta, Parser,
   #tag_directive_ctx{prefix = ""} = Ctx) when ?IS_SPACE(C) ->
     %% Skip leading white spaces.
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     parse_tag_directive_prefix(Rest, Line, Col1, Delta1, Parser, Ctx);
 parse_tag_directive_prefix([C | _] = Chars, Line, Col, Delta,
   #yaml_parser{doc_version = Version} = Parser,
@@ -1225,7 +1234,7 @@ parse_reserved_directive_arg([C | Rest], Line, Col, Delta, Parser,
   #reserved_directive_ctx{current = undefined} = Ctx)
   when ?IS_SPACE(C) ->
     %% Skip leading white spaces.
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     parse_reserved_directive_arg(Rest, Line, Col1, Delta1, Parser, Ctx);
 parse_reserved_directive_arg([C | _] = Chars, Line, Col, Delta,
   #yaml_parser{doc_version = Version} = Parser,
@@ -1252,7 +1261,7 @@ parse_reserved_directive_arg([C | _] = Chars, Line, Col, Delta,
 parse_reserved_directive_arg([C | Rest] = Chars, Line, Col, Delta, Parser,
   #reserved_directive_ctx{current = Current} = Ctx) ->
     Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Current1 = case Current of
         undefined -> [C];
         _         -> [C | Current]
@@ -1333,7 +1342,7 @@ queue_block_sequence_entry_token([_ | Rest], Line, Col, Delta, Parser)
       column = Col
     },
     Parser3 = queue_token(Parser2, Token),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     find_next_token(Rest, Line, Col1, Delta1, Parser3).
 
 %% -------------------------------------------------------------------
@@ -1369,7 +1378,7 @@ parse_flow_collection_start([_ | Rest] = Chars, Line, Col, Delta,
               waiting_for_kvpair = true
             }
     end,
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     find_next_token(Rest, Line, Col1, Delta1, Parser5).
 
 parse_flow_collection_end(Chars, Line, Col, Delta,
@@ -1398,7 +1407,7 @@ parse_flow_collection_end([_ | Rest], Line, Col, Delta,
       column = Col
     },
     Parser6 = queue_token(Parser5, Token),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     find_next_token(Rest, Line, Col1, Delta1, Parser6);
 parse_flow_collection_end(Chars, Line, Col, Delta,
   #yaml_parser{cur_coll = #fcoll{kind = Expected}} = Parser, Kind) ->
@@ -1423,7 +1432,7 @@ parse_flow_collection_end([_ | Rest], Line, Col, Delta,
     Parser1 = add_error(Parser, Error,
       "The ~s closing character doesn't match any opening character",
       [Kind]),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     find_next_token(Rest, Line, Col1, Delta1, Parser1).
 
 parse_flow_entry(Chars, Line, Col, Delta,
@@ -1444,7 +1453,7 @@ parse_flow_entry([_ | Rest], Line, Col, Delta,
     },
     Parser1 = add_error(Parser, Error,
       "Empty flow collection entry not allowed", []),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     find_next_token(Rest, Line, Col1, Delta1, Parser1);
 parse_flow_entry([_ | Rest], Line, Col, Delta,
   #yaml_parser{cur_coll = #fcoll{kind = Kind}} = Parser) ->
@@ -1461,7 +1470,7 @@ parse_flow_entry([_ | Rest], Line, Col, Delta,
               waiting_for_kvpair = true
             }
     end,
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     find_next_token(Rest, Line, Col1, Delta1, Parser4);
 parse_flow_entry(Chars, Line, Col, Delta, Parser) when ?IN_BLOCK_CTX(Parser) ->
     Error = #yaml_parsing_error{
@@ -1506,7 +1515,7 @@ queue_mapping_key_token([_ | Rest], Line, Col, Delta, Parser) ->
       column = Col
     },
     Parser3 = queue_token(Parser2, Token),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     find_next_token(Rest, Line, Col1, Delta1, Parser3).
 
 %% -------------------------------------------------------------------
@@ -1627,7 +1636,7 @@ queue_mapping_value_token2([_ | Rest], Line, Col, Delta, Parser) ->
       column = Col
     },
     Parser1 = queue_token(Parser, Token),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     find_next_token(Rest, Line, Col1, Delta1, Parser1).
 
 finish_incomplete_block_entries(Line, Col,
@@ -1695,7 +1704,7 @@ parse_anchor_or_alias([_ | Rest] = Chars, Line, Col, Delta, Parser, Type) ->
     },
     Parser1 = save_impl_key_pos(Chars, Line, Col, Delta, Parser),
     Parser2 = ?ALLOW_IMPL_KEY(Parser1, false),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     do_parse_anchor_or_alias(Rest, Line, Col1, Delta1, Parser2, Ctx).
 
 %% White spaces and flow indicators are forbidden inside anchor or alias
@@ -1708,7 +1717,7 @@ do_parse_anchor_or_alias([C | _] = Chars, Line, Col, Delta,
 
 do_parse_anchor_or_alias([C | Rest] = Chars, Line, Col, Delta, Parser, Ctx) ->
     Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#anchor_ctx{
       output = [C | Ctx#anchor_ctx.output]
     },
@@ -1755,7 +1764,7 @@ parse_tag([_ | Rest] = Chars, Line, Col, Delta,
     },
     Parser1 = save_impl_key_pos(Chars, Line, Col, Delta, Parser),
     Parser2 = ?ALLOW_IMPL_KEY(Parser1, false),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     determine_tag_type(Rest, Line, Col1, Delta1, Parser2, Ctx);
 parse_tag(Chars, Line, Col, Delta, #yaml_parser{last_tag = Tag} = Parser)
   when Tag /= undefined ->
@@ -1775,7 +1784,7 @@ parse_tag(Chars, Line, Col, Delta, #yaml_parser{last_tag = Tag} = Parser)
 %% Determine token type: verbatim tag or tag shorthand.
 determine_tag_type([$< | Rest], Line, Col, Delta, Parser, Ctx) ->
     %% Verbatim tag.
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#tag_ctx{
       prefix = undefined
     },
@@ -1796,12 +1805,12 @@ determine_tag_type([] = Chars, Line, Col, Delta,
 
 parse_verbatim_tag([$> | Rest], Line, Col, Delta, Parser, Ctx) ->
     %% End of the verbatim tag.
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     expand_tag(Rest, Line, Col1, Delta1, Parser, Ctx);
 parse_verbatim_tag([$! | Rest], Line, Col, Delta, Parser,
   #tag_ctx{suffix = ""} = Ctx) ->
     %% Local tag.
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#tag_ctx{
       suffix = "!"
     },
@@ -1822,11 +1831,11 @@ parse_verbatim_tag([$! | Rest], Line, Col, Delta, Parser,
     },
     Parser1 = add_error(Parser, Error,
       "Invalid character in tag handle", []),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     parse_verbatim_tag(Rest, Line, Col1, Delta1, Parser1, Ctx);
 parse_verbatim_tag([C | Rest], Line, Col, Delta, Parser, Ctx)
   when ?IS_URI_CHAR(C) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#tag_ctx{
       suffix = [C | Ctx#tag_ctx.suffix]
     },
@@ -1847,7 +1856,7 @@ parse_verbatim_tag([_ | Rest], Line, Col, Delta, Parser,
     },
     Parser1 = add_error(Parser, Error,
       "Invalid character in tag handle", []),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     parse_verbatim_tag(Rest, Line, Col1, Delta1, Parser1, Ctx);
 parse_verbatim_tag([] = Chars, Line, Col, Delta,
   #yaml_parser{raw_eos = false} = Parser, Ctx) ->
@@ -1880,7 +1889,7 @@ parse_verbatim_tag([] = Chars, Line, Col, Delta,
 parse_tag_shorthand([$! | Rest], Line, Col, Delta, Parser,
   #tag_ctx{prefix = "!", suffix = Suffix} = Ctx) ->
     %% Separator between the prefix and the suffix.
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#tag_ctx{
       prefix = "!" ++ lists:reverse(Suffix) ++ "!",
       suffix = ""
@@ -1903,7 +1912,7 @@ parse_tag_shorthand([$! | Rest], Line, Col, Delta, Parser,
     },
     Parser1 = add_error(Parser, Error,
       "Invalid character in tag handle", []),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     parse_tag_shorthand(Rest, Line, Col1, Delta1, Parser1, Ctx);
 
 %% Tag suffix.
@@ -1919,7 +1928,7 @@ parse_tag_shorthand([C | _] = Chars, Line, Col, Delta,
 
 parse_tag_shorthand([C | Rest], Line, Col, Delta, Parser,
   #tag_ctx{suffix = Suffix} = Ctx) when ?IS_URI_CHAR(C) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#tag_ctx{
       suffix = [C | Suffix]
     },
@@ -1943,7 +1952,7 @@ parse_tag_shorthand([_ | Rest] = Chars, Line, Col, Delta, Parser,
     },
     Parser2 = add_error(Parser1, Error,
       "Invalid character in tag handle", []),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     parse_tag_shorthand(Rest, Line, Col1, Delta1, Parser2, Ctx);
 
 parse_tag_shorthand([] = Chars, Line, Col, Delta,
@@ -2068,7 +2077,7 @@ parse_block_scalar([_ | Rest], Line, Col, Delta, Parser,
     },
     Parser1 = remove_impl_key_pos(Parser),
     Parser2 = ?ALLOW_IMPL_KEY(Parser1, true),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     do_parse_block_scalar_header(Rest, Line, Col1, Delta1, Parser2, Ctx).
 
 %%
@@ -2085,12 +2094,12 @@ do_parse_block_scalar_header([$\r] = Chars, Line, Col, Delta,
 do_parse_block_scalar_header([C | _] = Chars, Line, _, Delta,
   #yaml_parser{doc_version = Version} = Parser, Ctx)
   when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    {Rest, Line1, Col1, Delta1} = next_line(Chars, Line, Delta, Parser),
+    {Rest, Line1, Col1, Delta1} = ?NEXT_LINE(Chars, Line, Delta, Parser),
     prepare_parse_block_scalar(Rest, Line1, Col1, Delta1, Parser, Ctx);
 
 %% Comments.
 do_parse_block_scalar_header([$# | Rest], Line, Col, Delta, Parser, Ctx) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#block_scalar_hd_ctx{
       in_comment = true
     },
@@ -2098,14 +2107,14 @@ do_parse_block_scalar_header([$# | Rest], Line, Col, Delta, Parser, Ctx) ->
     do_parse_block_scalar_header(Rest, Line, Col1, Delta1, Parser, Ctx2);
 do_parse_block_scalar_header([_ | Rest], Line, Col, Delta, Parser,
   #block_scalar_hd_ctx{in_comment = true} = Ctx) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     do_parse_block_scalar_header(Rest, Line, Col1, Delta1, Parser, Ctx);
 
 %% Chomping indicator.
 do_parse_block_scalar_header([C | Rest], Line, Col, Delta, Parser,
   #block_scalar_hd_ctx{chomp = undefined} = Ctx)
   when C == $- orelse C == $+ ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Chomp = case C of
         $- -> strip;
         $+ -> keep
@@ -2136,7 +2145,7 @@ do_parse_block_scalar_header([C | Rest], Line, Col, Delta, Parser,
     Parser1 = add_error(Parser, Error,
       "Multiple chomping indicators specified: the last one will be used",
       []),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Chomp = case C of
         $- -> strip;
         $+ -> keep
@@ -2151,7 +2160,7 @@ do_parse_block_scalar_header([C | Rest], Line, Col, Delta, Parser,
 do_parse_block_scalar_header([C | Rest], Line, Col, Delta, Parser,
   #block_scalar_hd_ctx{indent = undefined} = Ctx)
   when C >= $1 andalso C =< $9 ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#block_scalar_hd_ctx{
       indent = {tmp, C - $0}
     },
@@ -2159,7 +2168,7 @@ do_parse_block_scalar_header([C | Rest], Line, Col, Delta, Parser,
 do_parse_block_scalar_header([C | Rest], Line, Col, Delta, Parser,
   #block_scalar_hd_ctx{indent = {tmp, Indent}} = Ctx)
   when C >= $1 andalso C =< $9 ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#block_scalar_hd_ctx{
       indent = {tmp, Indent * 10 + C - $0}
     },
@@ -2185,7 +2194,7 @@ do_parse_block_scalar_header([C | Rest], Line, Col, Delta, Parser,
     Parser1 = add_error(Parser, Error,
       "Multiple indent indicators specified: the last one will be used",
       []),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#block_scalar_hd_ctx{
       indent = {tmp, C - $0}
     },
@@ -2195,7 +2204,7 @@ do_parse_block_scalar_header([C | Rest], Line, Col, Delta, Parser,
 %% Trailing spaces.
 do_parse_block_scalar_header([C | Rest], Line, Col, Delta, Parser, Ctx)
   when ?IS_SPACE(C) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = final_indent(Parser, Ctx),
     do_parse_block_scalar_header(Rest, Line, Col1, Delta1, Parser, Ctx1);
 
@@ -2219,7 +2228,7 @@ do_parse_block_scalar_header([_ | Rest] = Chars, Line, Col, Delta, Parser,
     },
     Parser2 = add_error(Parser1, Error,
       "Invalid character in block scalar header", []),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = final_indent(Parser2, Ctx),
     do_parse_block_scalar_header(Rest, Line, Col1, Delta1, Parser2, Ctx1);
 
@@ -2276,7 +2285,7 @@ do_parse_block_scalar([C | _] = Chars, Line, _, Delta,
   #yaml_parser{doc_version = Version} = Parser,
   #block_scalar_ctx{newline = false, spaces = Spaces, output = ""} = Ctx)
   when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    {Rest, Line1, Col1, Delta1} = next_line(Chars, Line, Delta, Parser),
+    {Rest, Line1, Col1, Delta1} = ?NEXT_LINE(Chars, Line, Delta, Parser),
     Ctx1    = Ctx#block_scalar_ctx{
       newline = true,
       spaces  = [$\n | Spaces]
@@ -2288,7 +2297,7 @@ do_parse_block_scalar([C | _] = Chars, Line, _, Delta,
   #yaml_parser{doc_version = Version} = Parser,
   #block_scalar_ctx{spaces = Spaces, style = literal} = Ctx)
   when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    {Rest, Line1, Col1, Delta1} = next_line(Chars, Line, Delta, Parser),
+    {Rest, Line1, Col1, Delta1} = ?NEXT_LINE(Chars, Line, Delta, Parser),
     Ctx1 = Ctx#block_scalar_ctx{
       newline = true,
       spaces  = [$\n | Spaces]
@@ -2301,7 +2310,7 @@ do_parse_block_scalar([C | _] = Chars, Line, _, Delta,
   #block_scalar_ctx{spaces = Spaces, newline = false,
   more_indent = false} = Ctx)
   when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    {Rest, Line1, Col1, Delta1} = next_line(Chars, Line, Delta, Parser),
+    {Rest, Line1, Col1, Delta1} = ?NEXT_LINE(Chars, Line, Delta, Parser),
     Ctx1 = Ctx#block_scalar_ctx{
       newline = true,
       spaces  = [$\s | Spaces]
@@ -2314,7 +2323,7 @@ do_parse_block_scalar([C | _] = Chars, Line, _, Delta,
   #block_scalar_ctx{spaces = Spaces, newline = true,
   more_indent = false} = Ctx)
   when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    {Rest, Line1, Col1, Delta1} = next_line(Chars, Line, Delta, Parser),
+    {Rest, Line1, Col1, Delta1} = ?NEXT_LINE(Chars, Line, Delta, Parser),
     Spaces1 = case Spaces of
         [$\s | S] -> S;
         _         -> Spaces
@@ -2330,7 +2339,7 @@ do_parse_block_scalar([C | _] = Chars, Line, _, Delta,
   #yaml_parser{doc_version = Version} = Parser,
   #block_scalar_ctx{spaces = Spaces, more_indent = true} = Ctx)
   when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    {Rest, Line1, Col1, Delta1} = next_line(Chars, Line, Delta, Parser),
+    {Rest, Line1, Col1, Delta1} = ?NEXT_LINE(Chars, Line, Delta, Parser),
     Ctx1    = Ctx#block_scalar_ctx{
       newline = true,
       spaces  = [$\n | Spaces]
@@ -2377,7 +2386,7 @@ do_parse_block_scalar([C | _] = Chars, Line, Col, Delta, Parser,
     do_parse_block_scalar(Chars, Line, Col, Delta, Parser1, Ctx1);
 do_parse_block_scalar([$\s | Rest], Line, Col, Delta, Parser,
   #block_scalar_ctx{indent = undefined, longest_empty = Longest} = Ctx) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1    = if
         Col > Longest -> Ctx#block_scalar_ctx{longest_empty = Col};
         true          -> Ctx
@@ -2388,7 +2397,7 @@ do_parse_block_scalar([$\s | Rest], Line, Col, Delta, Parser,
 do_parse_block_scalar([$\s | Rest], Line, Col, Delta, Parser,
   #block_scalar_ctx{indent = Indent, newline = true} = Ctx)
   when Indent == undefined orelse Col < Indent ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     do_parse_block_scalar(Rest, Line, Col1, Delta1, Parser, Ctx);
 
 %% The next line is less indented than the block scalar: end it.
@@ -2462,7 +2471,7 @@ do_parse_block_scalar([$., $., $.] = Chars, Line, 1 = Col, Delta,
 do_parse_block_scalar([C | Rest] = Chars, Line, Col, Delta, Parser,
   #block_scalar_ctx{style = literal, spaces = Spaces} = Ctx) ->
     Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#block_scalar_ctx{
       spaces  = "",
       newline = false,
@@ -2487,7 +2496,7 @@ do_parse_block_scalar([C | Rest], Line, Col, Delta, Parser,
     output = Output} = Ctx)
   when not ?IS_SPACE(C) orelse
   (?IS_SPACE(C) andalso (not Newline orelse Output == "")) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#block_scalar_ctx{
       spaces  = "",
       newline = false,
@@ -2502,7 +2511,7 @@ do_parse_block_scalar([C | Rest], Line, Col, Delta, Parser,
   #block_scalar_ctx{style = folded, newline = true, spaces = Spaces,
     more_indent = More_Indented} = Ctx)
   when ?IS_SPACE(C) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Spaces1 = case Spaces of
         [$\s | S]            -> [$\n | S];
         _ when More_Indented -> Spaces;
@@ -2568,8 +2577,8 @@ parse_flow_scalar([C | Rest] = Chars, Line, Col, Delta, Parser, Style) ->
     Parser1 = save_impl_key_pos(Chars, Line, Col, Delta, Parser),
     Parser2 = ?ALLOW_IMPL_KEY(Parser1, false),
     {Rest1, {Col1, Delta1}} = case C of
-        $' -> {Rest, next_col(Col, Delta, 1)};
-        $" -> {Rest, next_col(Col, Delta, 1)};
+        $' -> {Rest, ?NEXT_COL(Col, Delta, 1)};
+        $" -> {Rest, ?NEXT_COL(Col, Delta, 1)};
         _  -> {Chars, {Col, Delta}}
     end,
     do_parse_flow_scalar(Rest1, Line, Col1, Delta1, Parser2, Ctx).
@@ -2589,7 +2598,7 @@ do_parse_flow_scalar([C | Rest], Line, Col, Delta, Parser,
   when ?IS_SPACE(C) ->
     %% Skip leading white spaces in a plain scalar. We must update the
     %% position of beginning of the scalar and thus the implicit key.
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Parser1 = save_impl_key_pos(Rest, Line, Col1, Delta1, Parser),
     Ctx1    = Ctx#flow_scalar_ctx{
       line = Line,
@@ -2606,7 +2615,7 @@ do_parse_flow_scalar([C | Rest], Line, Col, Delta, Parser,
 do_parse_flow_scalar([$\\ | Rest], Line, Col, Delta, Parser,
   #flow_scalar_ctx{style = double_quoted,
   spaces = Spaces} = Ctx) ->
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#flow_scalar_ctx{
       spaces       = "",
       newline      = false,
@@ -2651,7 +2660,7 @@ do_parse_flow_scalar([$'] = Chars, Line, Col, Delta,
       fun do_parse_flow_scalar/6, Ctx);
 do_parse_flow_scalar([$', $' | Rest], Line, Col, Delta, Parser,
   #flow_scalar_ctx{style = single_quoted, spaces = Spaces} = Ctx) ->
-    {Col1, Delta1} = next_col(Col, Delta, 2),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 2),
     Ctx1 = Ctx#flow_scalar_ctx{
       spaces  = "",
       newline = false,
@@ -2670,7 +2679,7 @@ do_parse_flow_scalar([C | _] = Chars, Line, _, Delta,
   #yaml_parser{doc_version = Version} = Parser,
   #flow_scalar_ctx{newline = false} = Ctx)
   when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    {Rest, Line1, Col1, Delta1} = next_line(Chars, Line, Delta, Parser),
+    {Rest, Line1, Col1, Delta1} = ?NEXT_LINE(Chars, Line, Delta, Parser),
     Ctx1    = Ctx#flow_scalar_ctx{
       spaces  = " ",
       newline = true
@@ -2681,7 +2690,7 @@ do_parse_flow_scalar([C | _] = Chars, Line, _, Delta,
   #yaml_parser{doc_version = Version} = Parser,
   #flow_scalar_ctx{newline = true, spaces = Spaces} = Ctx)
   when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    {Rest, Line1, Col1, Delta1} = next_line(Chars, Line, Delta, Parser),
+    {Rest, Line1, Col1, Delta1} = ?NEXT_LINE(Chars, Line, Delta, Parser),
     Spaces1 = case Spaces of
         [$\s | S] -> S;
         _         -> Spaces
@@ -2697,7 +2706,7 @@ do_parse_flow_scalar([C | Rest], Line, Col, Delta, Parser,
     %% Keep white spaces in a separate buffer. If we find content later,
     %% this buffer will be merged with the result buffer. Otherwise, the
     %% white spaces buffer may be trimmed or dropped.
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#flow_scalar_ctx{
       spaces = [C | Spaces]
     },
@@ -2707,7 +2716,7 @@ do_parse_flow_scalar([C | Rest], Line, Col, Delta, Parser,
   #flow_scalar_ctx{newline = true} = Ctx)
   when ?IS_SPACE(C) ->
     %% Drop leading white spaces when not on the first line.
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     do_parse_flow_scalar(Rest, Line, Col1, Delta1, Parser, Ctx);
 
 %%
@@ -2720,7 +2729,7 @@ do_parse_flow_scalar([C | Rest], Line, Col, Delta, Parser,
   (Style == single_quoted andalso C == $') ->
     %% Found the end of this flow scalar. Next step: find the next
     %% token.
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#flow_scalar_ctx{
       endline = Line,
       endcol  = Col1
@@ -2839,7 +2848,7 @@ do_parse_flow_scalar([C | Rest] = Chars, Line, Col, Delta, Parser,
   #flow_scalar_ctx{spaces = Spaces} = Ctx)
   when C == 16#9 orelse (C >= 16#20 andalso C =< 16#10FFFF) ->
     Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     Ctx1 = Ctx#flow_scalar_ctx{
       spaces  = "",
       newline = false,
@@ -2913,7 +2922,7 @@ do_parse_flow_scalar_escaped([$u, O1, O2, O3, O4 | Rest], Line, Col, Delta,
   Parser, #flow_scalar_ctx{surrogate = High} = Ctx) when
   ?IS_HEXADECIMAL(O1) andalso ?IS_HEXADECIMAL(O2) andalso
   ?IS_HEXADECIMAL(O3) andalso ?IS_HEXADECIMAL(O4) ->
-    {Col1, Delta1} = next_col(Col, Delta, 5),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 5),
     C    = hex_to_dec([O1, O2, O3, O4], 0),
     Ctx1 = case High of
         undefined ->
@@ -3004,7 +3013,7 @@ do_parse_flow_scalar_escaped([$U, O1, O2, O3, O4, O5, O6, O7, O8 | Rest],
   ?IS_HEXADECIMAL(O3) andalso ?IS_HEXADECIMAL(O4) andalso
   ?IS_HEXADECIMAL(O5) andalso ?IS_HEXADECIMAL(O6) andalso
   ?IS_HEXADECIMAL(O7) andalso ?IS_HEXADECIMAL(O8) ->
-    {Col1, Delta1} = next_col(Col, Delta, 9),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 9),
     C    = hex_to_dec([O1, O2, O3, O4, O5, O6, O7, O8], 0),
     Ctx1 = case High of
         undefined ->
@@ -3091,7 +3100,7 @@ do_parse_flow_scalar_escaped([$x | _] = Chars, Line, Col, Delta,
       fun do_parse_flow_scalar_escaped/6, Ctx);
 do_parse_flow_scalar_escaped([$x, O1, O2 | Rest], Line, Col, Delta, Parser, Ctx)
   when ?IS_HEXADECIMAL(O1) andalso ?IS_HEXADECIMAL(O2) ->
-    {Col1, Delta1} = next_col(Col, Delta, 3),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 3),
     C    = hex_to_dec([O1, O2], 0),
     Ctx1 = Ctx#flow_scalar_ctx{
       output       = [C | Ctx#flow_scalar_ctx.output]
@@ -3132,7 +3141,7 @@ do_parse_flow_scalar_escaped([C | _] = Chars, Line, _, Delta,
   #yaml_parser{doc_version = Version} = Parser,
   #flow_scalar_ctx{style = double_quoted} = Ctx)
   when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    {Rest, Line1, Col1, Delta1} = next_line(Chars, Line, Delta, Parser),
+    {Rest, Line1, Col1, Delta1} = ?NEXT_LINE(Chars, Line, Delta, Parser),
     Ctx1 = Ctx#flow_scalar_ctx{
       newline = true
     },
@@ -3165,7 +3174,7 @@ do_parse_flow_scalar_escaped([C | Rest] = Chars, Line, Col, Delta, Parser,
               "Invalid escaped character", []),
             do_parse_flow_scalar(Chars, Line, Col, Delta, Parser2, Ctx);
         C1 ->
-            {Col1, Delta1} = next_col(Col, Delta, 1),
+            {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
             Ctx1 = Ctx#flow_scalar_ctx{
               output       = [C1 | Ctx#flow_scalar_ctx.output]
             },
@@ -3262,7 +3271,7 @@ parse_comment([C | _] = Chars, Line, Col, Delta,
     find_next_token(Chars, Line, Col, Delta, Parser);
 parse_comment([_ | Rest] = Chars, Line, Col, Delta, Parser) ->
     Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
-    {Col1, Delta1} = next_col(Col, Delta, 1),
+    {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
     parse_comment(Rest, Line, Col1, Delta1, Parser1);
 parse_comment([] = Chars, Line, Col, Delta,
   #yaml_parser{raw_eos = false} = Parser) ->
@@ -4085,15 +4094,6 @@ invalid_option(Option) ->
             yaml_errors:format(Error, "Unknown option \"~w\"", [Option])
     end,
     yaml_errors:throw(Error1).
-
-next_col(Col, Delta, Count) ->
-    {Col + Count, Delta + Count}.
-
-next_line([$\r, $\n | Rest], Line, Delta, _) ->
-    {Rest, Line + 1, 1, Delta + 2};
-next_line([C | Rest], Line, Delta, #yaml_parser{doc_version = Version})
-  when ?IS_NEWLINE(C) orelse (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
-    {Rest, Line + 1, 1, Delta + 1}.
 
 empty_scalar(Line, Col) ->
     Empty = #yaml_scalar{
