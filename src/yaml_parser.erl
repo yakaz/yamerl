@@ -2472,10 +2472,14 @@ do_parse_block_scalar([C | Rest] = Chars, Line, Col, Delta, Parser,
   #block_scalar_ctx{style = literal, spaces = Spaces} = Ctx) ->
     Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
     {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
+    Output1 = case Spaces of
+        "" -> [C | Ctx#block_scalar_ctx.output];
+        _  -> [C | Spaces ++ Ctx#block_scalar_ctx.output]
+    end,
     Ctx1 = Ctx#block_scalar_ctx{
       spaces  = "",
       newline = false,
-      output  = [C | Spaces ++ Ctx#block_scalar_ctx.output],
+      output  = Output1,
       endline = Line,
       endcol  = Col1
     },
@@ -2497,10 +2501,14 @@ do_parse_block_scalar([C | Rest], Line, Col, Delta, Parser,
   when not ?IS_SPACE(C) orelse
   (?IS_SPACE(C) andalso (not Newline orelse Output == "")) ->
     {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
+    Output1 = case Spaces of
+        "" -> [C | Ctx#block_scalar_ctx.output];
+        _  -> [C | Spaces ++ Ctx#block_scalar_ctx.output]
+    end,
     Ctx1 = Ctx#block_scalar_ctx{
       spaces  = "",
       newline = false,
-      output  = [C | Spaces ++ Ctx#block_scalar_ctx.output],
+      output  = Output1,
       endline = Line,
       endcol  = Col1
     },
@@ -2616,10 +2624,14 @@ do_parse_flow_scalar([$\\ | Rest], Line, Col, Delta, Parser,
   #flow_scalar_ctx{style = double_quoted,
   spaces = Spaces} = Ctx) ->
     {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
+    Output1 = case Spaces of
+        "" -> Ctx#flow_scalar_ctx.output;
+        _  -> Spaces ++ Ctx#flow_scalar_ctx.output
+    end,
     Ctx1 = Ctx#flow_scalar_ctx{
       spaces       = "",
       newline      = false,
-      output       = Spaces ++ Ctx#flow_scalar_ctx.output
+      output       = Output1
     },
     do_parse_flow_scalar_escaped(Rest, Line, Col1, Delta1, Parser, Ctx1);
 
@@ -2661,10 +2673,14 @@ do_parse_flow_scalar([$'] = Chars, Line, Col, Delta,
 do_parse_flow_scalar([$', $' | Rest], Line, Col, Delta, Parser,
   #flow_scalar_ctx{style = single_quoted, spaces = Spaces} = Ctx) ->
     {Col1, Delta1} = ?NEXT_COL(Col, Delta, 2),
+    Output1 = case Spaces of
+        "" -> Ctx#flow_scalar_ctx.output;
+        _  -> Spaces ++ Ctx#flow_scalar_ctx.output
+    end,
     Ctx1 = Ctx#flow_scalar_ctx{
       spaces  = "",
       newline = false,
-      output  = [$' | Spaces ++ Ctx#flow_scalar_ctx.output]
+      output  = [$' | Output1]
     },
     do_parse_flow_scalar(Rest, Line, Col1, Delta1, Parser, Ctx1);
 
@@ -2849,10 +2865,14 @@ do_parse_flow_scalar([C | Rest] = Chars, Line, Col, Delta, Parser,
   when C == 16#9 orelse (C >= 16#20 andalso C =< 16#10FFFF) ->
     Parser1 = warn_if_non_ascii_line_break(Chars, Line, Col, Parser),
     {Col1, Delta1} = ?NEXT_COL(Col, Delta, 1),
+    Output1 = case Spaces of
+        "" -> [C | Ctx#flow_scalar_ctx.output];
+        _  -> [C | Spaces ++ Ctx#flow_scalar_ctx.output]
+    end,
     Ctx1 = Ctx#flow_scalar_ctx{
       spaces  = "",
       newline = false,
-      output  = [C | Spaces ++ Ctx#flow_scalar_ctx.output],
+      output  = Output1,
       endline = Line,
       endcol  = Col1
     },
@@ -3210,10 +3230,14 @@ queue_flow_scalar_token(Chars, Line, Col, Delta, Parser,
   #flow_scalar_ctx{style = Style, output = Output, spaces = Spaces,
   newline = Newline, line = Sc_Line, col = Sc_Col,
   endline = Endline, endcol = Endcol}) ->
+    Output1 = case Spaces of
+        "" -> Output;
+        _  -> Spaces ++ Output
+    end,
     Token = #yaml_scalar{
       style    = flow,
       substyle = Style,
-      text     = lists:reverse(Spaces ++ Output),
+      text     = lists:reverse(Output1),
       line     = Sc_Line,
       column   = Sc_Col
     },
