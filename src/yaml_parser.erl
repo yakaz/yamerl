@@ -4287,21 +4287,6 @@ is_uri_hier_part_valid(Parser, Token, [_ | _]) ->
     },
     add_error(Parser, Error, "Invalid character in URI scheme", []).
 
-%?WARN_IF_NON_ASCII_LINE_BREAK([C | _], Line, Col, Parser)
-%  when ?IS_NEWLINE_11(C) ->
-%    %% Non-ASCII line break in a YAML 1.2 document.
-%    Error = #yaml_parsing_error{
-%      type   = warning,
-%      name   = non_ascii_line_break,
-%      line   = Line,
-%      column = Col
-%    },
-%    add_error(Parser, Error,
-%      "Use of non-ASCII line break is not supported anymore starting "
-%      "with YAML 1.2; treated as non-break character", []);
-%?WARN_IF_NON_ASCII_LINE_BREAK(_, _, _, Parser) ->
-%    Parser.
-
 add_error(Parser, Error, Format, Args) ->
     %% Format error message.
     Error1 = yaml_errors:format(Error, Format, Args),
