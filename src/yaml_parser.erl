@@ -218,6 +218,15 @@
           P
   end).
 
+-define(BLOCK_SCALAR_DEFAULT_TAG(L, C),
+  ?DEFAULT_TAG({non_specific, "!"}, L, C)).
+-define(PLAIN_SCALAR_DEFAULT_TAG(L, C),
+  ?DEFAULT_TAG({non_specific, "?"}, L, C)).
+-define(FLOW_SCALAR_DEFAULT_TAG(L, C),
+  ?DEFAULT_TAG({non_specific, "!"}, L, C)).
+-define(COLL_SCALAR_DEFAULT_TAG(L, C),
+  ?DEFAULT_TAG({non_specific, "?"}, L, C)).
+
 %% -------------------------------------------------------------------
 %% Public API: chunked stream scanning.
 %% -------------------------------------------------------------------
@@ -1376,10 +1385,10 @@ parse_flow_collection_start([_ | Rest] = Chars, Line, Col, Delta,
       style  = flow,
       kind   = Kind,
       line   = Line,
-      column = Col
+      column = Col,
+      tag    = ?COLL_SCALAR_DEFAULT_TAG(Line, Col)
     },
-    Token1   = set_default_tag(Token),
-    Parser4  = queue_token(Parser3, Token1),
+    Parser4  = queue_token(Parser3, Token),
     New_Coll = #fcoll{kind = Kind},
     Parser5  = case Kind of
         sequence ->
@@ -2149,13 +2158,13 @@ do_parse_block_scalar_header([C | Rest], Line, Col, Delta, Parser,
       substyle = Style,
       text     = "",
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = ?BLOCK_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       name   = multiple_chomping_indicators,
       type   = warning,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col
     },
@@ -2198,13 +2207,13 @@ do_parse_block_scalar_header([C | Rest], Line, Col, Delta, Parser,
       substyle = Style,
       text     = "",
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = ?BLOCK_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       name   = multiple_indent_indicators,
       type   = warning,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col
     },
@@ -2234,12 +2243,12 @@ do_parse_block_scalar_header([_ | Rest] = Chars, Line, Col, Delta, Parser,
       substyle = Style,
       text     = "",
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = ?BLOCK_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       name   = invalid_block_scalar_header,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col
     },
@@ -2384,13 +2393,13 @@ do_parse_block_scalar([C | _] = Chars, Line, Col, Delta, Parser,
       style    = block,
       substyle = Style,
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = ?BLOCK_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       type   = warning,
       name   = leading_empty_lines_too_long,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col
     },
@@ -2441,12 +2450,12 @@ do_parse_block_scalar([C | _] = Chars, Line, Col, Delta, Parser,
       substyle = Style,
       text     = lists:reverse(Output),
       line     = Token_Line,
-      column   = Token_Col
+      column   = Token_Col,
+      tag      = ?BLOCK_SCALAR_DEFAULT_TAG(Token_Line, Token_Col)
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       name   = invalid_block_scalar_indentation,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col
     },
@@ -2576,10 +2585,10 @@ queue_block_scalar_token(Chars, Line, Col, Delta, Parser,
       substyle = Style,
       text     = lists:reverse(Text),
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = ?BLOCK_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
     },
-    Token1  = set_default_tag(Token),
-    Parser1 = queue_token(Parser, Token1),
+    Parser1 = queue_token(Parser, Token),
     Parser2 = Parser1#yaml_parser{
       endpos_set_by_token = true,
       last_token_endline  = Endline1,
@@ -2663,12 +2672,12 @@ do_parse_flow_scalar([_ | _] = Chars, Line, Col, Delta, Parser,
       substyle = Style,
       text     = lists:reverse(Output),
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = ?FLOW_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       name   = invalid_surrogate_pair,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col
     },
@@ -2899,17 +2908,21 @@ do_parse_flow_scalar([] = Chars, Line, Col, Delta,
   #yaml_parser{raw_eos = true} = Parser,
   #flow_scalar_ctx{style = Style, line = Sc_Line, col = Sc_Col,
   output = Output}) ->
+    Tag = case Style of
+        plain -> ?PLAIN_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col);
+        _     -> ?FLOW_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
+    end,
     Token = #yaml_scalar{
       style    = flow,
       substyle = Style,
       text     = lists:reverse(Output),
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = Tag
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       name   = unexpected_eos,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col
     },
@@ -2937,12 +2950,12 @@ do_parse_flow_scalar_escaped([$u | _] = Chars, Line, Col, Delta,
       substyle = Style,
       text     = lists:reverse(Output),
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = ?FLOW_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       name   = unexpected_eos,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col
     },
@@ -3000,13 +3013,13 @@ do_parse_flow_scalar_escaped([$u | _] = Chars, Line, Col, Delta, Parser,
       substyle = Style,
       text     = lists:reverse(Output),
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = ?FLOW_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       name   = invalid_escaped_character,
       type   = warning,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col - 1
     },
@@ -3026,12 +3039,12 @@ do_parse_flow_scalar_escaped([$U | _] = Chars, Line, Col, Delta,
       substyle = Style,
       text     = lists:reverse(Output),
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = ?FLOW_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       name   = unexpected_eos,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col
     },
@@ -3091,13 +3104,13 @@ do_parse_flow_scalar_escaped([$U | _] = Chars, Line, Col, Delta, Parser,
       substyle = Style,
       text     = lists:reverse(Output),
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = ?FLOW_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       name   = invalid_escaped_character,
       type   = warning,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col - 1
     },
@@ -3117,12 +3130,12 @@ do_parse_flow_scalar_escaped([$x | _] = Chars, Line, Col, Delta,
       substyle = Style,
       text     = lists:reverse(Output),
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = ?FLOW_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       name   = unexpected_eos,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col
     },
@@ -3152,13 +3165,13 @@ do_parse_flow_scalar_escaped([$x | _] = Chars, Line, Col, Delta, Parser,
       substyle = Style,
       text     = lists:reverse(Output),
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = ?FLOW_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       name   = invalid_escaped_character,
       type   = warning,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col - 1
     },
@@ -3197,13 +3210,13 @@ do_parse_flow_scalar_escaped([C | Rest] = Chars, Line, Col, Delta, Parser,
               substyle = Style,
               text     = lists:reverse(Output),
               line     = Sc_Line,
-              column   = Sc_Col
+              column   = Sc_Col,
+              tag      = ?FLOW_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
             },
-            Token1 = set_default_tag(Token),
             Error  = #yaml_parsing_error{
               name   = invalid_escaped_character,
               type   = warning,
-              token  = Token1,
+              token  = Token,
               line   = Line,
               column = Col - 1
             },
@@ -3227,12 +3240,12 @@ do_parse_flow_scalar_escaped([] = Chars, Line, Col, Delta,
       substyle = Style,
       text     = lists:reverse(Output),
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = ?FLOW_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
     },
-    Token1 = set_default_tag(Token),
     Error  = #yaml_parsing_error{
       name   = unexpected_eos,
-      token  = Token1,
+      token  = Token,
       line   = Line,
       column = Col
     },
@@ -3251,15 +3264,19 @@ queue_flow_scalar_token(Chars, Line, Col, Delta, Parser,
         "" -> Output;
         _  -> Spaces ++ Output
     end,
+    Tag = case Style of
+        plain -> ?PLAIN_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col);
+        _     -> ?FLOW_SCALAR_DEFAULT_TAG(Sc_Line, Sc_Col)
+    end,
     Token = #yaml_scalar{
       style    = flow,
       substyle = Style,
       text     = lists:reverse(Output1),
       line     = Sc_Line,
-      column   = Sc_Col
+      column   = Sc_Col,
+      tag      = Tag
     },
-    Token1  = set_default_tag(Token),
-    Parser1 = queue_token(Parser, Token1),
+    Parser1 = queue_token(Parser, Token),
     Parser2 = Parser1#yaml_parser{
       endpos_set_by_token = true,
       last_token_endline  = Endline,
@@ -3533,10 +3550,10 @@ queue_token_check_collection_start(
       style  = block,
       kind   = sequence,
       line   = Line,
-      column = Col
+      column = Col,
+      tag    = ?COLL_SCALAR_DEFAULT_TAG(Line, Col)
     },
-    Collection_Start1 = set_default_tag(Collection_Start),
-    Parser1 = queue_token(Parser, Collection_Start1, Insert_At),
+    Parser1 = queue_token(Parser, Collection_Start, Insert_At),
     %% Record the new block indent.
     New_Coll = #bcoll{kind = sequence, indent = Col},
     Parser2  = Parser1#yaml_parser{
@@ -3556,10 +3573,10 @@ queue_token_check_collection_start(
       style  = block,
       kind   = mapping,
       line   = Line,
-      column = Col
+      column = Col,
+      tag    = ?COLL_SCALAR_DEFAULT_TAG(Line, Col)
     },
-    Collection_Start1 = set_default_tag(Collection_Start),
-    Parser1 = queue_token(Parser, Collection_Start1, Insert_At),
+    Parser1 = queue_token(Parser, Collection_Start, Insert_At),
     %% Record the new block indent.
     New_Coll = #bcoll{kind = mapping, indent = Col},
     Parser2  = Parser1#yaml_parser{
@@ -3579,10 +3596,10 @@ queue_token_check_collection_start(
       style  = flow,
       kind   = mapping,
       line   = Line,
-      column = Col
+      column = Col,
+      tag    = ?COLL_SCALAR_DEFAULT_TAG(Line, Col)
     },
-    Collection_Start1 = set_default_tag(Collection_Start),
-    Parser1 = queue_token(Parser, Collection_Start1, Insert_At),
+    Parser1 = queue_token(Parser, Collection_Start, Insert_At),
     %% Flag this mapping as single pair inside flow sequence.
     New_Coll = #fcoll{kind = single_mapping},
     Parser2  = Parser1#yaml_parser{
@@ -4137,34 +4154,13 @@ invalid_option(Option) ->
     yaml_errors:throw(Error1).
 
 empty_scalar(Line, Col) ->
-    Empty = #yaml_scalar{
+    #yaml_scalar{
       style    = flow,
       substyle = plain,
       text     = "",
       line     = Line,
-      column   = Col
-    },
-    set_default_tag(Empty).
-
-set_default_tag(
-  #yaml_scalar{style = block, line = Line, column = Col} = Token) ->
-    Token#yaml_scalar{
-      tag = ?DEFAULT_TAG({non_specific, "!"}, Line, Col)
-    };
-set_default_tag(
-  #yaml_scalar{substyle = plain, line = Line, column = Col} = Token) ->
-    Token#yaml_scalar{
-      tag = ?DEFAULT_TAG({non_specific, "?"}, Line, Col)
-    };
-set_default_tag(
-  #yaml_scalar{line = Line, column = Col} = Token) ->
-    Token#yaml_scalar{
-      tag = ?DEFAULT_TAG({non_specific, "!"}, Line, Col)
-    };
-set_default_tag(
-  #yaml_collection_start{line = Line, column = Col} = Token) ->
-    Token#yaml_collection_start{
-      tag = ?DEFAULT_TAG({non_specific, "?"}, Line, Col)
+      column   = Col,
+      tag      = ?PLAIN_SCALAR_DEFAULT_TAG(Line, Col)
     }.
 
 check_for_closed_block_collections([C | _] = Chars, Line, Col, Delta,
