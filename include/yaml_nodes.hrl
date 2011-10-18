@@ -84,22 +84,28 @@
 -type yaml_simple_erlang_fun() :: function().
 
 %% Timestamp.
+-type year()   :: non_neg_integer(). %% Types from stdlib/src/calendar.erl
+-type month()  :: 1..12.
+-type day()    :: 1..31.
+-type hour()   :: 0..23.
+-type minute() :: 0..59.
+-type second() :: 0..59.
 -record(yaml_timestamp, {
     module = undefined         :: atom(),
     tag    = "!"               :: tag_uri(),
     pres   = []                :: list(),
-    year                       :: calendar:year() | undefined,
-    month                      :: calendar:month() | undefined,
-    day                        :: calendar:day() | undefined,
-    hour   = 0                 :: calendar:hour(),
-    minute = 0                 :: calendar:minute(),
-    second = 0                 :: calendar:second(),
+    year                       :: year() | undefined,
+    month                      :: month() | undefined,
+    day                        :: day() | undefined,
+    hour   = 0                 :: hour(),
+    minute = 0                 :: minute(),
+    second = 0                 :: second(),
     frac   = 0                 :: non_neg_integer(),
     tz     = 0                 :: integer()
   }).
 -type yaml_timestamp()         :: #yaml_timestamp{}.
--type yaml_simple_timestamp()  :: calendar:t_datetime()
-                                | {undefined, calendar:t_time()}.
+-type yaml_simple_timestamp()  :: calendar:datetime()
+                                | {undefined, calendar:time()}.
 
 %% Sequence (Failsafe Schema).
 -record(yaml_seq, {
