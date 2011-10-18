@@ -13,7 +13,7 @@
 -type yaml_parser_option() :: {default_tags, [{tag_uri(), tag_prefix()}]}
                             | {document_version, document_version()}
                             | {io_blocksize, pos_integer()}
-                            | {token_fun, yaml_parser_token_fun()}.
+                            | {token_fun, yaml_parser_token_fun() | acc | drop}.
 
 %% -------------------------------------------------------------------
 %% Main record to store the scanner state.
@@ -121,7 +121,11 @@
     %% parameters:
     %%   o  the block-context indentation prefixes (a stack);
     %%   o  the level of flow-context nesting (a stack too).
-    stream_state                      :: fun((#yaml_parser{}) ->
+    stream_state                      :: fun((string(),
+                                              pos_integer(),
+                                              pos_integer(),
+                                              non_neg_integer(),
+                                              #yaml_parser{}) ->
                                                {ok, #yaml_parser{}}
                                              | {continue, #yaml_parser{}}
                                              | none()),
@@ -160,7 +164,7 @@
     %%
 
     %% Callbacks.
-    token_fun :: yaml_parser_token_fun() | undefined,
+    token_fun = acc :: yaml_parser_token_fun() | acc | drop,
 
     %% List of scanned tokens with counters.
     tokens        = []  :: [yaml_token()],

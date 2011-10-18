@@ -240,7 +240,7 @@ new(Source, Options) ->
       source       = Source,
       options      = Options,
       stream_state = fun start_stream/5,
-      token_fun    = proplists:get_value(token_fun, Options)
+      token_fun    = proplists:get_value(token_fun, Options, acc)
     }.
 
 next_chunk(Parser, <<>>, false) ->
@@ -3930,21 +3930,25 @@ handle_tag_property(Parser, Token) ->
     do_emit_token(Parser, Token).
 
 do_emit_token(
-  #yaml_parser{token_fun = undefined,
+  #yaml_parser{token_fun = Not_Fun,
     tks_queued = Queued, tks_first_idx = First,
     tks_emitted = Emitted, tks_ready = Ready} = Parser,
-  Token) ->
+  Token) when Not_Fun == acc orelse Not_Fun == drop ->
     %% The anchor was already counted when first removed from the queue.
     {Queued1, First1} = case ?TOKEN_NAME(Token) of
         yaml_anchor -> {Queued,     First};
         _           -> {Queued - 1, First + 1}
+    end,
+    Ready1 = case Not_Fun of
+        acc  -> [Token | Ready];
+        drop -> Ready
     end,
     Parser#yaml_parser{
       tks_queued    = Queued1,
       tks_first_idx = First1,
       tks_emitted   = Emitted + 1,
       last_token    = Token,
-      tks_ready     = [Token | Ready]
+      tks_ready     = Ready1
     };
 do_emit_token(
   #yaml_parser{token_fun = Fun,
@@ -4115,6 +4119,10 @@ is_option_valid({doc_version, {Major, Minor}}) when
 is_option_valid({io_blocksize, BS})
   when is_integer(BS) andalso BS >= 1 ->
     true;
+is_option_valid({token_fun, acc}) ->
+    true;
+is_option_valid({token_fun, drop}) ->
+    true;
 is_option_valid({token_fun, Fun})
   when is_function(Fun, 1) ->
     true;
@@ -4146,7 +4154,7 @@ invalid_option(Option) ->
             Error#yaml_invalid_option{
               text = "Invalid value for option \"token_fun\": "
               "it must be a function taking the parser state "
-              "as its sole argument"
+              "as its sole argument, or the atom 'acc' or 'drop'"
             };
         _ ->
             yaml_errors:format(Error, "Unknown option \"~w\"", [Option])

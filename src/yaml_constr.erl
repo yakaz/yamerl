@@ -47,7 +47,7 @@ last_chunk(Parser, More_Data) ->
 
 get_docs(Parser) ->
     case yaml_parser:get_token_fun(Parser) of
-        undefined ->
+        Not_Fun when Not_Fun == acc orelse Not_Fun == drop ->
             Error = #yaml_parsing_error{
               name = token_fun_cleared
             },
