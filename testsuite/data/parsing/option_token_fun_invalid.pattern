@@ -4,7 +4,7 @@
 ?_assertThrow(
   {yaml_exception, [
       {yaml_invalid_option,error,
-        "Invalid value for option \"token_fun\": it must be a function taking the parser state as its sole argument",
+        "Invalid value for option \"token_fun\": it must be a function taking the parser state as its sole argument, or the atom 'acc' or 'drop'",
         {token_fun,invalid}}
     ]
   },
