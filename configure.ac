@@ -275,6 +275,9 @@ AC_CONFIG_FILES([
 AC_CONFIG_FILES([
 	testsuite/dialyzer
 ], [chmod +x testsuite/dialyzer])
+AC_CONFIG_FILES([
+	testsuite/benchmark
+], [chmod +x testsuite/benchmark])
 AC_OUTPUT
 
 dnl --------------------------------------------------

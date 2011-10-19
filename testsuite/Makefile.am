@@ -7,7 +7,7 @@ TPL_FILES = parsing.erl construction.erl
 
 ERL_TESTS = parsing construction
 
-TESTS = dialyzer $(ERL_TESTS)
+TESTS = dialyzer $(ERL_TESTS) benchmark
 
 TESTS_ENVIRONMENT = ERL_LIBS=$(ERL_LIBS)
 
