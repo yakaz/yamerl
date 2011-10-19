@@ -1,5 +1,7 @@
 -module(yaml_parser).
 
+-compile([native]).
+
 -include("yaml_errors.hrl").
 -include("yaml_tokens.hrl").
 -include("internal/yaml_parser.hrl").
