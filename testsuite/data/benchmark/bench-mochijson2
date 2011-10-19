@@ -1,0 +1,27 @@
+#!/usr/bin/env escript
+%% vim:ft=erlang:
+
+main([Input, Count_S]) ->
+    Count = list_to_integer(Count_S),
+    {ok, Content} = file:read_file(Input),
+    %% Build mochijson2.
+    Mochi = filename:join([filename:dirname(Input), "mochijson2.erl"]),
+    {ok, Module, Binary} = compile:file(Mochi, [binary, debug_info]),
+    {module, _} = code:load_binary(Module, Mochi, Binary),
+    T0 = erlang:now(),
+    loop(Content, Count),
+    T1 = erlang:now(),
+    print_result(Count, T0, T1).
+
+loop(Content, Count) when Count >= 1 ->
+    mochijson2:decode(Content),
+    loop(Content, Count - 1);
+loop(_, 0) ->
+    ok.
+
+print_result(Count, T0, T1) when Count > 0 ->
+    Diff = timer:now_diff(T1, T0),
+    io:format("  mochijson2:       ~8.2f µs~n",
+      [Diff / Count]);
+print_result(_, _, _) ->
+    io:format("No result~n", []).

@@ -6,5 +6,6 @@ count=500
 export ERL_AFLAGS="-pa @top_builddir@/ebin"
 
 echo Avergage parsing time:
-$dir/bench-xml $dir/input.xml $count
-$dir/bench-yaml $dir/input.yaml $count
+$dir/bench-mochijson2 $dir/input.yaml $count
+$dir/bench-xmerl_sax_parser $dir/input.xml $count
+$dir/bench-yaml_parser $dir/input.yaml $count
