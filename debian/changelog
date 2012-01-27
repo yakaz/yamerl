@@ -4,7 +4,7 @@ erlang-yaml (0.1.1-1) experimental; urgency=low
   * Add YAML failsafe/json/core schemas
   * Bugfixes
 
- -- Jean-Sébastien Pédron <jean-sebastien@yakaz.com>  Thu, 29 Sep 2011 14:05:05 +0200
+ -- Jean-Sébastien Pédron <jean-sebastien@yakaz.com>  Fri, 27 Jan 2012 10:33:02 +0100
 
 erlang-yaml (0.1.0-1) experimental; urgency=low
 
