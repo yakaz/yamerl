@@ -2,6 +2,7 @@ Source: erlang-yaml
 Section: devel
 Priority: optional
 Maintainer: Jean-Sébastien Pédron <jean-sebastien@yakaz.com>
+Uploaders: Christopher Faulet <christopher@yakaz.com>
 Build-Depends: debhelper (>= 8), autotools-dev, erlang-dev (>= 1:14.b.2), erlang-tools
 Standards-Version: 3.9.1
 
