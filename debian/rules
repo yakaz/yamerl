@@ -1,10 +1,5 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
-# Sample debian/rules that uses debhelper.
-# This file was originally written by Joey Hess and Craig Small.
-# As a special exception, when this file is copied by dh-make into a
-# dh-make output file, you may use that output file without restriction.
-# This special exception was added by Craig Small in version 0.37 of dh-make.
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
@@ -13,78 +8,26 @@ WORKDIR=$(CURDIR)/debian/build
 DESTDIR=$(CURDIR)/debian/erlang-yaml
 
 ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
-		DEBUG = yes
+	DEBUG = yes
 else
-		DEBUG = no
+	DEBUG = no
 endif
 
-configure: configure-stamp
-configure-stamp:
-		dh_testdir
-		if [ -d $(WORKDIR) ]; then rm -fr $(WORKDIR); fi
-		mkdir -p $(WORKDIR)
-		cd $(WORKDIR) &&					\
-		$(CURDIR)/configure --enable-debug=$(DEBUG)
-		touch configure-stamp
 
-build: build-stamp
-build-stamp: configure-stamp
-		dh_testdir
-		cd $(WORKDIR) && $(MAKE)
-		touch $@
+%:
+	dh $@ --parallel --builddirectory=$(WORKDIR)
 
-clean: clean-stamp
-		dh_testdir
-		dh_testroot
-		dh_clean
-		rm -rf $(WORKDIR)
+override_dh_auto_configure:
+	if [ -d $(WORKDIR) ]; then rm -fr $(WORKDIR); fi
+	mkdir -p $(WORKDIR)
+	cd $(WORKDIR) && $(CURDIR)/configure --enable-debug=$(DEBUG)
 
-clean-stamp:
-		rm -f *-stamp
+override_dh_auto_test:
+	@:
 
-install: build
-		dh_testdir
-		dh_testroot
-		dh_prep
-		dh_installdirs -i
-		cd $(WORKDIR) && $(MAKE) install DESTDIR=$(DESTDIR)
+override_dh_auto_install:
+	dh_auto_install --destdir=$(DESTDIR)
 
-
-# Build architecture-independent files here.
-binary-indep: DH_OPTIONS=-i
-binary-indep: build install
-		dh_testdir
-		dh_testroot
-		dh_installchangelogs
-		dh_installdocs
-#		dh_installexamples
-#		dh_install
-#		dh_installmenu
-#		dh_installdebconf
-#		dh_installlogrotate
-#		dh_installemacsen
-#		dh_installpam
-#		dh_installmime
-#		dh_python
-#		dh_installinit
-#		dh_installcron
-#		dh_installinfo
-#		dh_installman
-		dh_link
-		dh_strip
-		dh_compress
-		dh_fixperms
-#		dh_perl
-#		dh_makeshlibs
-		dh_installdeb
-		dh_shlibdeps
-		erlang-depends
-		dh_gencontrol
-		dh_md5sums
-		dh_builddeb
-
-# Build architecture-dependent files here.
-binary-arch: build install
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure
+override_dh_gencontrol:
+	erlang-depends
+	dh_gencontrol -O--parallel -O--builddirectory=$(WORKDIR)
