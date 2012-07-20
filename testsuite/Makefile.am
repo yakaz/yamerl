@@ -55,6 +55,11 @@ $(ERL_TESTS): $(ETEST) eunit_lib.beam eunit_tty.beam
 .PHONY: $(ERL_TESTS)
 
 # check-local is executed after check. We use this to output cover
-# results.
+# results and move tests output (cover & JUnit) to a user-specified
+# directory.
 check-local:
 	@$(srcdir)/$(COVER_TO_HTML) $(TESTS)
+	@if [ "$$TEST_OUTPUT_DIR" ]; then				\
+	  mkdir -p "$$TEST_OUTPUT_DIR";					\
+	  cp -a *.html *.xml "$$TEST_OUTPUT_DIR";			\
+	fi
