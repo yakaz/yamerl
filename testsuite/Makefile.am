@@ -12,19 +12,13 @@ TESTS = dialyzer $(ERL_TESTS) benchmark
 TESTS_ENVIRONMENT = ERL_LIBS=$(ERL_LIBS)
 
 EXTRA_DIST = $(TPL_PL) $(TPL_ERL) $(COVER_TO_HTML)			\
-	     eunit_lib.erl eunit_tty.erl test_coverage.escript data
+	     test_coverage.escript data
 
-CLEANFILES = $(ERL_TESTS) $(TPL_FILES) eunit_lib.beam eunit_tty.beam 	\
-	     erl_crash.dump cover_*.html cover_*.out cover_*.percent	\
+CLEANFILES = $(ERL_TESTS) $(TPL_FILES) erl_crash.dump			\
+	     cover_*.html cover_*.out cover_*.percent			\
 	     index*.html *.coverdata dialyzer.log *.xml
 
-eunit_lib.beam: eunit_lib.erl
-	$(ERLC) $(srcdir)/eunit_lib.erl
-
-eunit_tty.beam: eunit_tty.erl
-	$(ERLC) $(srcdir)/eunit_tty.erl
-
-$(ERL_TESTS): $(ETEST) eunit_lib.beam eunit_tty.beam
+$(ERL_TESTS): $(ETEST)
 	@(test ! -e $@ -o $(ETEST) -nt $@ && echo "Create: $@" &&	\
 	  cp $(ETEST) $@ && chmod 755 $@) || :
 	@mod=$@.erl; rebuild=no;					\
