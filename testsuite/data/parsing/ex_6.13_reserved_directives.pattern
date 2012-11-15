@@ -2,7 +2,7 @@
 
 %% TEST
 ?_assertMatch(
-  {yaml_parser,
+  {yamerl_parser,
     {file,"${FILENAME}"},
     [],
     <<>>,
@@ -39,22 +39,22 @@
     _,
     false,
     [
-      {yaml_parsing_error,warning,
+      {yamerl_parsing_error,warning,
         "Reserved directive \"FOO\" ignored",
         1,1,reserved_directive,
-        {yaml_reserved_directive,1,1,"FOO",["bar","baz"],2},
+        {yamerl_reserved_directive,1,1,"FOO",["bar","baz"],2},
         []}
     ],
     [
-      {yaml_stream_end,3,10},
-      {yaml_doc_end,3,10},
-      {yaml_scalar,3,5,
-        {yaml_tag,3,5,{non_specific,"!"}},
+      {yamerl_stream_end,3,10},
+      {yamerl_doc_end,3,10},
+      {yamerl_scalar,3,5,
+        {yamerl_tag,3,5,{non_specific,"!"}},
         flow,double_quoted,"foo"},
-      {yaml_doc_start,3,1,{1,2},_},
-      {yaml_reserved_directive,1,1,"FOO",["bar","baz"],2},
-      {yaml_stream_start,1,1,utf8}
+      {yamerl_doc_start,3,1,{1,2},_},
+      {yamerl_reserved_directive,1,1,"FOO",["bar","baz"],2},
+      {yamerl_stream_start,1,1,utf8}
     ]
   },
-  yaml_parser:file("${FILENAME}")
+  yamerl_parser:file("${FILENAME}")
 )

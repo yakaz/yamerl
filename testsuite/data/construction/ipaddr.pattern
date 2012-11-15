@@ -3,8 +3,8 @@
 %% TEST
 {setup,
   fun() ->
-      application:start(yaml),
-      yaml_app:set_param(node_mods, [yaml_node_ipaddr])
+      application:start(yamerl),
+      yamerl_app:set_param(node_mods, [yamerl_node_ipaddr])
   end,
   [
     ?_assertMatch(
@@ -19,47 +19,47 @@
           "Not an IP address"
         ]
       ],
-      yaml_constr:file("${FILENAME}", [{simple_structs, true}])
+      yamerl_constr:file("${FILENAME}", [{simple_structs, true}])
     ),
     ?_assertMatch(
       [
-        {yaml_doc,
-          {yaml_seq,yaml_node_seq,"tag:yaml.org,2002:seq",
+        {yamerl_doc,
+          {yamerl_seq,yamerl_node_seq,"tag:yaml.org,2002:seq",
             [{line,1},{column,1}],
-            [{yaml_ip_addr,yaml_node_ipaddr,
+            [{yamerl_ip_addr,yamerl_node_ipaddr,
                 "tag:yakaz.com,2011:ipaddr",
                 [{line,1},{column,3}],
                 {192,168,1,10}},
-              {yaml_ip_netmask,yaml_node_ipaddr,
+              {yamerl_ip_netmask,yamerl_node_ipaddr,
                 "tag:yakaz.com,2011:ipaddr",
                 [{line,2},{column,3}],
                 {192,168,1,10},
                 24},
-              {yaml_ip_range,yaml_node_ipaddr,
+              {yamerl_ip_range,yamerl_node_ipaddr,
                 "tag:yakaz.com,2011:ipaddr",
                 [{line,3},{column,3}],
                 {192,168,1,10},
                 {192,168,1,20}},
-              {yaml_ip_addr,yaml_node_ipaddr,
+              {yamerl_ip_addr,yamerl_node_ipaddr,
                 "tag:yakaz.com,2011:ipaddr",
                 [{line,5},{column,3}],
                 {8193,16848,1,28696,0,0,1,2}},
-              {yaml_ip_netmask,yaml_node_ipaddr,
+              {yamerl_ip_netmask,yamerl_node_ipaddr,
                 "tag:yakaz.com,2011:ipaddr",
                 [{line,6},{column,3}],
                 {8193,16848,1,28696,0,0,1,0},
                 64},
-              {yaml_ip_range,yaml_node_ipaddr,
+              {yamerl_ip_range,yamerl_node_ipaddr,
                 "tag:yakaz.com,2011:ipaddr",
                 [{line,7},{column,3}],
                 {8193,16848,1,28696,0,0,1,2},
                 {8193,16848,1,28696,0,0,1,5}},
-              {yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+              {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
                 [{line,9},{column,3}],
                 "Not an IP address"}],
             7}}
       ],
-      yaml_constr:file("${FILENAME}", [{simple_structs, false}])
+      yamerl_constr:file("${FILENAME}", [{simple_structs, false}])
     )
   ]
 }

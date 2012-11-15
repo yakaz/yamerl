@@ -2,17 +2,17 @@
 
 %% TEST
 ?_assertThrow(
-  {yaml_exception,
+  {yamerl_exception,
     [
-      {yaml_parsing_error,error,
+      {yamerl_parsing_error,error,
         "Tag handle \"!h!\" never declared",
-        4,9,undeclared_tag_handle,{yaml_tag,4,3,"!h!bar"},
+        4,9,undeclared_tag_handle,{yamerl_tag,4,3,"!h!bar"},
         []},
-      {yaml_parsing_error,error,
+      {yamerl_parsing_error,error,
         "Tag suffix mandatory",
-        3,6,invalid_tag_handle,{yaml_tag,3,3,"!e!"},
+        3,6,invalid_tag_handle,{yamerl_tag,3,3,"!e!"},
         []}
     ]
   },
-  yaml_parser:file("${FILENAME}")
+  yamerl_parser:file("${FILENAME}")
 )

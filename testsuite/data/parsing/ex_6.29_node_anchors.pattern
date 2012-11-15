@@ -2,7 +2,7 @@
 
 %% TEST
 ?_assertMatch(
-  {yaml_parser,
+  {yamerl_parser,
     {file,"${FILENAME}"},
     [],
     <<>>,
@@ -40,30 +40,30 @@
     false,
     [],
     [
-      {yaml_stream_end,2,27},
-      {yaml_doc_end,2,27},
-      {yaml_collection_end,2,27,block,mapping},
-      {yaml_alias,2,20,"anchor"},
-      {yaml_mapping_value,2,18},
-      {yaml_scalar,2,1,
-        {yaml_tag,2,1,{non_specific,"?"}},
+      {yamerl_stream_end,2,27},
+      {yamerl_doc_end,2,27},
+      {yamerl_collection_end,2,27,block,mapping},
+      {yamerl_alias,2,20,"anchor"},
+      {yamerl_mapping_value,2,18},
+      {yamerl_scalar,2,1,
+        {yamerl_tag,2,1,{non_specific,"?"}},
         flow,plain,"Second occurrence"},
-      {yaml_mapping_key,2,1},
-      {yaml_scalar,1,27,
-        {yaml_tag,1,27,{non_specific,"?"}},
+      {yamerl_mapping_key,2,1},
+      {yamerl_scalar,1,27,
+        {yamerl_tag,1,27,{non_specific,"?"}},
         flow,plain,"Value"},
-      {yaml_anchor,1,19,"anchor"},
-      {yaml_mapping_value,1,17},
-      {yaml_scalar,1,1,
-        {yaml_tag,1,1,{non_specific,"?"}},
+      {yamerl_anchor,1,19,"anchor"},
+      {yamerl_mapping_value,1,17},
+      {yamerl_scalar,1,1,
+        {yamerl_tag,1,1,{non_specific,"?"}},
         flow,plain,"First occurrence"},
-      {yaml_mapping_key,1,1},
-      {yaml_collection_start,1,1,
-        {yaml_tag,1,1,{non_specific,"?"}},
+      {yamerl_mapping_key,1,1},
+      {yamerl_collection_start,1,1,
+        {yamerl_tag,1,1,{non_specific,"?"}},
         block,mapping},
-      {yaml_doc_start,1,1,{1,2},_},
-      {yaml_stream_start,1,1,utf8}
+      {yamerl_doc_start,1,1,{1,2},_},
+      {yamerl_stream_start,1,1,utf8}
     ]
   },
-  yaml_parser:file("${FILENAME}")
+  yamerl_parser:file("${FILENAME}")
 )

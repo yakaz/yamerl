@@ -2,7 +2,7 @@
 
 %% TEST
 ?_assertMatch(
-  {yaml_parser,
+  {yamerl_parser,
     {file,"${FILENAME}"},
     [],
     <<>>,
@@ -40,14 +40,14 @@
     false,
     [],
     [
-      {yaml_stream_end,5,24},
-      {yaml_doc_end,5,24},
-      {yaml_scalar,1,1,
-        {yaml_tag,1,1,{non_specific,"!"}},
+      {yamerl_stream_end,5,24},
+      {yamerl_doc_end,5,24},
+      {yamerl_scalar,1,1,
+        {yamerl_tag,1,1,{non_specific,"!"}},
         flow,double_quoted,"Fun with \x5C \x22 \x07 \x08 \x1B \x0C \x0A \x0D \x09 \x0B \x00 \x20 \xA0 \x85 \x{2028} \x{2029} A A A"},
-      {yaml_doc_start,1,1,{1,2},_},
-      {yaml_stream_start,1,1,utf8}
+      {yamerl_doc_start,1,1,{1,2},_},
+      {yamerl_stream_start,1,1,utf8}
     ]
   },
-  yaml_parser:file("${FILENAME}")
+  yamerl_parser:file("${FILENAME}")
 )

@@ -2,7 +2,7 @@
 
 %% TEST
 ?_assertMatch(
-  {yaml_parser,
+  {yamerl_parser,
     {file,"${FILENAME}"},
     [],
     <<>>,
@@ -39,35 +39,35 @@
     _,
     false,
     [
-      {yaml_parsing_error,warning,
+      {yamerl_parsing_error,warning,
         "Invalid escaped character",
         3,3,invalid_escaped_character,
-        {yaml_scalar,2,3,{yaml_tag,2,3,{non_specific,"!"}},flow,double_quoted,"c "},
+        {yamerl_scalar,2,3,{yamerl_tag,2,3,{non_specific,"!"}},flow,double_quoted,"c "},
         []},
-      {yaml_parsing_error,warning,
+      {yamerl_parsing_error,warning,
         "Invalid escaped character",
         2,4,invalid_escaped_character,
-        {yaml_scalar,2,3,{yaml_tag,2,3,{non_specific,"!"}},flow,double_quoted,""},
+        {yamerl_scalar,2,3,{yamerl_tag,2,3,{non_specific,"!"}},flow,double_quoted,""},
         []}
     ],
     [
-      {yaml_stream_end,3,8},
-      {yaml_doc_end,3,8},
-      {yaml_collection_end,3,8,block,mapping},
-      {yaml_scalar,2,3,
-        {yaml_tag,2,3,{non_specific,"!"}},
+      {yamerl_stream_end,3,8},
+      {yamerl_doc_end,3,8},
+      {yamerl_collection_end,3,8,block,mapping},
+      {yamerl_scalar,2,3,
+        {yamerl_tag,2,3,{non_specific,"!"}},
         flow,double_quoted,"c xq-"},
-      {yaml_mapping_value,1,12},
-      {yaml_scalar,1,1,
-        {yaml_tag,1,1,{non_specific,"?"}},
+      {yamerl_mapping_value,1,12},
+      {yamerl_scalar,1,1,
+        {yamerl_tag,1,1,{non_specific,"?"}},
         flow,plain,"Bad escapes"},
-      {yaml_mapping_key,1,1},
-      {yaml_collection_start,1,1,
-        {yaml_tag,1,1,{non_specific,"?"}},
+      {yamerl_mapping_key,1,1},
+      {yamerl_collection_start,1,1,
+        {yamerl_tag,1,1,{non_specific,"?"}},
         block,mapping},
-      {yaml_doc_start,1,1,{1,2},_},
-      {yaml_stream_start,1,1,utf8}
+      {yamerl_doc_start,1,1,{1,2},_},
+      {yamerl_stream_start,1,1,utf8}
     ]
   },
-  yaml_parser:file("${FILENAME}")
+  yamerl_parser:file("${FILENAME}")
 )

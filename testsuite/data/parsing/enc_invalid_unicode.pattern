@@ -2,12 +2,12 @@
 
 %% TEST
 ?_assertThrow(
-  {yaml_exception, [
-      {yaml_parsing_error,error,
+  {yamerl_exception, [
+      {yamerl_parsing_error,error,
         "Invalid Unicode character at byte #4",
         undefined,undefined,invalid_unicode,undefined,
         [{byte,4}]}
     ]
   },
-  yaml_parser:file("${FILENAME}", [{io_blocksize, 1}])
+  yamerl_parser:file("${FILENAME}", [{io_blocksize, 1}])
 )

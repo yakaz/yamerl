@@ -2,7 +2,7 @@
 
 %% TEST
 ?_assertMatch(
-  {yaml_parser,
+  {yamerl_parser,
     {file,"${FILENAME}"},
     [],
     <<>>,
@@ -39,23 +39,23 @@
     _,
     false,
     [
-      {yaml_parsing_error,warning,
+      {yamerl_parsing_error,warning,
         "Multiple YAML directives found: the last one will be used",
         2,1,multiple_yaml_directives,
-        {yaml_yaml_directive,2,1,{1,1}},
+        {yamerl_yaml_directive,2,1,{1,1}},
         []}
     ],
     [
-      {yaml_stream_end,3,4},
-      {yaml_doc_end,3,4},
-      {yaml_scalar,3,1,
-        {yaml_tag,3,1,{non_specific,"?"}},
+      {yamerl_stream_end,3,4},
+      {yamerl_doc_end,3,4},
+      {yamerl_scalar,3,1,
+        {yamerl_tag,3,1,{non_specific,"?"}},
         flow,plain,"foo"},
-      {yaml_doc_start,3,1,{1,1},_},
-      {yaml_yaml_directive,2,1,{1,1}},
-      {yaml_yaml_directive,1,1,{1,2}},
-      {yaml_stream_start,1,1,utf8}
+      {yamerl_doc_start,3,1,{1,1},_},
+      {yamerl_yaml_directive,2,1,{1,1}},
+      {yamerl_yaml_directive,1,1,{1,2}},
+      {yamerl_stream_start,1,1,utf8}
     ]
   },
-  yaml_parser:file("${FILENAME}")
+  yamerl_parser:file("${FILENAME}")
 )

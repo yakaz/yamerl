@@ -3,13 +3,13 @@
 %% TEST
 {setup,
   fun() ->
-      application:start(yaml),
-      yaml_app:set_param(node_mods, [yaml_node_erlang_fun])
+      application:start(yamerl),
+      yamerl_app:set_param(node_mods, [yamerl_node_erlang_fun])
   end,
   [
     {generator,
       fun() ->
-          [Erlang_Fun_Simple] = yaml_constr:file("${FILENAME}",
+          [Erlang_Fun_Simple] = yamerl_constr:file("${FILENAME}",
             [{simple_structs, true}]),
           ?_assertMatch(
             "Hello World!",
@@ -18,13 +18,13 @@
       end},
     {generator,
       fun() ->
-          [{yaml_doc,
-              {yaml_erlang_fun,yaml_node_erlang_fun,
+          [{yamerl_doc,
+              {yamerl_erlang_fun,yamerl_node_erlang_fun,
                 "tag:erlang.org,2011:fun",
                 [{line,1},{column,28}],
                 Erlang_Fun_Normal,
                 "fun() -> \"Hello World!\" end.\n"}}
-          ] = yaml_constr:file("${FILENAME}",
+          ] = yamerl_constr:file("${FILENAME}",
             [{simple_structs, false}]),
           ?_assertMatch(
             "Hello World!",

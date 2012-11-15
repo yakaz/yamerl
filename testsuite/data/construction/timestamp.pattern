@@ -3,8 +3,8 @@
 %% TEST
 {setup,
   fun() ->
-      application:start(yaml),
-      yaml_app:set_param(node_mods, [yaml_node_timestamp])
+      application:start(yamerl),
+      yamerl_app:set_param(node_mods, [yamerl_node_timestamp])
   end,
   [
     ?_assertMatch(
@@ -18,44 +18,44 @@
           "Not a timestamp"
         ]
       ],
-      yaml_constr:file("${FILENAME}", [{simple_structs, true}])
+      yamerl_constr:file("${FILENAME}", [{simple_structs, true}])
     ),
     ?_assertMatch(
       [
-        {yaml_doc,
-          {yaml_seq,yaml_node_seq,"tag:yaml.org,2002:seq",
+        {yamerl_doc,
+          {yamerl_seq,yamerl_node_seq,"tag:yaml.org,2002:seq",
             [{line,1},{column,1}],
-            [{yaml_timestamp,yaml_node_timestamp,
+            [{yamerl_timestamp,yamerl_node_timestamp,
                 "tag:yakaz.com,2011:timestamp",
                 [{line,1},{column,3}],
                 2011,5,26,undefined,undefined,undefined,
                 0,0},
-              {yaml_timestamp,yaml_node_timestamp,
+              {yamerl_timestamp,yamerl_node_timestamp,
                 "tag:yakaz.com,2011:timestamp",
                 [{line,2},{column,3}],
                 undefined,undefined,undefined,14,58,3,
                 0,0},
-              {yaml_timestamp,yaml_node_timestamp,
+              {yamerl_timestamp,yamerl_node_timestamp,
                 "tag:yakaz.com,2011:timestamp",
                 [{line,3},{column,3}],
                 2011,5,26,14,58,3,
                 0,0},
-              {yaml_timestamp,yaml_node_timestamp,
+              {yamerl_timestamp,yamerl_node_timestamp,
                 "tag:yakaz.com,2011:timestamp",
                 [{line,4},{column,3}],
                 2011,5,26,14,58,3,
                 0,0},
-              {yaml_timestamp,yaml_node_timestamp,
+              {yamerl_timestamp,yamerl_node_timestamp,
                 "tag:yakaz.com,2011:timestamp",
                 [{line,5},{column,3}],
                 2011,5,26,14,58,3,
                 0,0},
-              {yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+              {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
                 [{line,7},{column,3}],
                 "Not a timestamp"}],
             6}}
       ],
-      yaml_constr:file("${FILENAME}", [{simple_structs, false}])
+      yamerl_constr:file("${FILENAME}", [{simple_structs, false}])
     )
   ]
 }

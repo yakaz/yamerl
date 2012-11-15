@@ -2,14 +2,14 @@
 
 %% TEST
 ?_assertThrow(
-  {yaml_exception,
+  {yamerl_exception,
     [
-      {yaml_parsing_error,error,
+      {yamerl_parsing_error,error,
         "Version 2.0 not supported (maximum version 1.2)",
         1,1,version_not_supported,
-        {yaml_doc_start,1,1,{2,0},_},
+        {yamerl_doc_start,1,1,{2,0},_},
         []}
     ]
   },
-  yaml_parser:file("${FILENAME}", [{doc_version, {2,0}}])
+  yamerl_parser:file("${FILENAME}", [{doc_version, {2,0}}])
 )

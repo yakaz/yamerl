@@ -2,7 +2,7 @@
 
 %% TEST
 ?_assertMatch(
-  {yaml_parser,
+  {yamerl_parser,
     {file,"${FILENAME}"},
     [],
     <<>>,
@@ -40,21 +40,21 @@
     false,
     [],
     [
-      {yaml_stream_end,7,15},
-      {yaml_doc_end,7,15},
-      {yaml_scalar,7,10,
-        {yaml_tag,7,1,"!my-light"},
+      {yamerl_stream_end,7,15},
+      {yamerl_doc_end,7,15},
+      {yamerl_scalar,7,10,
+        {yamerl_tag,7,1,"!my-light"},
         flow,plain,"green"},
-      {yaml_doc_start,6,1,{1,2},_},
-      {yaml_tag_directive,5,1,"!m!","!my-"},
-      {yaml_doc_end,4,1},
-      {yaml_scalar,3,10,
-        {yaml_tag,3,1,"!my-light"},
+      {yamerl_doc_start,6,1,{1,2},_},
+      {yamerl_tag_directive,5,1,"!m!","!my-"},
+      {yamerl_doc_end,4,1},
+      {yamerl_scalar,3,10,
+        {yamerl_tag,3,1,"!my-light"},
         flow,plain,"fluorescent"},
-      {yaml_doc_start,2,1,{1,2},_},
-      {yaml_tag_directive,1,1,"!m!","!my-"},
-      {yaml_stream_start,1,1,utf8}
+      {yamerl_doc_start,2,1,{1,2},_},
+      {yamerl_tag_directive,1,1,"!m!","!my-"},
+      {yamerl_stream_start,1,1,utf8}
     ]
   },
-  yaml_parser:file("${FILENAME}")
+  yamerl_parser:file("${FILENAME}")
 )

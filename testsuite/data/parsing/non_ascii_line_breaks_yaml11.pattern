@@ -2,7 +2,7 @@
 
 %% TEST
 ?_assertMatch(
-  {yaml_parser,
+  {yamerl_parser,
     {file,"${FILENAME}"},
     [{io_blocksize, 1}],
     <<>>,
@@ -40,16 +40,16 @@
     false,
     [],
     [
-      {yaml_stream_end,5,20},
-      {yaml_doc_end,5,20},
-      {yaml_scalar,3,1,
-        {yaml_tag,3,1,{non_specific,"?"}},
+      {yamerl_stream_end,5,20},
+      {yamerl_doc_end,5,20},
+      {yamerl_scalar,3,1,
+        {yamerl_tag,3,1,{non_specific,"?"}},
         flow,plain,
         "Next line Line separator Paragraph separator"},
-      {yaml_doc_start,3,1,{1,1},_},
-      {yaml_yaml_directive,1,1,{1,1}},
-      {yaml_stream_start,1,1,utf8}
+      {yamerl_doc_start,3,1,{1,1},_},
+      {yamerl_yaml_directive,1,1,{1,1}},
+      {yamerl_stream_start,1,1,utf8}
     ]
   },
-  yaml_parser:file("${FILENAME}", [{io_blocksize, 1}])
+  yamerl_parser:file("${FILENAME}", [{io_blocksize, 1}])
 )

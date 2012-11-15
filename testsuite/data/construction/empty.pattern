@@ -3,16 +3,16 @@
 %% TEST
 {setup,
   fun() ->
-      application:start(yaml)
+      application:start(yamerl)
   end,
   [
     ?_assertMatch(
       [],
-      yaml_constr:file("${FILENAME}", [{simple_structs, true}])
+      yamerl_constr:file("${FILENAME}", [{simple_structs, true}])
     ),
     ?_assertMatch(
       [],
-      yaml_constr:file("${FILENAME}", [{simple_structs, false}])
+      yamerl_constr:file("${FILENAME}", [{simple_structs, false}])
     )
   ]
 }

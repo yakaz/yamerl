@@ -1,29 +1,29 @@
-erlsrcdir = $(ERLANG_INSTALL_LIB_DIR_yaml)/src
+erlsrcdir = $(ERLANG_INSTALL_LIB_DIR_yamerl)/src
 
-dist_erlsrc_DATA = yaml_app.erl						\
-		   yaml_sup.erl						\
-		   yaml_errors.erl					\
-		   yaml_parser.erl					\
-		   yaml_constr.erl					\
-		   yaml_node_seq.erl					\
-		   yaml_node_map.erl					\
-		   yaml_node_str.erl					\
-		   yaml_node_null.erl					\
-		   yaml_node_null_json.erl				\
-		   yaml_node_bool.erl					\
-		   yaml_node_bool_json.erl				\
-		   yaml_node_bool_ext.erl				\
-		   yaml_node_int.erl					\
-		   yaml_node_int_json.erl				\
-		   yaml_node_int_ext.erl				\
-		   yaml_node_float.erl					\
-		   yaml_node_float_json.erl				\
-		   yaml_node_float_ext.erl				\
-		   yaml_node_size.erl					\
-		   yaml_node_timestamp.erl				\
-		   yaml_node_ipaddr.erl					\
-		   yaml_node_erlang_atom.erl				\
-		   yaml_node_erlang_fun.erl
+dist_erlsrc_DATA = yamerl_app.erl					\
+		   yamerl_sup.erl					\
+		   yamerl_errors.erl					\
+		   yamerl_parser.erl					\
+		   yamerl_constr.erl					\
+		   yamerl_node_seq.erl					\
+		   yamerl_node_map.erl					\
+		   yamerl_node_str.erl					\
+		   yamerl_node_null.erl					\
+		   yamerl_node_null_json.erl				\
+		   yamerl_node_bool.erl					\
+		   yamerl_node_bool_json.erl				\
+		   yamerl_node_bool_ext.erl				\
+		   yamerl_node_int.erl					\
+		   yamerl_node_int_json.erl				\
+		   yamerl_node_int_ext.erl				\
+		   yamerl_node_float.erl				\
+		   yamerl_node_float_json.erl				\
+		   yamerl_node_float_ext.erl				\
+		   yamerl_node_size.erl					\
+		   yamerl_node_timestamp.erl				\
+		   yamerl_node_ipaddr.erl				\
+		   yamerl_node_erlang_atom.erl				\
+		   yamerl_node_erlang_fun.erl
 
 CLEANFILES = Emakefile
 

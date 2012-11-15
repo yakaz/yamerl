@@ -2,7 +2,7 @@
 
 %% TEST
 ?_assertMatch(
-  {yaml_parser,
+  {yamerl_parser,
     string,
     [{token_fun, _}],
     <<>>,
@@ -41,5 +41,5 @@
     [],
     []
   },
-  yaml_parser:string(<<>>, [{token_fun, fun(_) -> ok end}])
+  yamerl_parser:string(<<>>, [{token_fun, fun(_) -> ok end}])
 )

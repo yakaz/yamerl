@@ -1,4 +1,4 @@
-Source: erlang-yaml
+Source: erlang-yamerl
 Section: devel
 Priority: optional
 Maintainer: Jean-Sébastien Pédron <jean-sebastien@yakaz.com>
@@ -6,12 +6,12 @@ Uploaders: Christopher Faulet <christopher@yakaz.com>
 Build-Depends: debhelper (>= 8), autotools-dev, erlang-dev (>= 1:14.b.2), erlang-tools
 Standards-Version: 3.9.1
 
-Package: erlang-yaml
+Package: erlang-yamerl
 Architecture: all
 Section: devel
 Priority: optional
 Depends: ${misc:Depends}, ${erlang:Depends}
-Description: YAML parser
+Description: Pure Erlang YAML 1.2 parser
  YAML is a human-friendly, cross language, Unicode based data
  serialization language designed around the common native data types of
  agile programming languages

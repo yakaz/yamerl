@@ -2,7 +2,7 @@
 
 %% TEST
 ?_assertMatch(
-  {yaml_parser,
+  {yamerl_parser,
     {file,"${FILENAME}"},
     [],
     <<>>,
@@ -39,22 +39,22 @@
     _,
     false,
     [
-      {yaml_parsing_error,warning,
+      {yamerl_parsing_error,warning,
         "Version 1.3 not supported (maximum version 1.2); parsing may fail",
         3,1,version_not_supported,
-        {yaml_doc_start,3,1,{1,3},_},
+        {yamerl_doc_start,3,1,{1,3},_},
         []}
     ],
     [
-      {yaml_stream_end,4,6},
-      {yaml_doc_end,4,6},
-      {yaml_scalar,4,1,
-        {yaml_tag,4,1,{non_specific,"!"}},
+      {yamerl_stream_end,4,6},
+      {yamerl_doc_end,4,6},
+      {yamerl_scalar,4,1,
+        {yamerl_tag,4,1,{non_specific,"!"}},
         flow,double_quoted,"foo"},
-      {yaml_doc_start,3,1,{1,3},_},
-      {yaml_yaml_directive,1,1,{1,3}},
-      {yaml_stream_start,1,1,utf8}
+      {yamerl_doc_start,3,1,{1,3},_},
+      {yamerl_yaml_directive,1,1,{1,3}},
+      {yamerl_stream_start,1,1,utf8}
     ]
   },
-  yaml_parser:file("${FILENAME}")
+  yamerl_parser:file("${FILENAME}")
 )

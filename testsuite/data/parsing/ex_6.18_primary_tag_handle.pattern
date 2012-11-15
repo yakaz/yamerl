@@ -2,7 +2,7 @@
 
 %% TEST
 ?_assertMatch(
-  {yaml_parser,
+  {yamerl_parser,
     {file,"${FILENAME}"},
     [],
     <<>>,
@@ -40,20 +40,20 @@
     false,
     [],
     [
-      {yaml_stream_end,7,11},
-      {yaml_doc_end,7,11},
-      {yaml_scalar,7,6,
-        {yaml_tag,7,1,"tag:example.com,2000:app/foo"},
+      {yamerl_stream_end,7,11},
+      {yamerl_doc_end,7,11},
+      {yamerl_scalar,7,6,
+        {yamerl_tag,7,1,"tag:example.com,2000:app/foo"},
         flow,double_quoted,"bar"},
-      {yaml_doc_start,6,1,{1,2},_},
-      {yaml_tag_directive,5,1,"!","tag:example.com,2000:app/"},
-      {yaml_doc_end,3,1},
-      {yaml_scalar,2,6,
-        {yaml_tag,2,1,"!foo"},
+      {yamerl_doc_start,6,1,{1,2},_},
+      {yamerl_tag_directive,5,1,"!","tag:example.com,2000:app/"},
+      {yamerl_doc_end,3,1},
+      {yamerl_scalar,2,6,
+        {yamerl_tag,2,1,"!foo"},
         flow,double_quoted,"bar"},
-      {yaml_doc_start,2,1,{1,2},_},
-      {yaml_stream_start,1,1,utf8}
+      {yamerl_doc_start,2,1,{1,2},_},
+      {yamerl_stream_start,1,1,utf8}
     ]
   },
-  yaml_parser:file("${FILENAME}")
+  yamerl_parser:file("${FILENAME}")
 )

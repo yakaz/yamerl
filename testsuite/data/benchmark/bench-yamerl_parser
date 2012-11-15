@@ -1,0 +1,25 @@
+#!/usr/bin/env escript
+%% vim:ft=erlang:
+
+main([Input, Count_S]) ->
+    Count = list_to_integer(Count_S),
+    {ok, Content} = file:read_file(Input),
+    T0 = erlang:now(),
+    loop(Content, Count),
+    T1 = erlang:now(),
+    print_result(Count, T0, T1).
+
+loop(Content, Count) when Count >= 1 ->
+    yamerl_parser:string(Content, [
+        {token_fun, fun(_) -> ok end}
+      ]),
+    loop(Content, Count - 1);
+loop(_, 0) ->
+    ok.
+
+print_result(Count, T0, T1) when Count > 0 ->
+    Diff = timer:now_diff(T1, T0),
+    io:format("  yamerl_parser:    ~8.2f µs~n",
+      [Diff / Count]);
+print_result(_, _, _) ->
+    io:format("No result~n", []).

@@ -2,7 +2,7 @@
 
 %% TEST
 ?_assertMatch(
-  {yaml_parser,
+  {yamerl_parser,
     {file,"${FILENAME}"},
     [{io_blocksize, 1}],
     <<>>,
@@ -40,9 +40,9 @@
     false,
     [],
     [
-      {yaml_stream_end,1,17},
-      {yaml_stream_start,1,1,utf8}
+      {yamerl_stream_end,1,17},
+      {yamerl_stream_start,1,1,utf8}
     ]
   },
-  yaml_parser:file("${FILENAME}", [{io_blocksize, 1}])
+  yamerl_parser:file("${FILENAME}", [{io_blocksize, 1}])
 )

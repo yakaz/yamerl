@@ -2,7 +2,7 @@
 
 %% TEST
 ?_assertMatch(
-  {yaml_parser,
+  {yamerl_parser,
     {file,"${FILENAME}"},
     [],
     <<>>,
@@ -40,14 +40,14 @@
     false,
     [],
     [
-      {yaml_stream_end,7,1},
-      {yaml_doc_end,7,1},
-      {yaml_scalar,1,1,
-        {yaml_tag,1,1,{non_specific,"!"}},
+      {yamerl_stream_end,7,1},
+      {yamerl_doc_end,7,1},
+      {yamerl_scalar,1,1,
+        {yamerl_tag,1,1,{non_specific,"!"}},
         block,folded,"foo \n\n\t bar\n\nbaz\n"},
-      {yaml_doc_start,1,1,{1,2},_},
-      {yaml_stream_start,1,1,utf8}
+      {yamerl_doc_start,1,1,{1,2},_},
+      {yamerl_stream_start,1,1,utf8}
     ]
   },
-  yaml_parser:file("${FILENAME}")
+  yamerl_parser:file("${FILENAME}")
 )

@@ -1,9 +1,9 @@
-headersdir = $(ERLANG_INSTALL_LIB_DIR_yaml)/include
+headersdir = $(ERLANG_INSTALL_LIB_DIR_yamerl)/include
 
-nobase_dist_headers_DATA = yaml_types.hrl				\
-			   yaml_errors.hrl				\
-			   yaml_tokens.hrl				\
-			   yaml_nodes.hrl				\
-			   yaml_nodes_yakaz.hrl				\
-			   internal/yaml_parser.hrl			\
-			   internal/yaml_constr.hrl
+nobase_dist_headers_DATA = yamerl_types.hrl				\
+			   yamerl_errors.hrl				\
+			   yamerl_tokens.hrl				\
+			   yamerl_nodes.hrl				\
+			   yamerl_nodes_yakaz.hrl			\
+			   internal/yamerl_parser.hrl			\
+			   internal/yamerl_constr.hrl

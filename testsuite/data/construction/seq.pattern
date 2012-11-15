@@ -3,7 +3,7 @@
 %% TEST
 {setup,
   fun() ->
-      application:start(yaml)
+      application:start(yamerl)
   end,
   [
     ?_assertMatch(
@@ -13,31 +13,31 @@
           [ "item", 2 ]
         ]
       ],
-      yaml_constr:file("${FILENAME}", [{simple_structs, true}])
+      yamerl_constr:file("${FILENAME}", [{simple_structs, true}])
     ),
     ?_assertMatch(
       [
-        {yaml_doc,
-          {yaml_seq,yaml_node_seq,"tag:yaml.org,2002:seq",
+        {yamerl_doc,
+          {yamerl_seq,yamerl_node_seq,"tag:yaml.org,2002:seq",
             [{line,1},{column,1}],
-            [{yaml_seq,yaml_node_seq,"tag:yaml.org,2002:seq",
+            [{yamerl_seq,yamerl_node_seq,"tag:yaml.org,2002:seq",
                 [{line,1},{column,3}],
-                [{yaml_str,yaml_node_str,
+                [{yamerl_str,yamerl_node_str,
                     "tag:yaml.org,2002:str",
                     [{line,1},{column,5}],
                     "item"},
-                  {yaml_int,yaml_node_int,
+                  {yamerl_int,yamerl_node_int,
                     "tag:yaml.org,2002:int",
                     [{line,1},{column,11}],
                     1}],
                 2},
-              {yaml_seq,yaml_node_seq,"tag:yaml.org,2002:seq",
+              {yamerl_seq,yamerl_node_seq,"tag:yaml.org,2002:seq",
                 [{line,2},{column,3}],
-                [{yaml_str,yaml_node_str,
+                [{yamerl_str,yamerl_node_str,
                     "tag:yaml.org,2002:str",
                     [{line,2},{column,5}],
                     "item"},
-                  {yaml_int,yaml_node_int,
+                  {yamerl_int,yamerl_node_int,
                     "tag:yaml.org,2002:int",
                     [{line,2},{column,11}],
                     2}],
@@ -45,7 +45,7 @@
             2}
         }
       ],
-      yaml_constr:file("${FILENAME}", [{simple_structs, false}])
+      yamerl_constr:file("${FILENAME}", [{simple_structs, false}])
     )
   ]
 }

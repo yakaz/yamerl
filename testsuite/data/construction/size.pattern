@@ -3,8 +3,8 @@
 %% TEST
 {setup,
   fun() ->
-      application:start(yaml),
-      yaml_app:set_param(node_mods, [yaml_node_size])
+      application:start(yamerl),
+      yamerl_app:set_param(node_mods, [yamerl_node_size])
   end,
   [
     ?_assertMatch(
@@ -15,43 +15,43 @@
           "Not a size"
         ]
       ],
-      yaml_constr:file("${FILENAME}", [{simple_structs, true}])
+      yamerl_constr:file("${FILENAME}", [{simple_structs, true}])
     ),
     ?_assertMatch(
       [
-        {yaml_doc,
-          {yaml_seq,yaml_node_seq,"tag:yaml.org,2002:seq",
+        {yamerl_doc,
+          {yamerl_seq,yamerl_node_seq,"tag:yaml.org,2002:seq",
             [{line,1},{column,1}],
-            [{yaml_int,yaml_node_size,"tag:yakaz.com,2011:size",
+            [{yamerl_int,yamerl_node_size,"tag:yakaz.com,2011:size",
                 [{line,1},{column,3}],
                 2000},
-              {yaml_int,yaml_node_size,"tag:yakaz.com,2011:size",
+              {yamerl_int,yamerl_node_size,"tag:yakaz.com,2011:size",
                 [{line,2},{column,3}],
                 2000000},
-              {yaml_int,yaml_node_size,"tag:yakaz.com,2011:size",
+              {yamerl_int,yamerl_node_size,"tag:yakaz.com,2011:size",
                 [{line,3},{column,3}],
                 2000000000},
-              {yaml_int,yaml_node_size,"tag:yakaz.com,2011:size",
+              {yamerl_int,yamerl_node_size,"tag:yakaz.com,2011:size",
                 [{line,4},{column,3}],
                 2000000000000},
-              {yaml_int,yaml_node_size,"tag:yakaz.com,2011:size",
+              {yamerl_int,yamerl_node_size,"tag:yakaz.com,2011:size",
                 [{line,6},{column,3}],
                 2048},
-              {yaml_int,yaml_node_size,"tag:yakaz.com,2011:size",
+              {yamerl_int,yamerl_node_size,"tag:yakaz.com,2011:size",
                 [{line,7},{column,3}],
                 2097152},
-              {yaml_int,yaml_node_size,"tag:yakaz.com,2011:size",
+              {yamerl_int,yamerl_node_size,"tag:yakaz.com,2011:size",
                 [{line,8},{column,3}],
                 2147483648},
-              {yaml_int,yaml_node_size,"tag:yakaz.com,2011:size",
+              {yamerl_int,yamerl_node_size,"tag:yakaz.com,2011:size",
                 [{line,9},{column,3}],
                 2199023255552},
-              {yaml_str,yaml_node_str,"tag:yaml.org,2002:str",
+              {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
                 [{line,11},{column,3}],
                 "Not a size"}],
             9}}
       ],
-      yaml_constr:file("${FILENAME}", [{simple_structs, false}])
+      yamerl_constr:file("${FILENAME}", [{simple_structs, false}])
     )
   ]
 }

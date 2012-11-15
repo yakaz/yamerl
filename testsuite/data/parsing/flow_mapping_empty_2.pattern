@@ -2,12 +2,12 @@
 
 %% TEST
 ?_assertThrow(
-  {yaml_exception,
+  {yamerl_exception,
     [
-      {yaml_parsing_error,error,
+      {yamerl_parsing_error,error,
         "Empty flow collection entry not allowed",
         2,1,flow_collection_entry_not_allowed,undefined,[]}
     ]
   },
-  yaml_parser:file("${FILENAME}")
+  yamerl_parser:file("${FILENAME}")
 )

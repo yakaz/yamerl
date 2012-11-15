@@ -2,16 +2,16 @@
 
 %% TEST
 ?_assertThrow(
-  {yaml_exception,
+  {yamerl_exception,
     [
-      {yaml_parsing_error,error,
-        "Unexpected \"yaml_scalar\" token following a \"yaml_scalar\" token",
+      {yamerl_parsing_error,error,
+        "Unexpected \"yamerl_scalar\" token following a \"yamerl_scalar\" token",
         3,1,unpected_token,
-        {yaml_scalar,3,1,
-          {yaml_tag,3,1,{non_specific,"!"}},
+        {yamerl_scalar,3,1,
+          {yamerl_tag,3,1,{non_specific,"!"}},
           flow,double_quoted,"item2"},
         []}
     ]
   },
-  yaml_parser:file("${FILENAME}")
+  yamerl_parser:file("${FILENAME}")
 )
