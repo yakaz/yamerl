@@ -93,7 +93,7 @@ string_to_float(Text) ->
 
 string_to_float2(Text) ->
     Opts = [{capture, none}],
-    Ret = re:run(Text, "^(\.[0-9]+|[0-9]+(\.[0-9]*)?)([eE][-+]?[0-9]+)?$",
+    Ret = re:run(Text, "^(\\.[0-9]+|[0-9]+(\\.[0-9]*)?)([eE][-+]?[0-9]+)?$",
       Opts),
     case Ret of
         match   -> erlang_list_to_float(Text);
