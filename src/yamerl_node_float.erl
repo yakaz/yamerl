@@ -100,9 +100,11 @@ string_to_float2(Text) ->
         nomatch -> error
     end.
 
+erlang_list_to_float([$. | _] = Text) ->
+    erlang_list_to_float([$0 | Text]);
 erlang_list_to_float(Text) ->
     try
-        Text1 = re:replace(Text, "^([-+]?[0-9]+)([eE]|$)", "\\1.0\\2",
+        Text1 = re:replace(Text, "^([0-9]+)\\.?([eE]|$)", "\\1.0\\2",
           [{return, list}]),
         erlang:list_to_float(Text1)
     catch
