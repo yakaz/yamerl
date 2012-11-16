@@ -3,7 +3,7 @@
 -include("yamerl_errors.hrl").
 -include("yamerl_tokens.hrl").
 -include("yamerl_nodes.hrl").
--include("yamerl_nodes_yakaz.hrl").
+-include("yamerl_nodes_yamerl_extensions.hrl").
 -include("internal/yamerl_constr.hrl").
 
 %% Public API.
@@ -15,7 +15,7 @@
     parse/1
   ]).
 
--define(TAG, "tag:yakaz.com,2011:ipaddr").
+-define(TAG, "tag:yamerl,2012:ipaddr").
 
 %% -------------------------------------------------------------------
 %% Public API.

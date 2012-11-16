@@ -1,5 +1,5 @@
--ifndef(yamerl_nodes_yakaz_hrl).
--define(yamerl_nodes_yakaz_hrl, true).
+-ifndef(yamerl_nodes_yamerl_extensions_hrl).
+-define(yamerl_nodes_yamerl_extensions_hrl, true).
 
 -include("yamerl_types.hrl").
 
