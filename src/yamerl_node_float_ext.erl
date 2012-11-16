@@ -90,36 +90,59 @@ string_to_float([$- | Text]) ->
 string_to_float(Text) ->
     string_to_float2(Text).
 
+%% The expressions given in the "Canonical:" and "Regexp:" sections in
+%% the "float" type specification [1] from the type repository have some
+%% inconsistencies:
+%%     o  "0" is accepted by "Canonical:", but not by "Regexp:".
+%%     o  Multiple "." are accepted by the base-10 expression in
+%%        "Regexp:". It probably should have been "_" inside the square
+%%        brackets.
+%%     o  base-10 and base-60 decimal parts don't have the same format
+%%        (base-60 accepts an "_" as the first character).
+%%     o  A "." whole alone is accepted.
+%%
+%% This module tries to implement a sensible mix of the specified expressions:
+%%     o  "0" is accepted, but not any other integer.
+%%     o  Multiple "." are denied.
+%%     o  "_" are accepted after ".".
+%%     o  base-10 and base-60 supports the same decimal format (ie. the
+%%        first character after "." must be a digit).
+%%     o  "." alone is denied.
+%%
+%% [1] http://yaml.org/type/float.html
+
+string_to_float2("0") ->
+    %% "0" is the only integer accepted by the "Canonical:" section.
+    0.0;
+string_to_float2(".") ->
+    error;
 string_to_float2(Text) ->
     %% Try base 10.
     Opts1 = [{capture, none}],
-    case re:run(Text, "^([0-9][0-9_]*)?\.[0-9.]*([eE][-+][0-9]+)?$", Opts1) of
+    Ret1 = re:run(Text,
+      "^([0-9][0-9_]*)?\\.([0-9][0-9_]*)?([eE][-+][0-9]+)?$",
+      Opts1),
+    case Ret1 of
         match ->
-            string_to_float3(Text);
+            yamerl_node_float:erlang_list_to_float(Text);
         nomatch ->
             %% Try base 60.
             Opts2 = [{capture, all_but_first, list}],
-            Ret = re:run(Text, "^([0-9][0-9_]*)(:[0-5]?[0-9])+\.([0-9_]*)$",
+            Ret2 = re:run(Text,
+              "^((?:[0-9][0-9_]*)(?::[0-5]?[0-9])+)\\.([0-9][0-9_]*)?$",
               Opts2),
-            case Ret of
-                {match, [P1, P2, Dec]} ->
-                    case yamerl_node_int_ext:base60_to_integer(P1 ++ P2, 0, 0) of
+            case Ret2 of
+                {match, [Base60, Dec]} ->
+                    case yamerl_node_int_ext:base60_to_integer(Base60, 0, 0) of
                         error ->
                             error;
                         Int ->
-                            string_to_float3(
+                            yamerl_node_float:erlang_list_to_float(
                               erlang:integer_to_list(Int) ++ "." ++ Dec)
                     end;
                 nomatch ->
                     error
             end
-    end.
-
-string_to_float3(Text) ->
-    try
-        erlang:list_to_float(Text)
-    catch
-        error:badarg -> error
     end.
 
 exception(Token) ->
