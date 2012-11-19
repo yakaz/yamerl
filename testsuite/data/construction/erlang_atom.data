@@ -1,2 +1,10 @@
 - !<tag:erlang.org,2011:atom> atom
 - !<tag:erlang.org,2011:atom> atom requiring quoting!
+
+- atom
+- node@domain
+
+- not an atom
+- NotAnAtom
+- 'Not an atom'
+- "Not an atom"
