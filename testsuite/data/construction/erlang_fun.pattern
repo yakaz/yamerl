@@ -20,8 +20,8 @@
       fun() ->
           [{yamerl_doc,
               {yamerl_erlang_fun,yamerl_node_erlang_fun,
-                "tag:erlang.org,2011:fun",
-                [{line,1},{column,28}],
+                "tag:yamerl,2012:fun",
+                [{line,1},{column,24}],
                 Erlang_Fun_Normal,
                 "fun() -> \"Hello World!\" end.\n"}}
           ] = yamerl_constr:file("${FILENAME}",

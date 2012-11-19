@@ -1,5 +1,5 @@
-- !<tag:erlang.org,2011:atom> atom
-- !<tag:erlang.org,2011:atom> atom requiring quoting!
+- !<tag:yamerl,2012:atom> atom
+- !<tag:yamerl,2012:atom> atom requiring quoting!
 
 - atom
 - node@domain

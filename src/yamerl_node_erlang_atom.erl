@@ -13,7 +13,7 @@
     node_pres/1
   ]).
 
--define(TAG, "tag:erlang.org,2011:atom").
+-define(TAG, "tag:yamerl,2012:atom").
 
 %% -------------------------------------------------------------------
 %% Public API.
