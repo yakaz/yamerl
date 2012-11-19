@@ -7,7 +7,9 @@
 %% Options.
 %% -------------------------------------------------------------------
 
--type yamerl_constr_option() :: {simple_structs, boolean()}.
+-type yamerl_constr_option() :: {simple_structs, boolean()}
+                              | {node_mods, [atom()]}
+                              | {schema, failsafe | json | core}.
 
 %% -------------------------------------------------------------------
 %% Representation state.
@@ -22,6 +24,7 @@
 
 -record(yamerl_constr, {
     options              = []         :: [yamerl_constr_option()],
+    ext_options          = []         :: [{term(), term()}],
     simple_structs       = true       :: boolean(),
     mods                 = []         :: [atom()],
     tags                 = []         :: [{tag_uri(), atom()}],

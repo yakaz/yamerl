@@ -18,7 +18,8 @@
     last_chunk/2,
     get_pres_details/1,
     node_line/1,
-    node_column/1
+    node_column/1,
+    option_names/0
   ]).
 
 %% -------------------------------------------------------------------
@@ -219,7 +220,8 @@ construct_parent(#yamerl_constr{docs = Docs, docs_count = Count} = Constr,
       anchors              = dict:new()
     },
     return_new_fun(Constr1);
-construct_parent(Constr, [#unfinished_node{module = Mod} = Node | Doc], Child) ->
+construct_parent(Constr, [#unfinished_node{module = Mod} = Node | Doc],
+  Child) ->
     %% We call the parent node's module to handle this new child node.
     Ret = Mod:construct_node(Constr, Node, Child),
     handle_construct_return(Constr, Doc, Ret).
@@ -314,23 +316,55 @@ index_tags2(Tags, [], _) ->
 %% -------------------------------------------------------------------
 
 initialize(Options) ->
-    {Constr_Options, Parser_Options} = filter_options(Options),
+    {Constr_Options, Parser_Options, Ext_Options} = filter_options(Options),
+    check_options(Constr_Options),
     Constr = #yamerl_constr{
       options        = Constr_Options,
+      ext_options    = Ext_Options,
       simple_structs = proplists:get_value(simple_structs, Constr_Options, true)
     },
     {ok, Token_Fun} = setup_node_mods(Constr),
     [{token_fun, Token_Fun} | Parser_Options].
 
 filter_options(Options) ->
-    Parser_Options = yamerl_parser:option_names(),
-    Fun = fun
-        ({Name, _}) -> not lists:member(Name, Parser_Options);
-        (_)         -> true
-    end,
-    {Constr_Options, _} = Filtered_Opts = lists:partition(Fun, Options),
-    check_options(Constr_Options),
-    Filtered_Opts.
+    Constr_Option_Names = option_names(),
+    Parser_Option_Names = yamerl_parser:option_names(),
+    filter_options2(Options, Constr_Option_Names, Parser_Option_Names,
+      [], [], []).
+
+filter_options2([{Name, _} = Option | Rest],
+  Constr_Option_Names, Parser_Option_Names,
+  Constr_Options, Parser_Options, Ext_Options) ->
+    case lists:member(Name, Constr_Option_Names) of
+        true ->
+            filter_options2(Rest,
+              Constr_Option_Names, Parser_Option_Names,
+              [Option | Constr_Options], Parser_Options, Ext_Options);
+        false ->
+            case lists:member(Name, Parser_Option_Names) of
+                true ->
+                    filter_options2(Rest,
+                      Constr_Option_Names, Parser_Option_Names,
+                      Constr_Options, [Option | Parser_Options], Ext_Options);
+                false ->
+                    filter_options2(Rest,
+                      Constr_Option_Names, Parser_Option_Names,
+                      Constr_Options, Parser_Options, [Option | Ext_Options])
+            end
+    end;
+filter_options2([], _, _, Constr_Options, Parser_Options, Ext_Options) ->
+    {
+      lists:reverse(Constr_Options),
+      lists:reverse(Parser_Options),
+      lists:reverse(Ext_Options)
+    }.
+
+option_names() ->
+    [
+      node_mods,
+      schema,
+      simple_structs
+    ].
 
 check_options([Option | Rest]) ->
     case is_option_valid(Option) of
