@@ -35,11 +35,4 @@
   }).
 -type yamerl_exception() :: #yamerl_exception{}.
 
-%% -------------------------------------------------------------------
-%% Macros to access common members of the error records.
-%% -------------------------------------------------------------------
-
--define(ERROR_TYPE(E), element(#yamerl_parsing_error.type, E)).
--define(ERROR_TEXT(E), element(#yamerl_parsing_error.text, E)).
-
 -endif.

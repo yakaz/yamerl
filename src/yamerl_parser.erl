@@ -4308,7 +4308,7 @@ add_error(
     %% Update has_errors flag.
     Has_Errors1 = if
         Has_Errors -> Has_Errors;
-        true       -> ?ERROR_TYPE(Error) == error
+        true       -> Error#yamerl_parsing_error.type == error
     end,
     Parser#yamerl_parser{
       has_errors = Has_Errors1,
