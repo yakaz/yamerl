@@ -161,7 +161,7 @@
                                    | yamerl_simple_node() | undefined
   }).
 -type yamerl_doc()                :: #yamerl_doc{root :: yamerl_node()}.
--type yamerl_simple_doc()         :: #yamerl_doc{root :: yamerl_simple_node()}.
+-type yamerl_simple_doc()         :: yamerl_simple_node().
 -type yamerl_partial_doc()        :: #yamerl_doc{}.
 
 %% -------------------------------------------------------------------
