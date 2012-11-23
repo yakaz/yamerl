@@ -275,7 +275,7 @@ string(String, Options) when is_binary(String) ->
     Parser = new(string, Options),
     next_chunk(Parser, String, true);
 string(String, Options) when is_list(String) ->
-    string(list_to_binary(String), Options).
+    string(unicode:characters_to_binary(String), Options).
 
 file(Filename) ->
     file(Filename, []).
