@@ -50,6 +50,13 @@
     vcol   = 1        :: position()          %% Last value column.
   }).
 
+-type stream_state_fun() ::
+      fun((unicode_string(), position(), position(), non_neg_integer(),
+           yamerl_parser()) ->
+             yamerl_parser()
+           | {continue, yamerl_parser()}
+           | no_return()).
+
 -record(yamerl_parser, {
     %%
     %% Buffer management.
@@ -122,14 +129,7 @@
     %% parameters:
     %%   o  the block-context indentation prefixes (a stack);
     %%   o  the level of flow-context nesting (a stack too).
-    stream_state                      :: fun((string(),
-                                              pos_integer(),
-                                              pos_integer(),
-                                              non_neg_integer(),
-                                              #yamerl_parser{}) ->
-                                               {ok, #yamerl_parser{}}
-                                             | {continue, #yamerl_parser{}}
-                                             | none()),
+    stream_state = fun start_stream/5 :: stream_state_fun(),
     parent_colls = []                 :: [#bcoll{} | #fcoll{}],
     cur_coll     = #bcoll{}           :: #bcoll{} | #fcoll{},
 
