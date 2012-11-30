@@ -316,7 +316,8 @@ index_tags2(Tags, [], _) ->
 %% -------------------------------------------------------------------
 
 initialize(Options) ->
-    {Constr_Options, Parser_Options, Ext_Options} = filter_options(Options),
+    Options0 = proplists:unfold(Options),
+    {Constr_Options, Parser_Options, Ext_Options} = filter_options(Options0),
     check_options(Constr_Options),
     Constr = #yamerl_constr{
       options        = Constr_Options,

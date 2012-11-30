@@ -237,12 +237,13 @@ new(Source) ->
     new(Source, []).
 
 new(Source, Options) ->
-    check_options(Options),
+    Options0 = proplists:unfold(Options),
+    check_options(Options0),
     #yamerl_parser{
       source       = Source,
-      options      = Options,
+      options      = Options0,
       stream_state = fun start_stream/5,
-      token_fun    = proplists:get_value(token_fun, Options, acc)
+      token_fun    = proplists:get_value(token_fun, Options0, acc)
     }.
 
 next_chunk(Parser, <<>>, false) ->
