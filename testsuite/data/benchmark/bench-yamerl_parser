@@ -19,7 +19,6 @@ loop(_, 0) ->
 
 print_result(Count, T0, T1) when Count > 0 ->
     Diff = timer:now_diff(T1, T0),
-    io:format("  yamerl_parser:    ~8.2f µs~n",
-      [Diff / Count]);
+    io:format("  yamerl_parser:    ~8.2f µs~n", [Diff / Count]);
 print_result(_, _, _) ->
-    io:format("No result~n", []).
+    io:format("  yamerl_parser:         n/a~n", []).
