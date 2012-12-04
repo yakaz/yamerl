@@ -80,7 +80,7 @@
     %% in this list. The index indicates where the characters data is in
     %% the stream; it equals to the amount of data already scanned in
     %% characters.
-    chars     = "" :: string(),
+    chars     = "" :: unicode_string(),
     chars_len = 0  :: non_neg_integer(),
     chars_idx = 0  :: non_neg_integer(),
 

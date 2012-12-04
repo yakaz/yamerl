@@ -23,6 +23,23 @@
   ]).
 
 %% -------------------------------------------------------------------
+%% Exported types.
+%% -------------------------------------------------------------------
+
+%% FIXME:
+%% This type should be "-opaque". However, up-to Erlang R15B03, an issue
+%% with either this code or Dialyzer prevents us from declaring it
+%% properly: Dialyzer reports warning regarding the stream_state_fun()
+%% type and several guard expression which will never match.
+-type yamerl_parser() :: #yamerl_parser{}.
+
+-export_type([
+    yamerl_parser/0,
+    yamerl_parser_option/0,
+    yamerl_parser_token_fun/0
+  ]).
+
+%% -------------------------------------------------------------------
 %% Secondary records to store the scanner state.
 %% -------------------------------------------------------------------
 
@@ -55,6 +72,8 @@
     args_count = 0 :: non_neg_integer()
   }).
 
+-type whitespace() :: [9 | 10 | 32].
+
 -record(block_scalar_hd_ctx, {
     style      = literal  :: literal | folded,
     line       = 1        :: position(),      %% Line where the token starts.
@@ -75,21 +94,21 @@
     indent                  :: pos_integer() | undefined, %% Block indent.
     longest_empty = 0       :: non_neg_integer(), %% Longest leading empty line.
     newline       = false   :: boolean(),     %% Met a newline character.
-    spaces        = ""      :: string(),      %% Last white spaces seen.
+    spaces        = ""      :: whitespace(),  %% Last white spaces seen.
     more_indent   = false   :: boolean(),     %% Last line is more indented.
     output        = ""      :: string()       %% Already parsed characters.
   }).
 
 -record(flow_scalar_ctx, {
     style        = plain :: double_quoted | single_quoted | plain,
-    line         = 1     :: position(), %% Line where the token starts.
-    col          = 1     :: position(), %% Column where the token starts.
-    endline      = 1     :: position(), %% Line where the token ends.
-    endcol       = 1     :: position(), %% Column where the token ends.
+    line         = 1     :: position(),   %% Line where the token starts.
+    col          = 1     :: position(),   %% Column where the token starts.
+    endline      = 1     :: position(),   %% Line where the token ends.
+    endcol       = 1     :: position(),   %% Column where the token ends.
     surrogate            :: 16#d800..16#dbff | undefined, %% High surrogate.
-    newline      = false :: boolean(),  %% Met a newline character.
-    spaces       = ""    :: string(),   %% Last white spaces seen.
-    output       = ""    :: string()    %% Already parsed characters.
+    newline      = false :: boolean(),    %% Met a newline character.
+    spaces       = ""    :: whitespace(), %% Last white spaces seen.
+    output       = ""    :: string()      %% Already parsed characters.
   }).
 
 -record(anchor_ctx, {
@@ -233,8 +252,19 @@
 %% Public API: chunked stream scanning.
 %% -------------------------------------------------------------------
 
+-spec new(Source) ->
+        Parser | no_return() when
+          Source :: term(),
+          Parser :: yamerl_parser().
+
 new(Source) ->
     new(Source, []).
+
+-spec new(Source, Options) ->
+        Parser | no_return() when
+          Source  :: term(),
+          Options :: [yamerl_parser_option()],
+          Parser  :: yamerl_parser().
 
 new(Source, Options) ->
     Options0 = proplists:unfold(Options),
@@ -246,31 +276,57 @@ new(Source, Options) ->
       token_fun    = proplists:get_value(token_fun, Options0, acc)
     }.
 
+-spec next_chunk(Parser, Chunk, Last_Chunk) ->
+        Ret | no_return() when
+          Parser     :: yamerl_parser(),
+          Chunk      :: unicode_binary(),
+          Last_Chunk :: boolean(),
+          Ret        :: {continue, New_Parser} | New_Parser,
+          New_Parser :: yamerl_parser().
+
 next_chunk(Parser, <<>>, false) ->
     %% No need to proceed further without any data.
     do_return(Parser);
-next_chunk(#yamerl_parser{raw_data = Data} = Parser, More_Data, EOS) ->
+next_chunk(#yamerl_parser{raw_data = Data} = Parser, Chunk, EOS) ->
     %% Append new data to the remaining data. Those data must then be
     %% decoded to Unicode characters.
-    New_Data = list_to_binary([Data, More_Data]),
+    New_Data = list_to_binary([Data, Chunk]),
     Parser1  = Parser#yamerl_parser{
       raw_data = New_Data,
       raw_eos  = EOS
     },
     decode_unicode(Parser1).
 
-next_chunk(Parser, More_Data) ->
-    next_chunk(Parser, More_Data, false).
+next_chunk(Parser, Chunk) ->
+    next_chunk(Parser, Chunk, false).
 
-last_chunk(Parser, More_Data) ->
-    next_chunk(Parser, More_Data, true).
+-spec last_chunk(Parser, Chunk) ->
+        Ret | no_return() when
+          Parser     :: yamerl_parser(),
+          Chunk      :: unicode_binary(),
+          Ret        :: {continue, New_Parser} | New_Parser,
+          New_Parser :: yamerl_parser().
+
+last_chunk(Parser, Chunk) ->
+    next_chunk(Parser, Chunk, true).
 
 %% -------------------------------------------------------------------
 %% Public API: common stream sources.
 %% -------------------------------------------------------------------
 
+-spec string(String) ->
+        Parser | no_return() when
+          String :: unicode_data(),
+          Parser :: yamerl_parser().
+
 string(String) ->
     string(String, []).
+
+-spec string(String, Options) ->
+        Parser | no_return() when
+          String  :: unicode_data(),
+          Options :: [yamerl_parser_option()],
+          Parser  :: yamerl_parser().
 
 string(String, Options) when is_binary(String) ->
     Parser = new(string, Options),
@@ -278,8 +334,19 @@ string(String, Options) when is_binary(String) ->
 string(String, Options) when is_list(String) ->
     string(unicode:characters_to_binary(String), Options).
 
+-spec file(Filename) ->
+        Parser | no_return() when
+          Filename :: string(),
+          Parser   :: yamerl_parser().
+
 file(Filename) ->
     file(Filename, []).
+
+-spec file(Filename, Options) ->
+        Parser | no_return() when
+          Filename :: string(),
+          Options  :: [yamerl_parser_option()],
+          Parser   :: yamerl_parser().
 
 file(Filename, Options) ->
     Parser    = new({file, Filename}, Options),
@@ -1472,8 +1539,7 @@ parse_flow_entry(Chars, Line, Col, Delta,
     Parser1 = finish_incomplete_flow_entries(Line, Col, Delta, Parser),
     parse_flow_entry(Chars, Line, Col, Delta, Parser1);
 parse_flow_entry([_ | Rest], Line, Col, Delta,
-  #yamerl_parser{
-  cur_coll = #fcoll{kind = Kind}} = Parser) when
+  #yamerl_parser{cur_coll = #fcoll{kind = Kind}} = Parser) when
   (Kind == sequence andalso ?MISSING_ENTRY(Parser)) orelse
   (Kind == mapping  andalso ?MISSING_KVPAIR(Parser)) ->
     %% In a flow collection, the "," entry indicator immediatly follows a
@@ -3457,8 +3523,21 @@ remove_impl_key_pos(
 %% Tokens queueing.
 %% -------------------------------------------------------------------
 
+-spec queue_token(Parser, Token) ->
+        New_Parser when
+          Parser     :: yamerl_parser(),
+          Token      :: yamerl_token(),
+          New_Parser :: yamerl_parser().
+
 queue_token(Parser, Token) ->
     queue_token_check_doc(Parser, Token, tail).
+
+-spec queue_token(Parser, Token, Insert_At) ->
+        New_Parser when
+          Parser     :: yamerl_parser(),
+          Token      :: yamerl_token(),
+          Insert_At  :: position() | tail,
+          New_Parser :: yamerl_parser().
 
 queue_token(Parser, Token, Insert_At) ->
     queue_token_check_doc(Parser, Token, Insert_At).
@@ -3990,7 +4069,7 @@ do_emit_token(
             },
             if
                 Error#yamerl_parsing_error.type == error -> do_return(Parser2);
-                true                                   -> Parser2
+                true                                     -> Parser2
             end;
         throw:{Fun2, Error} when is_record(Error, yamerl_parsing_error) ->
             Parser1 = add_error(Parser, Error),
@@ -4003,7 +4082,7 @@ do_emit_token(
             },
             if
                 Error#yamerl_parsing_error.type == error -> do_return(Parser2);
-                true                                   -> Parser2
+                true                                     -> Parser2
             end
     end.
 
@@ -4316,6 +4395,17 @@ add_error(
       errors     = [Error | Errors]
     }.
 
+-spec suspend_parsing(Chars, Line, Col, Delta, Parser, Fun) ->
+        Ret | no_return() when
+        Chars      :: unicode_string(),
+        Line       :: position(),
+        Col        :: position(),
+        Delta      :: non_neg_integer(),
+        Parser     :: yamerl_parser(),
+        Fun        :: stream_state_fun(),
+        Ret        :: {continue, New_Parser} | Parser,
+        New_Parser :: yamerl_parser().
+
 suspend_parsing(Chars, Line, Col, Delta, Parser, Fun) ->
     Parser1 = ?FLUSH_TO_PARSER(Chars, Line, Col, Delta, Parser),
     Parser2 = Parser1#yamerl_parser{
@@ -4330,6 +4420,9 @@ suspend_parsing(Chars, Line, Col, Delta, Parser, Fun, Ctx) ->
 return(Chars, Line, Col, Delta, Parser) ->
     Parser1 = ?FLUSH_TO_PARSER(Chars, Line, Col, Delta, Parser),
     do_return(Parser1).
+
+-spec do_return(Parser) -> {continue, Parser} | Parser | no_return() when
+        Parser :: yamerl_parser().
 
 do_return(#yamerl_parser{has_errors = true, errors = Errors}) ->
     yamerl_errors:throw(Errors);

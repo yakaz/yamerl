@@ -18,10 +18,10 @@
     module = undefined            :: atom(),
     tag    = "!"                  :: tag_uri(),
     pres   = []                   :: list(),
-    text   = ""                   :: string()
+    text   = ""                   :: unicode_string()
   }).
 -type yamerl_str()                :: #yamerl_str{}.
--type yamerl_simple_str()         :: string().
+-type yamerl_simple_str()         :: unicode_string().
 
 %% Null (Core Schema).
 -record(yamerl_null, {
@@ -78,7 +78,7 @@
     tag    = "!"                  :: tag_uri(),
     pres   = []                   :: list(),
     function                      :: function(),
-    text                          :: string()
+    text                          :: unicode_string()
   }).
 -type yamerl_erlang_fun()         :: #yamerl_erlang_fun{}.
 -type yamerl_simple_erlang_fun()  :: function().

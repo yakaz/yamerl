@@ -14,6 +14,11 @@
 -type encoding()         :: utf8
                           | {utf16, little | big}
                           | {utf32, little | big}.
+-type unicode_string()   :: [unicode:unicode_char()].
+%% unicode:external_unicode_binary() (UTF16/32) not exported.
+-type unicode_binary()   :: unicode:unicode_binary().
+-type unicode_data()     :: unicode_string()
+                          | unicode_binary().
 
 %% Tag declaration and usage.
 %% A tag handle is used in TAG directives and in front of a node. A tag

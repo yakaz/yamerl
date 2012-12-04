@@ -23,28 +23,104 @@
   ]).
 
 %% -------------------------------------------------------------------
+%% Exported types.
+%% -------------------------------------------------------------------
+
+%% FIXME:
+%% This type should be "-opaque". However, up-to Erlang R15B03, an issue
+%% with either this code or Dialyzer prevents us from declaring it
+%% properly: Dialyzer reports warning regarding the stream_state_fun()
+%% type and several guard expression which will never match.
+-type yamerl_constr() :: #yamerl_constr{}.
+
+-export_type([
+    yamerl_constr/0,
+    yamerl_constr_option/0,
+
+    yamerl_node/0,
+    yamerl_seq/0,
+    yamerl_map/0,
+    yamerl_str/0,
+    yamerl_null/0,
+    yamerl_bool/0,
+    yamerl_int/0,
+    yamerl_float/0,
+    yamerl_timestamp/0,
+    yamerl_erlang_atom/0,
+    yamerl_erlang_fun/0,
+    yamerl_user_node/0,
+
+    yamerl_simple_node/0,
+    yamerl_simple_seq/0,
+    yamerl_simple_map/0,
+    yamerl_simple_str/0,
+    yamerl_simple_null/0,
+    yamerl_simple_bool/0,
+    yamerl_simple_int/0,
+    yamerl_simple_float/0,
+    yamerl_simple_timestamp/0,
+    yamerl_simple_erlang_atom/0,
+    yamerl_simple_erlang_fun/0,
+    yamerl_user_simple_node/0
+  ]).
+
+%% -------------------------------------------------------------------
 %% Public API: chunked stream scanning.
 %% -------------------------------------------------------------------
 
+-spec new(Source) ->
+        Parser | no_return() when
+          Source :: term(),
+          Parser :: yamerl_parser:yamerl_parser().
+
 new(Source) ->
     new(Source, []).
+
+-spec new(Source, Options) ->
+        Parser | no_return() when
+          Source  :: term(),
+          Options :: [
+            yamerl_constr_option() |
+            yamerl_parser:yamerl_parser_option() |
+            proplists:property()
+          ],
+          Parser  :: yamerl_parser:yamerl_parser().
 
 new(Source, Options) ->
     Parser_Options = initialize(Options),
     yamerl_parser:new(Source, Parser_Options).
 
-next_chunk(Parser, More_Data, EOS) ->
-    Parser = yamerl_parser:next_chunk(Parser, More_Data, EOS),
+-spec next_chunk(Parser, Chunk, Last_Chunk) ->
+        Ret | no_return() when
+          Parser     :: yamerl_parser:yamerl_parser(),
+          Chunk      :: unicode_binary(),
+          Last_Chunk :: boolean(),
+          Ret        :: {continue, New_Parser} | Result,
+          New_Parser :: yamerl_parser:yamerl_parser(),
+          Result     :: [yamerl_doc()]
+                      | [yamerl_simple_doc()]
+                      | term().
+
+next_chunk(Parser, Chunk, EOS) ->
+    Parser = yamerl_parser:next_chunk(Parser, Chunk, EOS),
     if
         EOS  -> get_docs(Parser);
         true -> Parser
     end.
 
-next_chunk(Parser, More_Data) ->
-    next_chunk(Parser, More_Data, false).
+next_chunk(Parser, Chunk) ->
+    next_chunk(Parser, Chunk, false).
 
-last_chunk(Parser, More_Data) ->
-    next_chunk(Parser, More_Data, true).
+-spec last_chunk(Parser, Chunk) ->
+        Result | no_return() when
+          Parser     :: yamerl_parser:yamerl_parser(),
+          Chunk      :: unicode_binary(),
+          Result     :: [yamerl_doc()]
+                      | [yamerl_simple_doc()]
+                      | term().
+
+last_chunk(Parser, Chunk) ->
+    next_chunk(Parser, Chunk, true).
 
 get_docs(Parser) ->
     case yamerl_parser:get_token_fun(Parser) of
@@ -61,8 +137,21 @@ get_docs(Parser) ->
 %% Public API: common stream sources.
 %% -------------------------------------------------------------------
 
+%-spec string(String) ->
+%        Docs_List | no_return() when
+%          String    :: unicode_data(),
+%          Docs_List :: [yamerl_doc()] | [yamerl_simple_doc()] | [].
+
 string(String) ->
     string(String, []).
+
+%-spec string(String, Options) ->
+%        Docs_List | no_return() when
+%          String    :: unicode_data(),
+%          Options   :: [ yamerl_parser:yamerl_parser_option()
+%                       | yamerl_constr_option()
+%                       | proplists:proplist()],
+%          Docs_List :: [yamerl_doc()] | [yamerl_simple_doc()] | [].
 
 string(String, Options) ->
     Parser_Options = initialize(Options),
