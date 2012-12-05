@@ -1,5 +1,7 @@
 .swp
+.swo
 .*.swp
+.*.swo
 Makefile.in
 ac-aux/
 aclocal.m4
