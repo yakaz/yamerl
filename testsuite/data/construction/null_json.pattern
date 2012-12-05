@@ -1,0 +1,30 @@
+%% vim:ft=erlang:
+
+%% TEST
+{setup,
+  fun() ->
+      application:start(yamerl)
+  end,
+  [
+    ?_assertMatch(
+      [
+        [null]
+      ],
+      yamerl_constr:file("${FILENAME}",
+        [{simple_structs, true}, {schema, json}])
+    ),
+    ?_assertMatch(
+      [
+        {yamerl_doc,
+          {yamerl_seq,yamerl_node_seq,"tag:yaml.org,2002:seq",
+            [{line,1},{column,1}],
+            [{yamerl_null,yamerl_node_null_json,
+                "tag:yaml.org,2002:null",
+                [{line,1},{column,3}]}],
+            1}}
+      ],
+      yamerl_constr:file("${FILENAME}",
+        [{simple_structs, false}, {schema, json}])
+    )
+  ]
+}

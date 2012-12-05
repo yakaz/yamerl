@@ -13,10 +13,13 @@
       yamerl_constr:file("${FILENAME}",
         [{simple_structs, true}, {schema, failsafe}])
     ),
-    ?_assertMatch(
-      [
-        ["~", null, "Null", "NULL", "", "Not a null"]
-      ],
+    ?_assertThrow(
+      {yamerl_exception, [
+          {yamerl_parsing_error,error, "Invalid string", 1, 3, not_a_string,
+            {yamerl_scalar, 1, 3,
+              {yamerl_tag, 1, 3, {non_specific, "?"}},
+              flow, plain, "~"},
+            []}]},
       yamerl_constr:file("${FILENAME}",
         [{simple_structs, true}, {schema, json}])
     ),
@@ -55,31 +58,13 @@
       yamerl_constr:file("${FILENAME}",
         [{simple_structs, false}, {schema, failsafe}])
     ),
-    ?_assertMatch(
-      [
-        {yamerl_doc,
-          {yamerl_seq,yamerl_node_seq,"tag:yaml.org,2002:seq",
-            [{line,1},{column,1}],
-            [{yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
-                [{line,1},{column,3}],
-                "~"},
-              {yamerl_null,yamerl_node_null_json,
-                "tag:yaml.org,2002:null",
-                [{line,2},{column,3}]},
-              {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
-                [{line,3},{column,3}],
-                "Null"},
-              {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
-                [{line,4},{column,3}],
-                "NULL"},
-              {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
-                [{line,5},{column,1}],
-                ""},
-              {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
-                [{line,7},{column,3}],
-                "Not a null"}],
-            6}}
-      ],
+    ?_assertThrow(
+      {yamerl_exception, [
+          {yamerl_parsing_error,error, "Invalid string", 1, 3, not_a_string,
+            {yamerl_scalar, 1, 3,
+              {yamerl_tag, 1, 3, {non_specific, "?"}},
+              flow, plain, "~"},
+            []}]},
       yamerl_constr:file("${FILENAME}",
         [{simple_structs, false}, {schema, json}])
     ),
