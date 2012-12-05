@@ -373,7 +373,8 @@ setup_node_mods(Constr) ->
     Mods   = case Schema of
         failsafe -> umerge_unsorted(Mods1, ?FAILSAFE_SCHEMA_MODS);
         json     -> umerge_unsorted(Mods1, ?JSON_SCHEMA_MODS);
-        core     -> umerge_unsorted(Mods1, ?CORE_SCHEMA_MODS)
+        core     -> umerge_unsorted(Mods1, ?CORE_SCHEMA_MODS);
+        yaml11   -> umerge_unsorted(Mods1, ?YAML11_SCHEMA_MODS)
     end,
     Auto    = filter_autodetection_capable_mods(Mods, []),
     Tags    = index_tags(Mods, []),
@@ -496,7 +497,10 @@ is_option_valid({node_mods, Mods}) when is_list(Mods) ->
         _  -> false
     end;
 is_option_valid({schema, Schema})
-  when Schema == failsafe orelse Schema == json orelse Schema == core ->
+when Schema == failsafe
+orelse Schema == json
+orelse Schema == core
+orelse Schema == yaml11 ->
     true;
 is_option_valid(_) ->
     false.

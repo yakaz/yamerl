@@ -9,7 +9,7 @@
 
 -type yamerl_constr_option() :: {simple_structs, boolean()}
                               | {node_mods, [atom()]}
-                              | {schema, failsafe | json | core}.
+                              | {schema, failsafe | json | core | yaml11}.
 
 %% -------------------------------------------------------------------
 %% Representation state.

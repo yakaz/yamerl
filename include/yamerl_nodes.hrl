@@ -254,4 +254,14 @@
     yamerl_node_map
   ]).
 
+-define(YAML11_SCHEMA_MODS, [
+    yamerl_node_null,
+    yamerl_node_bool_ext,
+    yamerl_node_int_ext,
+    yamerl_node_float_ext,
+    yamerl_node_str,
+    yamerl_node_seq,
+    yamerl_node_map
+  ]).
+
 -endif.
