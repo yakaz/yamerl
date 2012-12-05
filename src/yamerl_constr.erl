@@ -49,6 +49,7 @@
     yamerl_erlang_atom/0,
     yamerl_erlang_fun/0,
     yamerl_user_node/0,
+    yamerl_doc/0,
 
     yamerl_simple_node/0,
     yamerl_simple_seq/0,
@@ -61,7 +62,8 @@
     yamerl_simple_timestamp/0,
     yamerl_simple_erlang_atom/0,
     yamerl_simple_erlang_fun/0,
-    yamerl_user_simple_node/0
+    yamerl_user_simple_node/0,
+    yamerl_simple_doc/0
   ]).
 
 %% -------------------------------------------------------------------
