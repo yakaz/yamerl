@@ -137,29 +137,50 @@ get_docs(Parser) ->
 %% Public API: common stream sources.
 %% -------------------------------------------------------------------
 
-%-spec string(String) ->
-%        Docs_List | no_return() when
-%          String    :: unicode_data(),
-%          Docs_List :: [yamerl_doc()] | [yamerl_simple_doc()] | [].
+-spec string(String) ->
+        Result | no_return() when
+          String :: unicode_data(),
+          Result :: [yamerl_doc()]
+                  | [yamerl_simple_doc()]
+                  | term().
 
 string(String) ->
     string(String, []).
 
-%-spec string(String, Options) ->
-%        Docs_List | no_return() when
-%          String    :: unicode_data(),
-%          Options   :: [ yamerl_parser:yamerl_parser_option()
-%                       | yamerl_constr_option()
-%                       | proplists:proplist()],
-%          Docs_List :: [yamerl_doc()] | [yamerl_simple_doc()] | [].
+-spec string(String, Options) ->
+        Result | no_return() when
+          String  :: unicode_data(),
+          Options :: [ yamerl_parser:yamerl_parser_option()
+                     | yamerl_constr_option()
+                     | proplists:property()],
+          Result  :: [yamerl_doc()]
+                   | [yamerl_simple_doc()]
+                   | term().
 
 string(String, Options) ->
     Parser_Options = initialize(Options),
     Parser = yamerl_parser:string(String, Parser_Options),
     get_docs(Parser).
 
+-spec file(Filename) ->
+        Result | no_return() when
+          Filename :: string(),
+          Result   :: [yamerl_doc()]
+                    | [yamerl_simple_doc()]
+                    | term().
+
 file(Filename) ->
     file(Filename, []).
+
+-spec file(Filename, Options) ->
+        Result | no_return() when
+          Filename :: string(),
+          Options  :: [ yamerl_parser:yamerl_parser_option()
+                      | yamerl_constr_option()
+                      | proplists:property()],
+          Result   :: [yamerl_doc()]
+                    | [yamerl_simple_doc()]
+                    | term().
 
 file(Filename, Options) ->
     Parser_Options = initialize(Options),
