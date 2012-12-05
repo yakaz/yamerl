@@ -1,0 +1,70 @@
+%% vim:ft=erlang:
+
+%% TEST
+{setup,
+  fun() ->
+      application:start(yamerl)
+  end,
+  [
+    ?_assertMatch(
+      [
+        [$2, $\s, 8364] % "2 €"
+      ],
+      yamerl_constr:file("${FILENAME}", [{simple_structs, true}])
+    ),
+    ?_assertMatch(
+      [
+        {yamerl_doc,
+          {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+            [{line,1},{column,1}],
+            [$2, $\s, 8364]} % "2 €"
+        }
+      ],
+      yamerl_constr:file("${FILENAME}", [{simple_structs, false}])
+    ),
+    ?_assertMatch(
+      [
+        <<50,32,226,130,172>> % "2 €"
+      ],
+      yamerl_constr:file("${FILENAME}", [
+          {simple_structs, true},
+          str_node_as_binary
+        ])
+    ),
+    ?_assertMatch(
+      [
+        {yamerl_doc,
+          {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+            [{line,1},{column,1}],
+            <<50,32,226,130,172>>} % "2 €"
+        }
+      ],
+      yamerl_constr:file("${FILENAME}", [
+          {simple_structs, false},
+          str_node_as_binary
+        ])
+    ),
+    ?_assertMatch(
+      [
+        <<0,0,0,50, 0,0,0,32, 0,0,32,172>> % "2 €"
+      ],
+      yamerl_constr:file("${FILENAME}", [
+          {simple_structs, true},
+          {str_node_as_binary, {utf32, big}}
+        ])
+    ),
+    ?_assertMatch(
+      [
+        {yamerl_doc,
+          {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+            [{line,1},{column,1}],
+            <<0,0,0,50, 0,0,0,32, 0,0,32,172>>} % "2 €"
+        }
+      ],
+      yamerl_constr:file("${FILENAME}", [
+          {simple_structs, false},
+          {str_node_as_binary, {utf32, big}}
+        ])
+    )
+  ]
+}
