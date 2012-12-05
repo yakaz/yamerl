@@ -7,6 +7,11 @@ TPL_FILES = parsing.erl construction.erl
 
 ERL_TESTS = parsing construction
 
+if HAVE_YAMLER
+TPL_FILES += yamler_compat.erl
+ERL_TESTS += yamler_compat
+endif
+
 TESTS = dialyzer $(ERL_TESTS) benchmark
 
 TESTS_ENVIRONMENT = ERL_LIBS=$(ERL_LIBS)

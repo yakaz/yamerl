@@ -24,7 +24,8 @@ dist_erlsrc_DATA = yamerl_app.erl					\
 		   yamerl_node_timestamp.erl				\
 		   yamerl_node_ipaddr.erl				\
 		   yamerl_node_erlang_atom.erl				\
-		   yamerl_node_erlang_fun.erl
+		   yamerl_node_erlang_fun.erl				\
+		   yamerl_yamler_compat.erl
 
 CLEANFILES = Emakefile
 

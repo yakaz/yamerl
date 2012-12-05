@@ -33,26 +33,50 @@ try_construct_token(Constr, Node,
 try_construct_token(_, _, _) ->
     unrecognized.
 
-construct_token(#yamerl_constr{simple_structs = true},
+construct_token(#yamerl_constr{simple_structs = true, ext_options = Options},
   undefined, #yamerl_scalar{text = Text} = Token) ->
     case string_to_float(Text) of
         error ->
             exception(Token);
         Int ->
-            {finished, Int}
+            Inf_As_Yamler = proplists:get_bool(inf_float_node_like_yamler,
+              Options),
+            Int1 = case Inf_As_Yamler of
+                false ->
+                    Int;
+                true ->
+                    case Int of
+                        '+inf' -> inf;
+                        '-inf' -> ninf;
+                        _      -> Int
+                    end
+            end,
+            {finished, Int1}
     end;
-construct_token(#yamerl_constr{simple_structs = false},
+construct_token(#yamerl_constr{simple_structs = false, ext_options = Options},
   undefined, #yamerl_scalar{text = Text} = Token) ->
     case string_to_float(Text) of
         error ->
             exception(Token);
         Int ->
+            Inf_As_Yamler = proplists:get_bool(inf_float_node_like_yamler,
+              Options),
+            Int1 = case Inf_As_Yamler of
+                false ->
+                    Int;
+                true ->
+                    case Int of
+                        '+inf' -> inf;
+                        '-inf' -> ninf;
+                        _      -> Int
+                    end
+            end,
             Pres = yamerl_constr:get_pres_details(Token),
             Node = #yamerl_float{
               module = ?MODULE,
               tag    = ?TAG,
               pres   = Pres,
-              value  = Int
+              value  = Int1
             },
             {finished, Node}
     end;

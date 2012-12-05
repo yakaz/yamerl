@@ -1,0 +1,14 @@
+%% vim:ft=erlang:
+
+%% TEST
+{setup,
+  fun() ->
+      application:start(yamerl)
+  end,
+  [
+    ?_assertEqual(
+      yaml:load_file("${FILENAME}"),
+      yamerl_yamler_compat:load_file("${FILENAME}")
+    )
+  ]
+}
