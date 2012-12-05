@@ -243,6 +243,24 @@ Provide eunit install path with --with-erlang-eunit.])])
 ERL_LIBS=$ERL_LIBS_save
 export ERL_LIBS
 
+dnl "yamler" install directory.
+AC_ARG_WITH([erlang_yamler],
+	AC_HELP_STRING([--with-erlang-yamler=PREFIX],
+		       [prefix where the "yamler" Erlang application is installed (optional)]),
+	with_erlang_yamler=${withval%/},
+	with_erlang_yamler="")
+
+ERL_LIBS_save=$ERL_LIBS
+if test "x${with_erlang_yamler}" != "x"; then
+	ERL_LIBS="${with_erlang_yamler}:${ERL_LIBS}"
+fi
+export ERL_LIBS
+AC_ERLANG_CHECK_LIB([yamler])
+ERL_LIBS=$ERL_LIBS_save
+export ERL_LIBS
+
+AM_CONDITIONAL([HAVE_YAMLER], [test x"$ERLANG_LIB_DIR_yamler" != x"not found"])
+
 dnl ------------------------------------------------------------------
 dnl Final substitutions.
 dnl ------------------------------------------------------------------
