@@ -12,12 +12,35 @@
     convert_options/2
   ]).
 
+-type yamler_schema() :: yaml_schema_failsafe
+                       | yaml_schema_json
+                       | yaml_schema_core
+                       | yaml_schema_erlang.
+-type yamler_option() :: {schema, yamler_schema()}
+                       | {implicit_atoms, boolean()}
+                       | implicit_atoms.
+
 %% -------------------------------------------------------------------
 %% Public API.
 %% -------------------------------------------------------------------
 
+-spec load(String) ->
+        Result | Error when
+          String  :: binary(),
+          Result  :: {ok, [yamerl_constr:yamerl_simple_doc()]},
+          Error   :: {error, Message},
+          Message :: string().
+
 load(String) ->
     load(String, []).
+
+-spec load(String, Options) ->
+        Result | Error when
+          String  :: binary(),
+          Options :: [yamler_option()],
+          Result  :: {ok, [yamerl_constr:yamerl_simple_doc()]},
+          Error   :: {error, Message},
+          Message :: string().
 
 load(String, Options) ->
     Options1 = convert_options(Options),
@@ -29,8 +52,23 @@ load(String, Options) ->
             format_error(Error)
     end.
 
+-spec load_file(Filename) ->
+        Result | Error when
+          Filename :: string(),
+          Result   :: {ok, [yamerl_constr:yamerl_simple_doc()]},
+          Error    :: {error, Message},
+          Message  :: string().
+
 load_file(Filename) ->
     load_file(Filename, []).
+
+-spec load_file(Filename, Options) ->
+        Result | Error when
+          Filename :: string(),
+          Options  :: [yamler_option()],
+          Result   :: {ok, [yamerl_constr:yamerl_simple_doc()]},
+          Error    :: {error, Message},
+          Message  :: string().
 
 load_file(Filename, Options) ->
     Options1 = convert_options(Options),
@@ -41,6 +79,15 @@ load_file(Filename, Options) ->
         throw:#yamerl_exception{errors = [Error]} ->
             format_error(Error)
     end.
+
+-spec convert_options(Options) ->
+        Converted when
+          Options   :: [yamler_option()],
+          Converted :: [
+            yamerl_parser:yamerl_parser_option() |
+            yamerl_constr:yamerl_constr_option() |
+            proplists:property()
+          ].
 
 convert_options(Options) ->
     convert_options(Options, []).
