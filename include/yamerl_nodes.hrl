@@ -239,7 +239,7 @@
     yamerl_node_bool_json,
     yamerl_node_int_json,
     yamerl_node_float_json,
-    yamerl_node_str,
+    yamerl_node_str_json,
     yamerl_node_seq,
     yamerl_node_map
   ]).

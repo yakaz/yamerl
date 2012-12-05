@@ -8,6 +8,7 @@ dist_erlsrc_DATA = yamerl_app.erl					\
 		   yamerl_node_seq.erl					\
 		   yamerl_node_map.erl					\
 		   yamerl_node_str.erl					\
+		   yamerl_node_str_json.erl				\
 		   yamerl_node_null.erl					\
 		   yamerl_node_null_json.erl				\
 		   yamerl_node_bool.erl					\
