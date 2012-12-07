@@ -22,6 +22,10 @@
     priv
   }).
 
+-record(node_anchor, {
+    name = ""
+  }).
+
 -record(yamerl_constr, {
     options              = []         :: [yamerl_constr_option()],
     ext_options          = []         :: [{term(), term()}],
@@ -32,7 +36,9 @@
                                           yamerl_simple_doc()],
     docs_count           = 0          :: non_neg_integer(),
     current_doc          = undefined  :: [yamerl_partial_doc() |
-                                          yamerl_partial_node()]
+                                          yamerl_partial_node() |
+                                          #unfinished_node{} |
+                                          #node_anchor{}]
                                        | undefined,
     current_node_is_leaf = false      :: boolean(),
     anchors              = dict:new() :: dict()

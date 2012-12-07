@@ -3,9 +3,9 @@ TPL_PL        = template.pl
 TPL_ERL       = template.erl
 COVER_TO_HTML = cover_to_html.sh
 
-TPL_FILES = parsing.erl construction.erl
+TPL_FILES = parsing.erl construction.erl examples.erl
 
-ERL_TESTS = parsing construction
+ERL_TESTS = parsing construction examples
 
 if HAVE_YAMLER
 TPL_FILES += yamler_compat.erl

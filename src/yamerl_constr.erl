@@ -295,6 +295,31 @@ construct(
     handle_construct_return(Constr, Doc, Ret);
 
 construct(
+  #yamerl_constr{current_doc = Doc, current_node_is_leaf = false} = Constr,
+  #yamerl_anchor{name = Anchor}) when Doc /= undefined ->
+    handle_construct_return(Constr, Doc, #node_anchor{name = Anchor});
+
+construct(
+  #yamerl_constr{current_doc = Doc, anchors = Anchors} = Constr,
+  #yamerl_alias{name = Alias} = Token) when Doc /= undefined ->
+    try
+        Node = dict:fetch(Alias, Anchors),
+        handle_construct_return(Constr, Doc, {finished, Node})
+    catch
+        _:_ ->
+            %% This alias references a non-existent anchor!
+            Error = #yamerl_parsing_error{
+              name   = no_matching_anchor,
+              token  = Token,
+              line   = ?TOKEN_LINE(Token),
+              column = ?TOKEN_COLUMN(Token)
+            },
+            Error1 = yamerl_errors:format(Error,
+              "No anchor corresponds to alias \"~s\"", [Alias]),
+            yamerl_errors:throw(Error1)
+    end;
+
+construct(
   #yamerl_constr{current_doc =
     [#unfinished_node{module = Mod} = Node | Doc]} = Constr,
   Token) ->
@@ -318,6 +343,13 @@ try_construct(_, [], Token) ->
     },
     yamerl_errors:throw(Error).
 
+construct_parent(#yamerl_constr{anchors = Anchors} = Constr,
+  [#node_anchor{name = Anchor} | Doc], Child) ->
+    Anchors1 = dict:store(Anchor, Child, Anchors),
+    Constr1  = Constr#yamerl_constr{
+      anchors = Anchors1
+    },
+    construct_parent(Constr1, Doc, Child);
 construct_parent(#yamerl_constr{docs = Docs, docs_count = Count} = Constr,
   [#yamerl_doc{} = Doc], Root) ->
     %% This node is the root of the document.
@@ -346,6 +378,12 @@ handle_construct_return(Constr, Doc, {unfinished, Node, Is_Leaf}) ->
     Constr1 = Constr#yamerl_constr{
       current_doc          = [Node | Doc],
       current_node_is_leaf = Is_Leaf
+    },
+    return_new_fun(Constr1);
+handle_construct_return(Constr, Doc, #node_anchor{} = Anchor) ->
+    %% Anchor before a (not-yet-started) node, wait this node.
+    Constr1 = Constr#yamerl_constr{
+      current_doc = [Anchor | Doc]
     },
     return_new_fun(Constr1).
 
