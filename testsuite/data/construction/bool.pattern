@@ -21,7 +21,7 @@
         ]
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, failsafe}])
+        [{detailed_constr, false}, {schema, failsafe}])
     ),
     ?_assertThrow(
       {yamerl_exception, [
@@ -31,7 +31,7 @@
               flow, plain, "True"},
             []}]},
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, json}])
+        [{detailed_constr, false}, {schema, json}])
     ),
     ?_assertMatch(
       [
@@ -48,7 +48,7 @@
         ]
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, core}])
+        [{detailed_constr, false}, {schema, core}])
     ),
     ?_assertMatch(
       [
@@ -65,7 +65,7 @@
         ]
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, failsafe},
+        [{detailed_constr, false}, {schema, failsafe},
           {node_mods, [yamerl_node_bool_ext]}])
     ),
     ?_assertMatch(
@@ -146,7 +146,7 @@
         }
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, failsafe}])
+        [{detailed_constr, true}, {schema, failsafe}])
     ),
     ?_assertThrow(
       {yamerl_exception, [
@@ -156,7 +156,7 @@
               flow, plain, "True"},
             []}]},
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, json}])
+        [{detailed_constr, true}, {schema, json}])
     ),
     ?_assertMatch(
       [
@@ -236,7 +236,7 @@
         }
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, core}])
+        [{detailed_constr, true}, {schema, core}])
     ),
     ?_assertMatch(
       [
@@ -318,7 +318,7 @@
         }
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, failsafe},
+        [{detailed_constr, true}, {schema, failsafe},
           {node_mods, [yamerl_node_bool_ext]}])
     )
   ]

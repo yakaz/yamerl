@@ -30,7 +30,7 @@
                 {"file","MoreClass.py"},
                 {"line",58},
                 {"code","foo = bar"}]]}]],
-      yamerl_constr:file("${FILENAME}", [{simple_structs, true}])
+      yamerl_constr:file("${FILENAME}", [{detailed_constr, false}])
     ),
     ?_assertMatch(
       [
@@ -166,7 +166,7 @@
                             "foo = bar"}}]}],
                   2}}]}}
       ],
-      yamerl_constr:file("${FILENAME}", [{simple_structs, false}])
+      yamerl_constr:file("${FILENAME}", [{detailed_constr, true}])
     )
   ]
 }

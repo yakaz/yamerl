@@ -12,7 +12,7 @@
         "inexistent_atom"
       ],
       yamerl_constr:file("${FILENAME}", [
-          {simple_structs, true},
+          {detailed_constr, false},
           {erlang_atom_autodetection, true},
           {erlang_atom_only_if_exist, true}
         ])
@@ -26,7 +26,7 @@
         }
       ],
       yamerl_constr:file("${FILENAME}", [
-          {simple_structs, false},
+          {detailed_constr, true},
           {erlang_atom_autodetection, true},
           {erlang_atom_only_if_exist, true}
         ])

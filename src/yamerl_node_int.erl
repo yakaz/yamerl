@@ -38,7 +38,7 @@ try_construct_token(Constr, Node,
 try_construct_token(_, _, _) ->
     unrecognized.
 
-construct_token(#yamerl_constr{simple_structs = true},
+construct_token(#yamerl_constr{detailed_constr = false},
   undefined, #yamerl_scalar{text = Text} = Token) ->
     case string_to_integer(Text) of
         error ->
@@ -46,7 +46,7 @@ construct_token(#yamerl_constr{simple_structs = true},
         Int ->
             {finished, Int}
     end;
-construct_token(#yamerl_constr{simple_structs = false},
+construct_token(#yamerl_constr{detailed_constr = true},
   undefined, #yamerl_scalar{text = Text} = Token) ->
     case string_to_integer(Text) of
         error ->

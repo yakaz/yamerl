@@ -7,7 +7,7 @@
 %% Options.
 %% -------------------------------------------------------------------
 
--type yamerl_constr_option() :: {simple_structs, boolean()}
+-type yamerl_constr_option() :: {detailed_constr, boolean()}
                               | {node_mods, [atom()]}
                               | {schema, failsafe | json | core | yaml11}.
 
@@ -29,7 +29,7 @@
 -record(yamerl_constr, {
     options              = []         :: [yamerl_constr_option()],
     ext_options          = []         :: [{term(), term()}],
-    simple_structs       = true       :: boolean(),
+    detailed_constr      = false      :: boolean(),
     mods                 = []         :: [atom()],
     tags                 = []         :: [{tag_uri(), atom()}],
     docs                 = []         :: [yamerl_doc() |

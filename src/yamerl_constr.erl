@@ -394,9 +394,9 @@ handle_construct_return(Constr, Doc, #node_anchor{} = Anchor) ->
     },
     return_new_fun(Constr1).
 
-return_new_fun(#yamerl_constr{simple_structs = Simple} = Constr) ->
+return_new_fun(#yamerl_constr{detailed_constr = Detailed} = Constr) ->
     Fun = fun
-        (get_docs) when Simple ->
+        (get_docs) when not Detailed ->
             [Doc#yamerl_doc.root || Doc <- Constr#yamerl_constr.docs];
         (get_docs) ->
             Constr#yamerl_constr.docs;
@@ -477,10 +477,11 @@ initialize(Options) ->
     Options0 = proplists:unfold(Options),
     {Constr_Options, Parser_Options, Ext_Options} = filter_options(Options0),
     check_options(Constr_Options),
+    Detailed = proplists:get_value(detailed_constr, Constr_Options, false),
     Constr = #yamerl_constr{
-      options        = Constr_Options,
-      ext_options    = Ext_Options,
-      simple_structs = proplists:get_value(simple_structs, Constr_Options, true)
+      options         = Constr_Options,
+      ext_options     = Ext_Options,
+      detailed_constr = Detailed
     },
     {ok, Token_Fun} = setup_node_mods(Constr),
     [{token_fun, Token_Fun} | Parser_Options].
@@ -522,7 +523,7 @@ option_names() ->
     [
       node_mods,
       schema,
-      simple_structs
+      detailed_constr
     ].
 
 check_options([Option | Rest]) ->
@@ -533,7 +534,7 @@ check_options([Option | Rest]) ->
 check_options([]) ->
     ok.
 
-is_option_valid({simple_structs, Flag}) when is_boolean(Flag) ->
+is_option_valid({detailed_constr, Flag}) when is_boolean(Flag) ->
     true;
 is_option_valid({node_mods, Mods}) when is_list(Mods) ->
     Fun = fun(Mod) ->
@@ -557,9 +558,9 @@ invalid_option(Option) ->
       option = Option
     },
     Error1 = case Option of
-        {simple_structs, _} ->
+        {detailed_constr, _} ->
             Error#yamerl_invalid_option{
-              text = "Invalid value for option \"simple_structs\": "
+              text = "Invalid value for option \"detailed_constr\": "
               "it must be a boolean"
             };
         {node_mods, _} ->

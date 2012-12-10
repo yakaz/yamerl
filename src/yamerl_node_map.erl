@@ -49,11 +49,11 @@ construct_token(_, #unfinished_node{priv = [{Key, undefined} | Pairs]} = Node,
     },
     {unfinished, Node1, false};
 
-construct_token(#yamerl_constr{simple_structs = true},
+construct_token(#yamerl_constr{detailed_constr = false},
   #unfinished_node{priv = Pairs}, #yamerl_collection_end{}) ->
     Node = lists:reverse(Pairs),
     {finished, Node};
-construct_token(#yamerl_constr{simple_structs = false},
+construct_token(#yamerl_constr{detailed_constr = true},
   #unfinished_node{pres = Pres, priv = Pairs}, #yamerl_collection_end{}) ->
     Node = #yamerl_map{
       module = ?MODULE,

@@ -33,13 +33,13 @@ try_construct_token(Constr, Node,
 try_construct_token(_, _, _) ->
     unrecognized.
 
-construct_token(#yamerl_constr{simple_structs = true},
+construct_token(#yamerl_constr{detailed_constr = false},
   undefined, #yamerl_scalar{text = Text}) when ?IS_TRUE(Text) ->
     {finished, true};
-construct_token(#yamerl_constr{simple_structs = true},
+construct_token(#yamerl_constr{detailed_constr = false},
   undefined, #yamerl_scalar{text = Text}) when ?IS_FALSE(Text) ->
     {finished, false};
-construct_token(#yamerl_constr{simple_structs = false},
+construct_token(#yamerl_constr{detailed_constr = true},
   undefined, #yamerl_scalar{text = Text} = Token) when ?IS_TRUE(Text) ->
     Pres = yamerl_constr:get_pres_details(Token),
     Node = #yamerl_bool{
@@ -49,7 +49,7 @@ construct_token(#yamerl_constr{simple_structs = false},
       value  = true
     },
     {finished, Node};
-construct_token(#yamerl_constr{simple_structs = false},
+construct_token(#yamerl_constr{detailed_constr = true},
   undefined, #yamerl_scalar{text = Text} = Token) when ?IS_FALSE(Text) ->
     Pres = yamerl_constr:get_pres_details(Token),
     Node = #yamerl_bool{

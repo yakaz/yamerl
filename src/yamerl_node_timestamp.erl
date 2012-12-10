@@ -43,7 +43,7 @@ try_construct_token(Constr, Node,
 try_construct_token(_, _, _) ->
     unrecognized.
 
-construct_token(#yamerl_constr{simple_structs = true},
+construct_token(#yamerl_constr{detailed_constr = false},
   undefined, #yamerl_scalar{text = Text} = Token) ->
     case string_to_timestamp(Text) of
         {undefined, undefined, undefined, H, Mi, S, _, _} ->
@@ -55,7 +55,7 @@ construct_token(#yamerl_constr{simple_structs = true},
         error ->
             exception(Token)
     end;
-construct_token(#yamerl_constr{simple_structs = false},
+construct_token(#yamerl_constr{detailed_constr = true},
   undefined, #yamerl_scalar{text = Text} = Token) ->
     case string_to_timestamp(Text) of
         {Y, Mo, D, H, Mi, S, F, Z} ->

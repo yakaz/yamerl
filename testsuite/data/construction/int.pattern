@@ -21,7 +21,7 @@
         ]
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, failsafe}]) %% No integer parsing
+        [{detailed_constr, false}, {schema, failsafe}]) %% No integer parsing
     ),
     ?_assertMatch(
       [
@@ -38,7 +38,7 @@
         ]
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, failsafe},
+        [{detailed_constr, false}, {schema, failsafe},
           {node_mods, [yamerl_node_int_json]}])
     ),
     ?_assertMatch(
@@ -56,7 +56,7 @@
         ]
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, core},
+        [{detailed_constr, false}, {schema, core},
           {node_mods, [yamerl_node_int]}])
     ),
     ?_assertMatch(
@@ -74,7 +74,7 @@
         ]
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, failsafe},
+        [{detailed_constr, false}, {schema, failsafe},
           {node_mods, [yamerl_node_int_ext]}])
     ),
     ?_assertMatch(
@@ -176,7 +176,7 @@
         }
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, failsafe}]) %% No integer parsing
+        [{detailed_constr, true}, {schema, failsafe}]) %% No integer parsing
     ),
     ?_assertMatch(
       [
@@ -281,7 +281,7 @@
         }
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, failsafe},
+        [{detailed_constr, true}, {schema, failsafe},
           {node_mods, [yamerl_node_int_json]}])
     ),
     ?_assertMatch(
@@ -383,7 +383,7 @@
         }
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, failsafe},
+        [{detailed_constr, true}, {schema, failsafe},
           {node_mods, [yamerl_node_int]}])
     ),
     ?_assertMatch(
@@ -485,7 +485,7 @@
         }
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, failsafe},
+        [{detailed_constr, true}, {schema, failsafe},
           {node_mods, [yamerl_node_int_ext]}])
     )
   ]

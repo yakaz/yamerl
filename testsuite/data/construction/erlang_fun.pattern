@@ -10,7 +10,7 @@
     {generator,
       fun() ->
           [Erlang_Fun_Simple] = yamerl_constr:file("${FILENAME}",
-            [{simple_structs, true}]),
+            [{detailed_constr, false}]),
           ?_assertMatch(
             "Hello World!",
             Erlang_Fun_Simple()
@@ -25,7 +25,7 @@
                 Erlang_Fun_Normal,
                 "fun() -> \"Hello World!\" end.\n"}}
           ] = yamerl_constr:file("${FILENAME}",
-            [{simple_structs, false}]),
+            [{detailed_constr, true}]),
           ?_assertMatch(
             "Hello World!",
             Erlang_Fun_Normal()

@@ -24,7 +24,7 @@
         ]
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, failsafe}]) %% No float parsing
+        [{detailed_constr, false}, {schema, failsafe}]) %% No float parsing
     ),
     ?_assertMatch(
       [
@@ -44,7 +44,7 @@
         ]
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, failsafe},
+        [{detailed_constr, false}, {schema, failsafe},
           {node_mods, [yamerl_node_float_json]}])
     ),
     ?_assertMatch(
@@ -65,7 +65,7 @@
         ]
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, failsafe},
+        [{detailed_constr, false}, {schema, failsafe},
           {node_mods, [yamerl_node_float]}])
     ),
     ?_assertMatch(
@@ -86,7 +86,7 @@
         ]
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, failsafe},
+        [{detailed_constr, false}, {schema, failsafe},
           {node_mods, [yamerl_node_float_ext]}])
     ),
     ?_assertMatch(
@@ -213,7 +213,7 @@
                 "-Not a float.0e+10"}],
             39}}],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, failsafe}]) %% No float parsing
+        [{detailed_constr, true}, {schema, failsafe}]) %% No float parsing
     ),
     ?_assertMatch(
       [{yamerl_doc,
@@ -357,7 +357,7 @@
                 "-Not a float.0e+10"}],
             39}}],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, failsafe},
+        [{detailed_constr, true}, {schema, failsafe},
           {node_mods, [yamerl_node_float_json]}])
     ),
     ?_assertMatch(
@@ -484,7 +484,7 @@
                 "-Not a float.0e+10"}],
             39}}],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, failsafe},
+        [{detailed_constr, true}, {schema, failsafe},
           {node_mods, [yamerl_node_float]}])
     ),
     ?_assertMatch(
@@ -634,7 +634,7 @@
                 "-Not a float.0e+10"}],
             39}}],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, failsafe},
+        [{detailed_constr, true}, {schema, failsafe},
           {node_mods, [yamerl_node_float_ext]}])
     )
   ]

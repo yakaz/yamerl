@@ -15,7 +15,7 @@
           "Not a size"
         ]
       ],
-      yamerl_constr:file("${FILENAME}", [{simple_structs, true}])
+      yamerl_constr:file("${FILENAME}", [{detailed_constr, false}])
     ),
     ?_assertMatch(
       [
@@ -51,7 +51,7 @@
                 "Not a size"}],
             9}}
       ],
-      yamerl_constr:file("${FILENAME}", [{simple_structs, false}])
+      yamerl_constr:file("${FILENAME}", [{detailed_constr, true}])
     )
   ]
 }

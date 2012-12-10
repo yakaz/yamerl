@@ -20,7 +20,7 @@
 
 tags() -> [?TAG].
 
-construct_token(#yamerl_constr{simple_structs = Simple},
+construct_token(#yamerl_constr{detailed_constr = Detailed},
   undefined, #yamerl_scalar{text = Text} = Token) ->
     case erl_scan:string(Text) of
         {ok, Tokens, _} ->
@@ -28,7 +28,7 @@ construct_token(#yamerl_constr{simple_structs = Simple},
                 {ok, Exprs} ->
                     {value, Fun, _} = erl_eval:exprs(Exprs, []),
                     Node = if
-                        Simple ->
+                        not Detailed ->
                             Fun;
                         true ->
                             Pres = yamerl_constr:get_pres_details(Token),

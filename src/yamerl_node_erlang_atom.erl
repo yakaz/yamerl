@@ -100,9 +100,9 @@ construct_token(_, _, Token) ->
     },
     throw(Error).
 
-construct_token2(#yamerl_constr{simple_structs = true}, _, Atom) ->
+construct_token2(#yamerl_constr{detailed_constr = false}, _, Atom) ->
     {finished, Atom};
-construct_token2(#yamerl_constr{simple_structs = false}, Token, Atom) ->
+construct_token2(#yamerl_constr{detailed_constr = true}, Token, Atom) ->
     Pres = yamerl_constr:get_pres_details(Token),
     Node = #yamerl_erlang_atom{
       module   = ?MODULE,

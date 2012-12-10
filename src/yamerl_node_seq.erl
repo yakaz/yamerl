@@ -44,11 +44,11 @@ construct_token(_, #unfinished_node{path = {seq, Count}, priv = Entries} = Node,
     },
     {unfinished, Node1, false};
 
-construct_token(#yamerl_constr{simple_structs = true},
+construct_token(#yamerl_constr{detailed_constr = false},
   #unfinished_node{priv = Entries}, #yamerl_collection_end{}) ->
     Node = lists:reverse(Entries),
     {finished, Node};
-construct_token(#yamerl_constr{simple_structs = false},
+construct_token(#yamerl_constr{detailed_constr = true},
   #unfinished_node{path = {_, Count}, pres = Pres, priv = Entries},
   #yamerl_collection_end{}) ->
     Node = #yamerl_seq{

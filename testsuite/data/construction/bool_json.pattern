@@ -14,7 +14,7 @@
         ]
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, true}, {schema, json}])
+        [{detailed_constr, false}, {schema, json}])
     ),
     ?_assertMatch(
       [
@@ -33,7 +33,7 @@
         }
       ],
       yamerl_constr:file("${FILENAME}",
-        [{simple_structs, false}, {schema, json}])
+        [{detailed_constr, true}, {schema, json}])
     )
   ]
 }

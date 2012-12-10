@@ -26,7 +26,7 @@ try_construct_token(Constr, Node, #yamerl_scalar{} = Token) ->
 try_construct_token(_, _, _) ->
     unrecognized.
 
-construct_token(#yamerl_constr{simple_structs = true, ext_options = Options},
+construct_token(#yamerl_constr{detailed_constr = false, ext_options = Options},
   undefined, #yamerl_scalar{text = Text, tag = #yamerl_tag{uri = Uri}})
 when Uri /= {non_specific, "?"} ->
     Node = case proplists:get_value(str_node_as_binary, Options, false) of
@@ -35,7 +35,7 @@ when Uri /= {non_specific, "?"} ->
         Encoding -> unicode:characters_to_binary(Text, unicode, Encoding)
     end,
     {finished, Node};
-construct_token(#yamerl_constr{simple_structs = false, ext_options = Options},
+construct_token(#yamerl_constr{detailed_constr = true, ext_options = Options},
   undefined, #yamerl_scalar{text = Text, tag = #yamerl_tag{uri = Uri}} = Token)
 when Uri /= {non_specific, "?"} ->
     Text1 = case proplists:get_value(str_node_as_binary, Options, false) of

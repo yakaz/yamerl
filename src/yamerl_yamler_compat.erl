@@ -138,7 +138,7 @@ convert_options([], Converted) ->
     end,
     [
       {doc_version, {1, 1}},
-      simple_structs,
+      {detailed_constr, false},
       str_node_as_binary,
       inf_float_node_like_yamler
       | Converted1

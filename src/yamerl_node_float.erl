@@ -34,7 +34,7 @@ try_construct_token(Constr, Node,
 try_construct_token(_, _, _) ->
     unrecognized.
 
-construct_token(#yamerl_constr{simple_structs = true, ext_options = Options},
+construct_token(#yamerl_constr{detailed_constr = false, ext_options = Options},
   undefined, #yamerl_scalar{text = Text} = Token) ->
     case string_to_float(Text) of
         error ->
@@ -54,7 +54,7 @@ construct_token(#yamerl_constr{simple_structs = true, ext_options = Options},
             end,
             {finished, Int1}
     end;
-construct_token(#yamerl_constr{simple_structs = false, ext_options = Options},
+construct_token(#yamerl_constr{detailed_constr = true, ext_options = Options},
   undefined, #yamerl_scalar{text = Text} = Token) ->
     case string_to_float(Text) of
         error ->
