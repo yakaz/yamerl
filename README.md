@@ -143,7 +143,7 @@ yamerl_constr:file("system.yaml").
 
 Full documents:
 ```erlang
-yamerl_constr:file("system.yaml", [{simple_structs, false}]).
+yamerl_constr:file("system.yaml", [{detailed_constr, true}]).
 ```
 ```erlang
 % List of documents.
