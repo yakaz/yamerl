@@ -14,8 +14,8 @@
     string/2,
     file/1,
     file/2,
-    next_chunk/3,
     next_chunk/2,
+    next_chunk/3,
     last_chunk/2,
     get_token_fun/1,
     set_token_fun/2,
@@ -276,6 +276,16 @@ new(Source, Options) ->
       token_fun    = proplists:get_value(token_fun, Options0, acc)
     }.
 
+-spec next_chunk(Parser, Chunk) ->
+        Ret | no_return() when
+          Parser     :: yamerl_parser(),
+          Chunk      :: unicode_binary(),
+          Ret        :: {continue, New_Parser},
+          New_Parser :: yamerl_parser().
+
+next_chunk(Parser, Chunk) ->
+    next_chunk(Parser, Chunk, false).
+
 -spec next_chunk(Parser, Chunk, Last_Chunk) ->
         Ret | no_return() when
           Parser     :: yamerl_parser(),
@@ -296,9 +306,6 @@ next_chunk(#yamerl_parser{raw_data = Data} = Parser, Chunk, EOS) ->
       raw_eos  = EOS
     },
     decode_unicode(Parser1).
-
-next_chunk(Parser, Chunk) ->
-    next_chunk(Parser, Chunk, false).
 
 -spec last_chunk(Parser, Chunk) ->
         Ret | no_return() when

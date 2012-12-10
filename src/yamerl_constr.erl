@@ -92,6 +92,16 @@ new(Source, Options) ->
     Parser_Options = initialize(Options),
     yamerl_parser:new(Source, Parser_Options).
 
+-spec next_chunk(Parser, Chunk) ->
+        Ret | no_return() when
+          Parser     :: yamerl_parser:yamerl_parser(),
+          Chunk      :: unicode_binary(),
+          Ret        :: {continue, New_Parser},
+          New_Parser :: yamerl_parser:yamerl_parser().
+
+next_chunk(Parser, Chunk) ->
+    next_chunk(Parser, Chunk, false).
+
 -spec next_chunk(Parser, Chunk, Last_Chunk) ->
         Ret | no_return() when
           Parser     :: yamerl_parser:yamerl_parser(),
@@ -109,9 +119,6 @@ next_chunk(Parser, Chunk, EOS) ->
         EOS  -> get_docs(Parser);
         true -> Parser
     end.
-
-next_chunk(Parser, Chunk) ->
-    next_chunk(Parser, Chunk, false).
 
 -spec last_chunk(Parser, Chunk) ->
         Result | no_return() when
