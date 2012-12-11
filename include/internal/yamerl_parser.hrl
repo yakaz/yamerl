@@ -8,7 +8,8 @@
 %% -------------------------------------------------------------------
 
 -type yamerl_parser_token_fun() ::
-        fun((yamerl_token() | term()) -> ok | {ok, yamerl_parser_token_fun()}).
+        fun((yamerl_token() | term()) ->
+              ok | {ok, yamerl_parser_token_fun()} | term()).
 
 -type yamerl_parser_option() :: {default_tags, [{tag_uri(), tag_prefix()}]}
                               | {document_version, document_version()}

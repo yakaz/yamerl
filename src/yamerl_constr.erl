@@ -102,22 +102,24 @@ new(Source, Options) ->
 next_chunk(Parser, Chunk) ->
     next_chunk(Parser, Chunk, false).
 
--spec next_chunk(Parser, Chunk, Last_Chunk) ->
+-spec next_chunk(Parser, Chunk, false) ->
         Ret | no_return() when
           Parser     :: yamerl_parser:yamerl_parser(),
           Chunk      :: unicode_binary(),
-          Last_Chunk :: boolean(),
-          Ret        :: {continue, New_Parser} | Result,
-          New_Parser :: yamerl_parser:yamerl_parser(),
+          Ret        :: {continue, New_Parser},
+          New_Parser :: yamerl_parser:yamerl_parser();
+      (Parser, Chunk, true) ->
+        Result | no_return() when
+          Parser     :: yamerl_parser:yamerl_parser(),
+          Chunk      :: unicode_binary(),
           Result     :: [yamerl_doc()]
-                      | [yamerl_simple_doc()]
-                      | term().
+                      | [yamerl_simple_doc()].
 
 next_chunk(Parser, Chunk, EOS) ->
-    Parser = yamerl_parser:next_chunk(Parser, Chunk, EOS),
+    Ret = yamerl_parser:next_chunk(Parser, Chunk, EOS),
     if
-        EOS  -> get_docs(Parser);
-        true -> Parser
+        EOS  -> get_docs(Ret);
+        true -> Ret
     end.
 
 -spec last_chunk(Parser, Chunk) ->
@@ -125,11 +127,16 @@ next_chunk(Parser, Chunk, EOS) ->
           Parser     :: yamerl_parser:yamerl_parser(),
           Chunk      :: unicode_binary(),
           Result     :: [yamerl_doc()]
-                      | [yamerl_simple_doc()]
-                      | term().
+                      | [yamerl_simple_doc()].
 
 last_chunk(Parser, Chunk) ->
     next_chunk(Parser, Chunk, true).
+
+-spec get_docs(Parser) ->
+        Docs | no_return() when
+          Parser :: yamerl_parser:yamerl_parser(),
+          Docs   :: [yamerl_doc()]
+                  | [yamerl_simple_doc()].
 
 get_docs(Parser) ->
     case yamerl_parser:get_token_fun(Parser) of
