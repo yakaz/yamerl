@@ -71,75 +71,75 @@
 %% -------------------------------------------------------------------
 
 -spec new(Source) ->
-        Parser | no_return() when
+        Constr | no_return() when
           Source :: term(),
-          Parser :: yamerl_parser:yamerl_parser().
+          Constr :: yamerl_parser:yamerl_parser().
 
 new(Source) ->
     new(Source, []).
 
 -spec new(Source, Options) ->
-        Parser | no_return() when
+        Constr | no_return() when
           Source  :: term(),
           Options :: [
             yamerl_constr_option() |
             yamerl_parser:yamerl_parser_option() |
             proplists:property()
           ],
-          Parser  :: yamerl_parser:yamerl_parser().
+          Constr  :: yamerl_parser:yamerl_parser().
 
 new(Source, Options) ->
     Parser_Options = initialize(Options),
     yamerl_parser:new(Source, Parser_Options).
 
--spec next_chunk(Parser, Chunk) ->
+-spec next_chunk(Constr, Chunk) ->
         Ret | no_return() when
-          Parser     :: yamerl_parser:yamerl_parser(),
+          Constr     :: yamerl_parser:yamerl_parser(),
           Chunk      :: unicode_binary(),
-          Ret        :: {continue, New_Parser},
-          New_Parser :: yamerl_parser:yamerl_parser().
+          Ret        :: {continue, New_Constr},
+          New_Constr :: yamerl_parser:yamerl_parser().
 
-next_chunk(Parser, Chunk) ->
-    next_chunk(Parser, Chunk, false).
+next_chunk(Constr, Chunk) ->
+    next_chunk(Constr, Chunk, false).
 
--spec next_chunk(Parser, Chunk, false) ->
+-spec next_chunk(Constr, Chunk, false) ->
         Ret | no_return() when
-          Parser     :: yamerl_parser:yamerl_parser(),
+          Constr     :: yamerl_parser:yamerl_parser(),
           Chunk      :: unicode_binary(),
-          Ret        :: {continue, New_Parser},
-          New_Parser :: yamerl_parser:yamerl_parser();
-      (Parser, Chunk, true) ->
+          Ret        :: {continue, New_Constr},
+          New_Constr :: yamerl_parser:yamerl_parser();
+      (Constr, Chunk, true) ->
         Result | no_return() when
-          Parser     :: yamerl_parser:yamerl_parser(),
+          Constr     :: yamerl_parser:yamerl_parser(),
           Chunk      :: unicode_binary(),
           Result     :: [yamerl_doc()]
                       | [yamerl_simple_doc()].
 
-next_chunk(Parser, Chunk, EOS) ->
-    Ret = yamerl_parser:next_chunk(Parser, Chunk, EOS),
+next_chunk(Constr, Chunk, EOS) ->
+    Ret = yamerl_parser:next_chunk(Constr, Chunk, EOS),
     if
         EOS  -> get_docs(Ret);
         true -> Ret
     end.
 
--spec last_chunk(Parser, Chunk) ->
+-spec last_chunk(Constr, Chunk) ->
         Result | no_return() when
-          Parser     :: yamerl_parser:yamerl_parser(),
+          Constr     :: yamerl_parser:yamerl_parser(),
           Chunk      :: unicode_binary(),
           Result     :: [yamerl_doc()]
                       | [yamerl_simple_doc()].
 
-last_chunk(Parser, Chunk) ->
-    next_chunk(Parser, Chunk, true).
+last_chunk(Constr, Chunk) ->
+    next_chunk(Constr, Chunk, true).
 
--spec get_docs(Parser) ->
+-spec get_docs(Constr) ->
         Docs | no_return() when
-          Parser :: yamerl_parser:yamerl_parser(),
+          Constr :: yamerl_parser:yamerl_parser(),
           Docs   :: [yamerl_doc()]
                   | [yamerl_simple_doc()].
 
-get_docs(Parser) ->
-    case yamerl_parser:get_token_fun(Parser) of
+get_docs(Constr) ->
+    case yamerl_parser:get_token_fun(Constr) of
         Not_Fun when Not_Fun == acc orelse Not_Fun == drop ->
             Error = #yamerl_parsing_error{
               name = token_fun_cleared
@@ -175,8 +175,8 @@ string(String) ->
 
 string(String, Options) ->
     Parser_Options = initialize(Options),
-    Parser = yamerl_parser:string(String, Parser_Options),
-    get_docs(Parser).
+    Constr = yamerl_parser:string(String, Parser_Options),
+    get_docs(Constr).
 
 -spec file(Filename) ->
         Result | no_return() when
@@ -200,8 +200,8 @@ file(Filename) ->
 
 file(Filename, Options) ->
     Parser_Options = initialize(Options),
-    Parser = yamerl_parser:file(Filename, Parser_Options),
-    get_docs(Parser).
+    Constr = yamerl_parser:file(Filename, Parser_Options),
+    get_docs(Constr).
 
 %% -------------------------------------------------------------------
 %% Presentation details.
