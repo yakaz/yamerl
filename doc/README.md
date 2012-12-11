@@ -1,5 +1,6 @@
-# yamerl User Guide
+# yamerl Documentation
 
-> Before using yamerl, you may want to:
-> * look at the [illustrated features list](features.md);
-> * read the [installation instructions](installation.md).
+* [Features](features.md)
+* [Installation instructions](installation.md)
+* [Reference Manual](reference-manual/README.md)
+* [User Guide](user-guide/README.md)
