@@ -1,0 +1,37 @@
+%% vim:ft=erlang:
+
+%% TEST
+{setup,
+  fun() ->
+      application:start(yamerl)
+  end,
+  [
+    ?_assertMatch(
+      [
+        [
+          "Duplicate",
+          "Duplicate"
+        ]
+      ],
+      yamerl_constr:file("${FILENAME}", [{detailed_constr, false}])
+    ),
+    ?_assertMatch(
+      [
+        {yamerl_doc,
+          {yamerl_seq,yamerl_node_seq, "tag:yaml.org,2002:seq",
+            [{line,1},{column,1}],
+            [
+              {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+                [{line,1},{column,11}],
+                "Duplicate"},
+              {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+                [{line,1},{column,11}],
+                "Duplicate"}
+            ],
+            2}
+        }
+      ],
+      yamerl_constr:file("${FILENAME}", [{detailed_constr, true}])
+    )
+  ]
+}

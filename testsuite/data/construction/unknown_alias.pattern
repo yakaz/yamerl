@@ -1,0 +1,32 @@
+%% vim:ft=erlang:
+
+%% TEST
+{setup,
+  fun() ->
+      application:start(yamerl)
+  end,
+  [
+    ?_assertThrow(
+      {yamerl_exception,
+        [{yamerl_parsing_error,error,
+            "No anchor corresponds to alias \"anchor\"",
+            2,3,no_matching_anchor,
+            {yamerl_alias,2,3,"anchor"},
+            []}
+        ]
+      },
+      yamerl_constr:file("${FILENAME}", [{detailed_constr, false}])
+    ),
+    ?_assertThrow(
+      {yamerl_exception,
+        [{yamerl_parsing_error,error,
+            "No anchor corresponds to alias \"anchor\"",
+            2,3,no_matching_anchor,
+            {yamerl_alias,2,3,"anchor"},
+            []}
+        ]
+      },
+      yamerl_constr:file("${FILENAME}", [{detailed_constr, true}])
+    )
+  ]
+}
