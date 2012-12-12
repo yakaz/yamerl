@@ -1,7 +1,7 @@
 ETEST         = etest
-TPL_PL        = template.pl
+TPL_PL        = gen-test-erlang-module
 TPL_ERL       = template.erl
-COVER_TO_HTML = cover_to_html.sh
+COVER_TO_HTML = cover_to_html
 
 TPL_FILES = parsing.erl construction.erl examples.erl
 
@@ -17,7 +17,7 @@ TESTS = dialyzer $(ERL_TESTS) benchmark
 TESTS_ENVIRONMENT = ERL_LIBS=$(ERL_LIBS)
 
 EXTRA_DIST = $(TPL_PL) $(TPL_ERL) $(COVER_TO_HTML)			\
-	     test_coverage.escript data
+	     test_coverage data
 
 CLEANFILES = $(ERL_TESTS) $(TPL_FILES) erl_crash.dump			\
 	     cover_*.html cover_*.out cover_*.percent			\

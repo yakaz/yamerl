@@ -32,7 +32,7 @@ if [ -z "$1" ]; then
 fi
 
 scriptdir=`dirname $0`
-test_coverage=$scriptdir/test_coverage.escript
+test_coverage=$scriptdir/test_coverage
 
 color_0="ff2200"
 color_5="ff3800"
