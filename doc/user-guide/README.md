@@ -2,5 +2,5 @@
 
 ## Recipes
 
-* [Basic parsing](recipe-basic-parsing.md)
-* [Error handling](recipe-error-handling.md)
+* [Basic parsing](user-guide/recipe-basic-parsing.md)
+* [Error handling](user-guide/recipe-error-handling.md)
