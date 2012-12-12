@@ -3,17 +3,17 @@
 ## Functions list
 
 * In-memory string parsing:
- * [`string/1`](#function_string_1)
- * [`string/2`](#function_string_2)
+  * [`string/1`](#function_string_1)
+  * [`string/2`](#function_string_2)
 * File parsing:
- * [`file/1`](#function_file_1)
- * [`file/2`](#function_file_2)
+  * [`file/1`](#function_file_1)
+  * [`file/2`](#function_file_2)
 * Stream parsing:
- * [`new/1`](#function_new_1)
- * [`new/2`](#function_new_2)
- * [`next_chunk/2`](#function_next_chunk_2)
- * [`next_chunk/3`](#function_next_chunk_3)
- * [`last_chunk/2`](#function_last_chunk_2)
+  * [`new/1`](#function_new_1)
+  * [`new/2`](#function_new_2)
+  * [`next_chunk/2`](#function_next_chunk_2)
+  * [`next_chunk/3`](#function_next_chunk_3)
+  * [`last_chunk/2`](#function_last_chunk_2)
 
 ## Functions reference
 
@@ -32,9 +32,9 @@ yamerl_constr:new(Source, []).
 
 * `Source`: An arbitrary term describing the source of the data.
 * `Options`: A proplist of options:
- * `{detailed_constr, boolean()}`: Flag to enable/disable the detailed construction mode (default: `false`).
- * `{schema, failsafe | json | core | yaml11}`: Name of the official schema to use (default: `core`).
- * `{node_mods, Mods_List}`: List of Erlang modules to extend supported node types (default: `[]`).
+  * `{detailed_constr, boolean()}`: Flag to enable/disable the detailed construction mode (default: `false`).
+  * `{schema, failsafe | json | core | yaml11}`: Name of the official schema to use (default: `core`).
+  * `{node_mods, Mods_List}`: List of Erlang modules to extend supported node types (default: `[]`).
 
 #### Description
 
@@ -161,14 +161,18 @@ yamerl_constr:string(String, []).
 Parse the given string and return a list of constructed YAML documents.
 
 The `String` argument can be:
+
 * an Erlang string (ie. list):
-```erlang
-yamerl_constr:string("This is a string").
-```
+
+  ```erlang
+  yamerl_constr:string("This is a string").
+  ```
+
 * a binary using the UTF-8, UTF-16 or UTF-32 Unicode encoding. A leading _BOM_ character is used to determine the encoding and endianness. If no BOM is present, UTF-8 is assumed.
-```erlang
-yamerl_constr:string(<<50,32,226,130,172>>). % The string "2 €" encoded in UTF-8.
-```
+
+  ```erlang
+  yamerl_constr:string(<<50,32,226,130,172>>). % The string "2 €" encoded in UTF-8.
+  ```
 
 #### Return values & exceptions
 

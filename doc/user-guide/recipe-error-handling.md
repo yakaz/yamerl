@@ -3,26 +3,30 @@
 yamerl **throws an exception when an error occurs**.
 
 1. Start the yamerl application. This is a mandatory step.
-```erlang
-application:start(yamerl).
-```
+
+  ```erlang
+  application:start(yamerl).
+  ```
+
 2. You're now ready to parse a serialized document:
- * To parse an in-memory string or binary:
-```erlang
--include_lib("yamerl/include/yamerl_errors.hrl").
 
-% ...
+  * To parse an in-memory string or binary:
 
-try
-  Documents = yamerl_constr:string("Hello!"),
-  % Documents is a list of constructed documents.
-  Documents
-catch
-  throw:#yamerl_exception{errors = Errors} ->
-    % Do something with the exception.
-    Errors
-end.
-```
+    ```erlang
+    -include_lib("yamerl/include/yamerl_errors.hrl").
+
+    % ...
+
+    try
+      Documents = yamerl_constr:string("Hello!"),
+      % Documents is a list of constructed documents.
+      Documents
+    catch
+      throw:#yamerl_exception{errors = Errors} ->
+        % Do something with the exception.
+        Errors
+    end.
+    ```
 
 As you can see, the `#yamerl_exception{}` record embeds all encountered errors:
 ```erlang

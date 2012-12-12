@@ -5,8 +5,8 @@
 ### Advantages
 
 * Pure Erlang implementation:
- * should scale more easily than a port-driver based implementation;
- * won't take the whole VM down in case of a crash.
+  * should scale more easily than a port-driver based implementation;
+  * won't take the whole VM down in case of a crash.
 * YAML 1.2 support, which is not widely supported in many other languages.
 
 ### Caveats
