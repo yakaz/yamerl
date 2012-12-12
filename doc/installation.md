@@ -25,7 +25,7 @@ The default installation path is your Erlang's distribution libraries directory.
 ### Build dependencies
 
 * autoconf 2.64 or later
-* automake (tested with 1.12.x, but should work with earlier versions)
+* automake 1.11 or later
 * awk (tested with FreeBSD's awk, mawk and gawk, should work with any flavor of Awk)
 * make (tested with FreeBSD's make and GNU make, should work with any flavor of make)
 * Erlang/OTP R14B02 or later
