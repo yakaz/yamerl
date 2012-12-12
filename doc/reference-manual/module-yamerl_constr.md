@@ -3,30 +3,30 @@
 ## Functions list
 
 * In-memory string parsing:
-  * [`string/1`](#function_string_1)
-  * [`string/2`](#function_string_2)
+  * [`string/1`](#function-stringstring)
+  * [`string/2`](#function-stringstring-options)
 * File parsing:
-  * [`file/1`](#function_file_1)
-  * [`file/2`](#function_file_2)
+  * [`file/1`](#function-filefilename)
+  * [`file/2`](#function-filefilename-options)
 * Stream parsing:
-  * [`new/1`](#function_new_1)
-  * [`new/2`](#function_new_2)
-  * [`next_chunk/2`](#function_next_chunk_2)
-  * [`next_chunk/3`](#function_next_chunk_3)
-  * [`last_chunk/2`](#function_last_chunk_2)
+  * [`new/1`](#function-newsource)
+  * [`new/2`](#function-newsource-options)
+  * [`next_chunk/2`](#function-next_chunkconstr_state-chunk)
+  * [`next_chunk/3`](#function-next_chunkconstr_state-chunk-last_chunk)
+  * [`last_chunk/2`](#function-last_chunkconstr_state-chunk)
 
 ## Functions reference
 
-### <a name="function_new_1"/>Function: new(Source)
+### Function: new(Source)
 
 Same as:
 ```erlang
 yamerl_constr:new(Source, []).
 ```
 
-> See [`new/2`](#function_new_2).
+> See [`new/2`](#function-newsource-options).
 
-### <a name="function_new_2"/>Function: new(Source, Options)
+### Function: new(Source, Options)
 
 #### Arguments
 
@@ -40,7 +40,7 @@ yamerl_constr:new(Source, []).
 
 Create a new construction state.
 
-The returned state is then used in the [next\_chunk/2](#function_next_chunk_2), [next\_chunk/3](#function_next_chunk_3) and [last\_chunk/2](#function_last_chunk_2) functions.
+The returned state is then used in the [next\_chunk/2](#function-next_chunkconstr_state-chunk), [next\_chunk/3](#function-next_chunkconstr_state-chunk-last_chunk) and [last\_chunk/2](#function-last_chunkconstr_state-chunk) functions.
 
 #### Return values & exceptions
 
@@ -48,20 +48,20 @@ If specified options are valid, return a new construction state.
 
 If specified options are invalid, throw an exception.
 
-### <a name="function_next_chunk_2"/>Function: next\_chunk(Constr\_State, Chunk)
+### Function: next\_chunk(Constr\_State, Chunk)
 
 Same as:
 ```erlang
 yamerl_constr:next_chunk(Constr_State, Chunk, false).
 ```
 
-> See [`next_chunk/3`](#function_next_chunk_3).
+> See [`next_chunk/3`](#function-next_chunkconstr_state-chunk-last_chunk).
 
-### <a name="function_next_chunk_3"/>Function: next\_chunk(Constr\_State, Chunk, Last\_Chunk)
+### Function: next\_chunk(Constr\_State, Chunk, Last\_Chunk)
 
 #### Arguments
 
-* `Constr_State`: A construction state as returned by [new/1](#function_new_1), [new/2](#function_new_2), [next\_chunk/2](#function_next_chunk_2) or [next\_chunk/3](#function_next_chunk_3).
+* `Constr_State`: A construction state as returned by [new/1](#function-newsource), [new/2](#function-newsource-options), [next\_chunk/2](#function-next_chunkconstr_state-chunk) or [next\_chunk/3](#function-next_chunkconstr_state-chunk-last_chunk).
 * `Chunk`: A UTF-8/16/32-encoded binary chunk of a stream containing one or more YAML documents.
 * `Last_Chunk`: Flag indicating if the given chunk is the last one or not.
 
@@ -73,7 +73,7 @@ The chunk must be an Erlang binary, using the UTF-8, UTF-16 or UTF-32 Unicode en
 
 #### Return values & exceptions
 
-If parsing succeeds and `Last_Chunk` is `false`, return `{continue, New_Constr_State}`. The `New_Constr_State` must be used for subsequent calls to [next\_chunk/2](#function_next_chunk_2), [next\_chunk/3](#function_next_chunk_3) or [last\_chunk/2](#function_last_chunk_2).
+If parsing succeeds and `Last_Chunk` is `false`, return `{continue, New_Constr_State}`. The `New_Constr_State` must be used for subsequent calls to [next\_chunk/2](#function-next_chunkconstr_state-chunk), [next\_chunk/3](#function-next_chunkconstr_state-chunk-last_chunk) or [last\_chunk/2](#function-last_chunkconstr_state-chunk).
 
 If parsing and construction succeed and `Last_Chunk` is `true`, return a list of documents:
 * Basic-terms-based documents are returned if option `{detailed_constr, false}` is set (default);
@@ -129,16 +129,16 @@ Throws:
 }
 ```
 
-### <a name="function_last_chunk_2"/>Function: last\_chunk(Constr\_State, Chunk)
+### Function: last\_chunk(Constr\_State, Chunk)
 
 Same as:
 ```erlang
 yamerl_constr:next_chunk(Constr_State, Chunk, true).
 ```
 
-> See [`next_chunk/3`](#function_next_chunk_3).
+> See [`next_chunk/3`](#function-next_chunkconstr_state-chunk-last_chunk).
 
-### <a name="function_string_1"/>Function: string(String)
+### Function: string(String)
 
 #### Description
 
@@ -147,14 +147,14 @@ Same as:
 yamerl_constr:string(String, []).
 ```
 
-> See [`string/2`](#function_string_2).
+> See [`string/2`](#function-stringstring-options).
 
-### <a name="function_string_2"/>Function: string(String, Options)
+### Function: string(String, Options)
 
 #### Arguments
 
 * `String`: A string or UTF-8/16/32-encoded binary containing one or more YAML documents.
-* `Options`: A proplist of options; see [`new/2`](#function_new_2).
+* `Options`: A proplist of options; see [`new/2`](#function-newsource-options).
 
 #### Description
 
@@ -245,7 +245,7 @@ Throws an exception:
 }.
 ```
 
-### <a name="function_file_1"/>Function: file(Filename)
+### Function: file(Filename)
 
 #### Description
 
@@ -254,14 +254,14 @@ Same as:
 yamerl_constr:file(Filename, []).
 ```
 
-> See [`file/2`](#function_file_2).
+> See [`file/2`](#function-filefilename-options).
 
-### <a name="function_file_2"/>Function: file(Filename, Options)
+### Function: file(Filename, Options)
 
 #### Arguments
 
 * `Filename`: A string containing the filename to parse.
-* `Options`: A proplist of options; see [`new/2`](#function_new_2).
+* `Options`: A proplist of options; see [`new/2`](#function-newsource-options).
 
 #### Description
 
@@ -269,6 +269,6 @@ Parse the file indicated by the given filename and return a list of constructed 
 
 The file is read by chunk of 4096 bytes (not configurable at this time).
 
-Otherwise, the behavior is the same as [`string/2`](#function_string_2).
+Otherwise, the behavior is the same as [`string/2`](#function-stringstring-options).
 
-> See [`string/2`](#function_string_2) for return values, exceptions and examples.
+> See [`string/2`](#function-stringstring-options) for return values, exceptions and examples.
