@@ -6,6 +6,7 @@
 
   ```bash
   git clone 'https://github.com/yakaz/yamerl.git'
+  cd yamerl/
   autoreconf -vif
   ```
 
