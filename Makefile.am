@@ -3,7 +3,10 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = include src ebin testsuite
 
-EXTRA_DIST = debian/changelog						\
+EXTRA_DIST = README.md							\
+	     AUTHORS							\
+	     COPYING							\
+	     debian/changelog						\
 	     debian/compat						\
 	     debian/control						\
 	     debian/copyright						\
