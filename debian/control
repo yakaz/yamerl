@@ -3,7 +3,10 @@ Section: devel
 Priority: optional
 Maintainer: Jean-Sébastien Pédron <jean-sebastien@yakaz.com>
 Uploaders: Christopher Faulet <christopher@yakaz.com>
-Build-Depends: debhelper (>= 8), autotools-dev, erlang-dev (>= 1:14.b.2), erlang-tools
+Build-Depends: debhelper (>= 8),
+ autotools-dev,
+ erlang-dev (>= 1:14.b.2),
+ erlang-tools
 Standards-Version: 3.9.1
 
 Package: erlang-yamerl
@@ -16,6 +19,11 @@ Description: Pure Erlang YAML 1.2 parser
  serialization language designed around the common native data types of
  agile programming languages
  .
- This parser conforms to the version 1.2 of the specification, 3rd
- edition (2009-10-01)
+ yamerl is a pure Erlang application which is able to parse YAML 1.1
+ and YAML 1.2 documents, as well as JSON documents. It only depends on
+ standard Erlang/OTP applications, no external dependency is required.
+ It doesn't use native code either (neither port drivers nor NIFs).
+ .
+ yamerl is distributed under the terms of the 2-clause BSD license; see
+ COPYING.
  .
