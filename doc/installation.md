@@ -3,17 +3,19 @@
 ## tl;dr
 
 1. Take the sources from Github and generate Autotools files:
-```bash
-git clone 'https://github.com/yakaz/yamerl.git'
-autoreconf -vif
-```
+
+  ```bash
+  git clone 'https://github.com/yakaz/yamerl.git'
+  autoreconf -vif
+  ```
 
 2. Enter the sources directory and run the usual configure/make/make install:
-```bash
-./configure
-make
-make install
-```
+
+  ```bash
+  ./configure
+  make
+  make install
+  ```
 
 The default installation path is your Erlang's distribution libraries directory.
 
@@ -55,20 +57,22 @@ autoreconf -vif
 #### Inside sources vs. outside sources
 
 * The simplest method is to run the `configure` script from the sources directory:
-```bash
-./configure
-```
+
+  ```bash
+  ./configure
+  ```
 
 * The **recommended method** is to run the `configure` script from a separate directory, in order to keep the sources directory clean:
-```bash
-# Create and enter a separate directory.
-mkdir build-yamerl
-cd build-yamerl
 
-# Execute the configure script from this directory; all files are
-# created in this directory, not in the sources directory.
-/path/to/yamerl-sources/configure
-```
+  ```bash
+  # Create and enter a separate directory.
+  mkdir build-yamerl
+  cd build-yamerl
+
+  # Execute the configure script from this directory; all files are
+  # created in this directory, not in the sources directory.
+  /path/to/yamerl-sources/configure
+  ```
 
 #### Changing the install path
 
@@ -80,14 +84,18 @@ The default installation path is your Erlang's distribution libraries directory,
 #### Using a non-default Erlang distribution
 
 By default, the system Erlang distribution is used by querying `erl(1)` taken from the `$PATH`. You can specify another Erlang distribution:
+
 * using the `--with-erlang` option to point to the Erlang root directory:
-```bash
-.../configure --with-erlang=/erlang/root/directory
-```
+
+  ```bash
+  .../configure --with-erlang=/erlang/root/directory
+  ```
+
 * using the `$ERL` variable to point to the alternate `erl(1)` binary:
-```bash
-.../configure ERL=/path/to/erl
-```
+
+  ```bash
+  .../configure ERL=/path/to/erl
+  ```
 
 ### Compiling
 
@@ -101,12 +109,15 @@ You can use multiple make jobs (ie. using the `-j` option). However Erlang modul
 ## Installing
 
 * Simply run:
-```bash
-make install
-```
-Note that you may need increased privileges.
+
+  ```bash
+  make install
+  ```
+
+  Note that you may need increased privileges.
 
 * To help mostly packagers, the `$DESTDIR` variable is honored:
-```bash
-make install DESTDIR=/path/to/fake/root
-```
+
+  ```bash
+  make install DESTDIR=/path/to/fake/root
+  ```
