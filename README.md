@@ -2,9 +2,9 @@
 
 YAML is a human friendly data serialization format. The specification for this language  and many examples are available from the [Official YAML web site](http://www.yaml.org/). You may also want to check the [YAML Wikipedia article](http://en.wikipedia.org/wiki/YAML).
 
-**yamerl** is a pure [Erlang application](http://www.erlang.org/) which is able to parse [YAML 1.1](http://yaml.org/spec/1.1/) and [YAML 1.2](http://www.yaml.org/spec/1.2/spec.html) documents.
+**yamerl** is a pure [Erlang application](http://www.erlang.org/) which is able to parse [YAML 1.1](http://yaml.org/spec/1.1/) and [YAML 1.2](http://www.yaml.org/spec/1.2/spec.html) documents, as well as JSON documents. It only depends on standard Erlang/OTP applications, no external dependency is required. It doesn't use native code either (neither port drivers nor NIFs).
 
-yamerl only depends on standard Erlang/OTP applications, no external dependency is required. It doesn't use native code either (neither port drivers nor NIFs).
+yamerl is distributed under the terms of the **2-clause BSD license**; see `COPYING`.
 
 ## Installation
 
