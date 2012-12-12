@@ -86,7 +86,7 @@ If parsing or construction fails, throw an exception.
 ##### Parse a valid stream
 
 ```erlang
-Stream_St1 = yamerl_constr:new("<stdin>"),
+Stream_St1 = yamerl_constr:new({file, "<stdin>"}),
 {continue, Stream_St2} = yamerl_constr:next_chunk(Stream_St1, <<"He">>),
 {continue, Stream_St3} = yamerl_constr:next_chunk(Stream_St2, <<"ll">>),
 yamerl_constr:last_chunk(Stream_St3, <<"o!">>).
@@ -104,7 +104,7 @@ Returns:
 ##### Parse an invalid stream
 
 ```erlang
-Stream_St1 = yamerl_constr:new("<stdin>"),
+Stream_St1 = yamerl_constr:new({file, "<stdin>"}),
 {continue, Stream_St2} = yamerl_constr:next_chunk(Stream_St1, <<"'He">>),
 {continue, Stream_St3} = yamerl_constr:next_chunk(Stream_St2, <<"ll">>),
 yamerl_constr:last_chunk(Stream_St3, <<"o!">>) % Unfinished single-quoted scalar.

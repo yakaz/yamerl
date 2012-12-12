@@ -18,8 +18,9 @@ Documents = yamerl_constr:file("input.yaml").
  * To parse a stream:
 ```erlang
 % Create a new construction state. The only required argument is an
-% arbitrary term describing the source of the data.
-Constr_State = yamerl_constr:new("<stdin>"),
+% arbitrary term describing the source of the data. Here, we use the
+% same term structure as yamerl_constr:file/{1, 2}.
+Constr_State = yamerl_constr:new({file, "<stdin>"}),
 
 % Feed the parser with binary chunks. The developer is responsible for
 % reading the chunk from the underlying source.
