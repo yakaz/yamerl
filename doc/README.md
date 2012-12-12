@@ -2,5 +2,5 @@
 
 * [Features](doc/features.md)
 * [Installation instructions](doc/installation.md)
-* [Reference Manual](doc/reference-manual)
-* [User Guide](doc/user-guide)
+* [Reference Manual](doc/reference-manual#readme)
+* [User Guide](doc/user-guide#readme)
