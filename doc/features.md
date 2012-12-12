@@ -74,4 +74,4 @@
 
 ## Alternatives to yamerl
 
-If yamerl doesn't fit your needs, you can read a [list of alternatives](alternatives.md).
+If yamerl doesn't fit your needs, you can read a [list of alternatives](alternatives.md#alternatives-to-yamerl).
