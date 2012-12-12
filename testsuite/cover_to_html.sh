@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 #-
 # Copyright (c) 2012 Yakaz
 # All rights reserved.
@@ -23,6 +23,8 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
+
+set -e
 
 if [ -z "$1" ]; then
 	echo "Syntax: $0 <test_name> [<test_name> ...]"
