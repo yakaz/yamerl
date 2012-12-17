@@ -9,6 +9,10 @@ autom4te.cache/
 config.h.in
 config.h.in~
 configure
+/ebin/*.app
+/ebin/*.beam
+/.eunit
+/rebar
 
 # Files produced by Debian package.
 build-stamp

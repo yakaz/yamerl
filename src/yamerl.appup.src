@@ -1,7 +1,7 @@
 %% -*-erlang-*-
 %% vim:ft=erlang:
 
-{ "@VERSION@",
+{ git,
   [
     %% To upgrade from the specified version to current one.
   ], [
