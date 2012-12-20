@@ -1,0 +1,22 @@
+%% vim:ft=erlang:
+
+%% TEST
+{setup,
+  fun() ->
+      application:start(yamerl)
+  end,
+  [
+    ?_assertEqual(
+      yamerl:decode("[one, two]"),
+      yamerl_constr:string("[one, two]")
+    ),
+    ?_assertEqual(
+      yamerl:decode("[one, two]", [{detailed_constr, false}]),
+      yamerl_constr:string("[one, two]", [{detailed_constr, false}])
+    ),
+    ?_assertEqual(
+      yamerl:decode("[one, two]", [{detailed_constr, true}]),
+      yamerl_constr:string("[one, two]", [{detailed_constr, true}])
+    )
+  ]
+}

@@ -3,9 +3,9 @@ TPL_PL        = gen-test-erlang-module
 TPL_ERL       = template.erl
 COVER_TO_HTML = cover_to_html
 
-TPL_FILES = parsing.erl construction.erl examples.erl
+TPL_FILES = parsing.erl construction.erl wrapper.erl examples.erl
 
-ERL_TESTS = parsing construction examples
+ERL_TESTS = parsing construction wrapper examples
 
 if HAVE_YAMLER
 TPL_FILES += yamler_compat.erl
