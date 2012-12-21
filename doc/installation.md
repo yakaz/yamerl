@@ -2,7 +2,19 @@
 
 ## tl;dr
 
-1. Take the sources from Github and generate Autotools files:
+### Rebar
+
+1. Take the sources from GitHub and run rebar(1):
+
+  ```bash
+  git clone 'https://github.com/yakaz/yamerl.git'
+  cd yamerl/
+  rebar compile
+  ```
+
+### Autotools
+
+1. Take the sources from GitHub and generate Autotools files:
 
   ```bash
   git clone 'https://github.com/yakaz/yamerl.git'
@@ -24,6 +36,12 @@ The default installation path is your Erlang's distribution libraries directory.
 
 ### Build dependencies
 
+If you're using Rebar:
+* rebar
+* awk (tested with FreeBSD's awk, mawk and gawk, should work with any flavor of Awk)
+* Erlang/OTP R14B02 or later
+
+If you're using the Autotools:
 * autoconf 2.64 or later
 * automake 1.11 or later
 * awk (tested with FreeBSD's awk, mawk and gawk, should work with any flavor of Awk)
@@ -32,6 +50,8 @@ The default installation path is your Erlang's distribution libraries directory.
 
 ### Testsuite dependencies
 
+> The testsuite is only supported when using the Autotools.
+
 * Erlang/OTP R14B02 or later
 * [yamler](https://github.com/goertzenator/yamler) (optional)
 
@@ -39,7 +59,14 @@ The default installation path is your Erlang's distribution libraries directory.
 
 * Erlang/OTP R14B02 or later
 
-## Building
+## Building using Rebar
+
+A single step is required here:
+```bash
+rebar compile
+```
+
+## Building using the Autotools
 
 ### Generating the Autotools files
 
@@ -108,6 +135,8 @@ make
 You can use multiple make jobs (ie. using the `-j` option). However Erlang modules are built using Erlang's `make` application. And, as of this writing (Erlang R15B03), this application doesn't build modules in parallel.
 
 ## Installing
+
+> Installation is only supported when using the Autotools.
 
 * Simply run:
 

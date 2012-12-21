@@ -8,7 +8,16 @@ yamerl is distributed under the terms of the **2-clause BSD license**; see `COPY
 
 ## Installation
 
-Autotools and `make(1)` are used to build the application. After cloning the Git repository and entering the working copy directory:
+### Rebar
+
+If you use rebar, you can run the following command to build the application:
+```bash
+rebar compile
+```
+
+### Autotools
+
+If you use the Autotools and `make(1)`, run the following commands to build the application:
 ```bash
 # Generate Autotools files.
 autoreconf -vif
@@ -16,6 +25,8 @@ autoreconf -vif
 # Build the application.
 ./configure
 make
+
+# Install it.
 sudo make install
 ```
 
