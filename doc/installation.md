@@ -2,7 +2,7 @@
 
 ## tl;dr
 
-### Rebar
+### Using Rebar
 
 1. Take the sources from GitHub and run rebar(1):
 
@@ -12,7 +12,7 @@
   rebar compile
   ```
 
-### Autotools
+### Using the Autotools
 
 1. Take the sources from GitHub and generate Autotools files:
 
