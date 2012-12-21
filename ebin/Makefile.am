@@ -15,7 +15,13 @@ $(APP_NAME).app: Makefile.am $(APP_NAME).app.in
 	@echo "Generate: $@"
 	@src=`ls $(BEAM_FILES) | sort`;					\
 	$(AWK) -v src="$$src"						\
-	"{ print }							\
+	"/{vsn, *{cmd,/ {						\
+		line = \$$0;						\
+		sub(/{vsn.*/, \"{vsn, \\\"$(VERSION)\\\"},\", line);	\
+		print line;						\
+		next;							\
+	}								\
+	{ print; }							\
 	/% DO NOT EDIT: Modules list is generated/ {			\
 		indent = index(\$$0, \"%\");				\
 		indent = substr(\$$0, 1, indent - 1);			\
