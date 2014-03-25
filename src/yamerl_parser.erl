@@ -3390,7 +3390,7 @@ queue_flow_scalar_token(Chars, Line, Col, Delta, Parser,
     find_next_token(Chars, Line, Col, Delta, Parser2).
 
 unescape_char($0)  -> 16#0;    %% \0 = NUL                        [42]
-unescape_char($a)  -> 16#7;    %% \7 = BELL                       [43]
+unescape_char($a)  -> 16#7;    %% \a = BELL                       [43]
 unescape_char($b)  -> $\b;     %% \b = BS                         [44]
 unescape_char($t)  -> $\t;     %% \t = TAB                        [45]
 unescape_char($n)  -> $\n;     %% \n = LF                         [46]
@@ -4272,8 +4272,8 @@ invalid_option(Option) ->
         {token_fun, _} ->
             Error#yamerl_invalid_option{
               text = "Invalid value for option \"token_fun\": "
-              "it must be a function taking the parser state "
-              "as its sole argument, or the atom 'acc' or 'drop'"
+              "it must be a function taking the next token as "
+              "its sole argument, or the atom 'acc' or 'drop'"
             };
         _ ->
             yamerl_errors:format(Error, "Unknown option \"~w\"", [Option])
