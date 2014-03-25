@@ -53,7 +53,7 @@ fi
 AC_ARG_ENABLE([warnings],
 	AC_HELP_STRING([--enable-warnings],
 	    [treat warnings as errors [[default=yes]]]),,
-	enable_warnings=yes)
+	enable_warnings=no)
 if test "x${enable_warnings}" = "xyes"; then
 	append_to_EMKOPTS "warnings_as_errors"
 fi
