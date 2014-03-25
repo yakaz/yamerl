@@ -7,27 +7,8 @@
 WORKDIR=$(CURDIR)/debian/build
 DESTDIR=$(CURDIR)/debian/erlang-yamerl
 
-ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
-	DEBUG = yes
-else
-	DEBUG = no
-endif
-
-
 %:
-	dh $@ --parallel --builddirectory=$(WORKDIR)
+	dh $@ --parallel --with autoreconf
 
 override_dh_auto_configure:
-	if [ -d $(WORKDIR) ]; then rm -fr $(WORKDIR); fi
-	mkdir -p $(WORKDIR)
-	cd $(WORKDIR) && $(CURDIR)/configure --enable-debug=$(DEBUG)
-
-override_dh_auto_test:
-	@:
-
-override_dh_auto_install:
-	dh_auto_install --destdir=$(DESTDIR)
-
-override_dh_gencontrol:
-	erlang-depends
-	dh_gencontrol -O--parallel -O--builddirectory=$(WORKDIR)
+	dh_auto_configure -- --prefix=/usr/lib/erlang/lib
