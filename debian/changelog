@@ -1,14 +1,9 @@
-erlang-yamerl (0.3.0-2) experimental; urgency=low
-
-  * Fix Debian package.
-
- -- Jean-Sébastien Pédron <jean-sebastien@yakaz.com>  Tue, 25 Mar 2014 17:33:07 +0100
-
-erlang-yamerl (0.3.0-1) experimental; urgency=low
+erlang-yamerl (0.3.0-1) stable; urgency=low
 
   * Rename application to "yamerl".
+  * Fix Debian package.
 
- -- Jean-Sébastien Pédron <jean-sebastien@yakaz.com>  Thu, 15 Nov 2012 13:15:08 +0100
+ -- Jean-Sébastien Pédron <jean-sebastien@yakaz.com>  Wed, 26 Mar 2014 11:08:22 +0100
 
 erlang-yaml (0.2.0-1) experimental; urgency=low
 
