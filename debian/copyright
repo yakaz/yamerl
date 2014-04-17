@@ -4,9 +4,9 @@ Upstream-Contact: Jean-Sébastien Pédron <jean-sebastien@yakaz.com>
 Source: https://github.com/yakaz/yamerl
 
 Files: *
-Copyright: 2012, Yakaz
+Copyright: 2012-2014, Yakaz
 License: BSD-2-clause
- Copyright (c) 2012 Yakaz
+ Copyright (c) 2012-2014 Yakaz
  All rights reserved.
  .
  Redistribution and use in source and binary forms, with or without
