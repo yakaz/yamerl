@@ -49,8 +49,6 @@
     config_change/3
   ]).
 
--define(APPLICATION, yamerl).
-
 %% -------------------------------------------------------------------
 %% Configuration API.
 %% -------------------------------------------------------------------
@@ -65,7 +63,7 @@ params_list() ->
 -spec get_param(atom()) -> term().
 
 get_param(Param) ->
-    {ok, Value} = application:get_env(?APPLICATION, Param),
+    {ok, Value} = application:get_env(yamerl, Param),
     Value.
 
 -spec is_param_valid(atom(), term()) -> boolean().
@@ -86,7 +84,7 @@ is_param_valid(_Param, _Value) ->
 -spec set_param(atom(), term()) -> ok.
 
 set_param(Param, Value) ->
-    application:set_env(?APPLICATION, Param, Value).
+    application:set_env(yamerl, Param, Value).
 
 -spec check_and_set_param(atom(), term()) -> ok.
 
@@ -130,14 +128,14 @@ log_param_errors([]) ->
     ok;
 log_param_errors([node_mods = Param | Rest]) ->
     error_logger:warning_msg(
-      "~s: invalid value for \"~s\": ~p.~n"
+      "yamerl: invalid value for \"~s\": ~p.~n"
       "It must be the name of an existing module (atom).~n",
-      [?APPLICATION, Param, get_param(Param)]),
+      [Param, get_param(Param)]),
     log_param_errors(Rest);
 log_param_errors([Param | Rest]) ->
     error_logger:warning_msg(
-      "~s: unknown parameter \"~s\".~n",
-      [?APPLICATION, Param]),
+      "yamerl: unknown parameter \"~s\".~n",
+      [Param]),
     log_param_errors(Rest).
 
 is_node_mod(Mod) ->
@@ -192,7 +190,7 @@ do_start([check_params | Rest]) ->
             do_start(Rest);
         false ->
             Message = io_lib:format(
-              "~s: invalid application configuration~n", [?APPLICATION]),
+              "yamerl: invalid application configuration~n", []),
             {error, invalid_configuration, Message}
     end;
 do_start([preload_core_schema_mods | Rest]) ->
@@ -203,7 +201,7 @@ do_start([preload_core_schema_mods | Rest]) ->
     catch
         _:_ ->
             Message = io_lib:format(
-              "~s: failed to preload Core Schema modules~n", [?APPLICATION]),
+              "yamerl: failed to preload Core Schema modules~n", []),
             {error, bad_score_schema_mods, Message}
     end;
 do_start([]) ->
