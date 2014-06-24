@@ -131,7 +131,7 @@ string_to_float(Text) ->
     string_to_float2(Text).
 
 string_to_float2(Text) ->
-    Opts = [{capture, none}],
+    Opts = [{capture, none}, unicode],
     Ret = re:run(Text, "^(0|[1-9][0-9]*)(\\.[0-9]*)?([eE][-+]?[0-9]+)?$", Opts),
     case Ret of
         match   -> yamerl_node_float:erlang_list_to_float(Text);

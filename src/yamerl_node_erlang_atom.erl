@@ -87,7 +87,7 @@ try_construct_token3(#yamerl_constr{ext_options = Options} = Constr,
     end.
 
 is_valid_atom(Text) ->
-    Opts = [{capture, none}],
+    Opts = [{capture, none}, unicode],
     case re:run(Text, "^[a-z][a-zA-Z0-9_@]*$", Opts) of
         match   -> true;
         nomatch -> false

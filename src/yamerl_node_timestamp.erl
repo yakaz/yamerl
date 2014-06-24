@@ -114,7 +114,8 @@ node_pres(Node) ->
 %% -------------------------------------------------------------------
 
 string_to_timestamp(Text) ->
-    case re:run(Text, ?REGEX, [{capture, all_but_first, list}]) of
+    Opts = [{capture, all_but_first, list}, unicode],
+    case re:run(Text, ?REGEX, Opts) of
         {match, [Y, Mo, D, H, Mi, S]} ->
             %% Date/time.
             {

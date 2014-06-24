@@ -94,7 +94,8 @@ node_pres(Node) ->
 %% -------------------------------------------------------------------
 
 string_to_size(Text) ->
-    case re:run(Text, ?REGEX, [{capture, all_but_first, list}]) of
+    Opts = [{capture, all_but_first, list}, unicode],
+    case re:run(Text, ?REGEX, Opts) of
         {match, [I, U, B]} ->
             Multiplier = case {U, B} of
                 {"k", "B"} -> 1024;

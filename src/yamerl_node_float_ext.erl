@@ -167,7 +167,7 @@ string_to_float2(".") ->
     error;
 string_to_float2(Text) ->
     %% Try base 10.
-    Opts1 = [{capture, none}],
+    Opts1 = [{capture, none}, unicode],
     Ret1 = re:run(Text,
       "^([0-9][0-9_]*)?\\.([0-9][0-9_]*)?([eE][-+][0-9]+)?$",
       Opts1),
@@ -176,7 +176,7 @@ string_to_float2(Text) ->
             yamerl_node_float:erlang_list_to_float(Text);
         nomatch ->
             %% Try base 60.
-            Opts2 = [{capture, all_but_first, list}],
+            Opts2 = [{capture, all_but_first, list}, unicode],
             Ret2 = re:run(Text,
               "^((?:[0-9][0-9_]*)(?::[0-5]?[0-9])+)\\.([0-9][0-9_]*)?$",
               Opts2),
