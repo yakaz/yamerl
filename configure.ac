@@ -2,7 +2,7 @@ dnl ------------------------------------------------------------------
 dnl Autoconf initialization.
 dnl ------------------------------------------------------------------
 
-AC_INIT([yamerl], [0.3.0])
+AC_INIT([yamerl], [0.3.1])
 
 AC_CONFIG_SRCDIR([src/yamerl_app.erl])
 AC_CONFIG_MACRO_DIR([m4])

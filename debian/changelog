@@ -1,3 +1,10 @@
+erlang-yamerl (0.3.1-1) experimental; urgency=low
+
+  * Fix bug with re:run/3 usage and Unicode string (#5).
+  * (not released yet)
+
+ -- Jean-Sébastien Pédron <jean-sebastien@yakaz.com>  Tue, 24 Jun 2014 17:02:05 +0200
+
 erlang-yamerl (0.3.0-1) stable; urgency=low
 
   * Rename application to "yamerl".
