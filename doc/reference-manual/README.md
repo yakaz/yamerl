@@ -2,4 +2,4 @@
 
 ## Modules
 
-* [`yamerl_constr`](reference-manual/module-yamerl_constr.md)
+* [`yamerl_constr`](module-yamerl_constr.md)
