@@ -55,9 +55,8 @@ If you're using the Autotools:
 
 ### Testsuite dependencies
 
-> The testsuite is only supported when using the Autotools.
-
 * Erlang/OTP R14B02 or later
+* Perl
 * [yamler](https://github.com/goertzenator/yamler) (optional)
 
 ### Runtime dependencies
@@ -69,6 +68,11 @@ If you're using the Autotools:
 A single step is required here:
 ```bash
 rebar compile
+```
+
+If you want to run the testsuite:
+```bash
+rebar eunit
 ```
 
 ## Building using the Autotools
@@ -147,6 +151,11 @@ You can use multiple make jobs (ie. using the `-j` option). However
 Erlang modules are built using Erlang's `make` application. And, as of
 this writing (Erlang R15B03), this application doesn't build modules in
 parallel.
+
+If you want to run the testsuite:
+```bash
+make check
+```
 
 ## Installing
 
