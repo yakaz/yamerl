@@ -4,7 +4,12 @@
 {setup,
   fun() ->
       application:start(yamerl),
-      yamerl_app:set_param(node_mods, [yamerl_node_timestamp])
+      Node_Mods = yamerl_app:get_param(node_mods),
+      yamerl_app:set_param(node_mods, [yamerl_node_timestamp]),
+      Node_Mods
+  end,
+  fun(Node_Mods) ->
+      yamerl_app:set_param(node_mods, Node_Mods)
   end,
   [
     ?_assertMatch(
