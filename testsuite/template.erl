@@ -38,16 +38,22 @@ ${include}
 %% Testsuite entry point.
 %% -------------------------------------------------------------------
 
+-ifndef(TEST).
 main_test_() ->
     Setup   = fun setup/0,
     Cleanup = fun cleanup/1,
     Tests   = tests_list(),
     {setup, Setup, Cleanup, Tests}.
+-else.
+main_test_() ->
+    tests_list().
+-endif.
 
 %% -------------------------------------------------------------------
 %% Setup and cleanup.
 %% -------------------------------------------------------------------
 
+-ifndef(TEST).
 setup() ->
     %% Setup coverity checking. To know what module to compile and the
     %% options to use, we look at the Emakefile.
@@ -88,6 +94,8 @@ cover_compile2([], _) ->
 cleanup(_) ->
     cover:export(?MODULE_STRING ".coverdata"),
     cover:stop().
+-else.
+-endif.
 
 %% -------------------------------------------------------------------
 %% Tests listing and construction.

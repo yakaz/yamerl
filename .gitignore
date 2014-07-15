@@ -22,3 +22,8 @@ debian/*/
 debian/build/
 debian/files
 !debian/source/
+
+# Files produced by rebar.
+/.eunit
+/.rebar
+/test
