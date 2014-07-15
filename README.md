@@ -1,23 +1,34 @@
 # yamerl: YAML 1.2 parser in Erlang
 
-YAML is a human friendly data serialization format. The specification for this language  and many examples are available from the [Official YAML web site](http://www.yaml.org/). You may also want to check the [YAML Wikipedia article](http://en.wikipedia.org/wiki/YAML).
+YAML is a human friendly data serialization format. The specification
+for this language and many examples are available from the [Official
+YAML web site](http://www.yaml.org/). You may also want to check the
+[YAML Wikipedia article](http://en.wikipedia.org/wiki/YAML).
 
-**yamerl** is a pure [Erlang application](http://www.erlang.org/) which is able to parse [YAML 1.1](http://yaml.org/spec/1.1/) and [YAML 1.2](http://www.yaml.org/spec/1.2/spec.html) documents, as well as JSON documents. It only depends on standard Erlang/OTP applications, no external dependency is required. It doesn't use native code either (neither port drivers nor NIFs).
+**yamerl** is a pure [Erlang application](http://www.erlang.org/)
+which is able to parse [YAML 1.1](http://yaml.org/spec/1.1/) and [YAML
+1.2](http://www.yaml.org/spec/1.2/spec.html) documents, as well as
+JSON documents. It only depends on standard Erlang/OTP applications,
+no external dependency is required. It doesn't use native code either
+(neither port drivers nor NIFs).
 
-yamerl is distributed under the terms of the **2-clause BSD license**; see `COPYING`.
+yamerl is distributed under the terms of the **2-clause BSD license**;
+see `COPYING`.
 
 ## Installation
 
 ### Rebar
 
-If you use rebar, you can run the following command to build the application:
+If you use rebar, you can run the following command to build the
+application:
 ```bash
 rebar compile
 ```
 
 ### Autotools
 
-If you use the Autotools and `make(1)`, run the following commands to build the application:
+If you use the Autotools and `make(1)`, run the following commands to
+build the application:
 ```bash
 # Generate Autotools files.
 autoreconf -vif
@@ -30,7 +41,8 @@ make
 sudo make install
 ```
 
-The default installation path is your Erlang's distribution libraries directory (see `code:lib_dir()`).
+The default installation path is your Erlang's distribution libraries
+directory (see `code:lib_dir()`).
 
 ## Getting started
 
@@ -39,12 +51,15 @@ Before using yamerl, the application must be started:
 application:start(yamerl).
 ```
 
-Now, one can use the `yamerl_constr` module to parse and construct a list of documents from:
+Now, one can use the `yamerl_constr` module to parse and construct a
+list of documents from:
 * an in-memory document (string or binary);
 * a file;
 * a stream.
 
-Because a YAML input stream may contain multiple documents, `yamerl_constr` always returns a list of documents, even if the input stream only contains one.
+Because a YAML input stream may contain multiple documents,
+`yamerl_constr` always returns a list of documents, even if the input
+stream only contains one.
 
 ### Parsing an in-memory document
 
@@ -59,7 +74,8 @@ yamerl_constr:string("Hello World!").
 ]
 ```
 
-Here, the returned value is a list of documents containing one document. This document has a scalar as its sole node.
+Here, the returned value is a list of documents containing one document.
+This document has a scalar as its sole node.
 
 ### Parsing a file
 
@@ -105,7 +121,8 @@ yamerl_constr:file("applications.yaml").
 
 ### Parsing a stream
 
-The developer is responsible for reading the stream and provide the chunks to yamerl.
+The developer is responsible for reading the stream and provide the
+chunks to yamerl.
 
 ```erlang
 % Initialize a new construction state. It takes a term describing the
@@ -124,8 +141,12 @@ Documents = yamerl_constr:last_chunk(Parser2, Chunk3).
 ## Simple vs. full document structures
 
 `yamerl_constr` comes with two built-in modes:
-* It can output simple documents, eg. documents based on basic Erlang structures (strings, numbers, lists, proplists). This is the default mode.
-* It can output detailed documents using records. These records carry more information such as line/column, tag URI, YAML node type, module used to construct it, etc.
+* It can output simple documents, eg. documents based on basic Erlang
+    structures (strings, numbers, lists, proplists). This is the default
+    mode.
+* It can output detailed documents using records. These records carry
+    more information such as line/column, tag URI, YAML node type, module
+    used to construct it, etc.
 
 If we use the following YAML document:
 ```yaml
@@ -182,4 +203,5 @@ yamerl_constr:file("system.yaml", [{detailed_constr, true}]).
 
 ## Complete documentation
 
-See the `doc` subdirectory for a complete user guide and reference manual.
+See the `doc` subdirectory for a complete user guide and reference
+manual.
