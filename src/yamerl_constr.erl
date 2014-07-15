@@ -473,6 +473,7 @@ umerge_unsorted(List1, List2) ->
     lists:foldl(Fun, List1, List2).
 
 filter_autodetection_capable_mods([Mod | Rest], Auto) ->
+    catch Mod:module_info(),
     Auto1 = case erlang:function_exported(Mod, try_construct_token, 3) of
         true  -> [Mod | Auto];
         false -> Auto
