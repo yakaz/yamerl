@@ -15,6 +15,8 @@ no external dependency is required. It doesn't use native code either
 yamerl is distributed under the terms of the **2-clause BSD license**;
 see `COPYING`.
 
+[![Build Status](https://travis-ci.org/yakaz/yamerl.svg?branch=master)](https://travis-ci.org/yakaz/yamerl)
+
 ## Installation
 
 ### Rebar
