@@ -1,7 +1,5 @@
-.swp
-.swo
-.*.swp
-.*.swo
+.sw?
+.*.sw?
 *.beam
 Makefile.in
 /ac-aux/
@@ -10,8 +8,6 @@ Makefile.in
 /config.h.in
 /config.h.in~
 /configure
-/rebar
-/ebin/yamerl.app
 
 # Files produced by Debian package.
 build-stamp
@@ -24,6 +20,9 @@ debian/files
 !debian/source/
 
 # Files produced by rebar.
-/.eunit
-/.rebar
-/test
+/.eunit/
+/.rebar/
+/rebar
+/deps/
+/test/
+/ebin/yamerl.app
