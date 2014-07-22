@@ -1,9 +1,11 @@
 erlang-yamerl (0.3.1-1) stable; urgency=low
 
   * Fix bug with re:run/3 usage and Unicode string (#5).
-  * (not released yet)
+  * yamerl_constr: Ensure the node module is loaded.
+  * Allow to run the testsuite using rebar.
+  * Improve documentation.
 
- -- Jean-Sébastien Pédron <jean-sebastien@yakaz.com>  Tue, 22 Jul 2014 16:47:33 +0200
+ -- Jean-Sébastien Pédron <jean-sebastien@yakaz.com>  Tue, 22 Jul 2014 16:52:57 +0200
 
 erlang-yamerl (0.3.0-1) stable; urgency=low
 
