@@ -13,7 +13,7 @@ CLEANFILES = $(APP_NAME).app $(BEAM_FILES)
 # present in the ebin/ directory.
 $(APP_NAME).app: Makefile.am $(APP_NAME).app.in
 	@echo "Generate: $@"
-	@src=`ls $(BEAM_FILES) | sort`;					\
+	@src=`echo $$(ls $(BEAM_FILES) | sort)`;			\
 	$(AWK) -v src="$$src"						\
 	"/{vsn, *{cmd,/ {						\
 		line = \$$0;						\
