@@ -66,7 +66,7 @@
                                           #node_anchor{}]
                                        | undefined,
     current_node_is_leaf = false      :: boolean(),
-    anchors              = dict:new() :: dict()
+    anchors              = dict:new() :: dict:dict(term(), term())
   }).
 
 -endif.

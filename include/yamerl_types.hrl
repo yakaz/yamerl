@@ -53,7 +53,7 @@
 -type tag_prefix()       :: nonempty_string().
 -type tag_uri()          :: nonempty_string()
                           | {non_specific, [33 | 63]}. %% "!" | "?"
--type tags_table()       :: dict().
+-type tags_table()       :: dict:dict(term(), term()).
 
 %% Node styles, substyles and kinds.
 -type style()            :: block
