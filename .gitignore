@@ -26,3 +26,7 @@ debian/files
 /deps/
 /test/
 /ebin/yamerl.app
+
+# Elixir Support
+/_build/
+*.ez
