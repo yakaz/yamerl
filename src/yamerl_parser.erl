@@ -25,8 +25,6 @@
 
 -module(yamerl_parser).
 
--compile([native]).
-
 -include("yamerl_errors.hrl").
 -include("yamerl_tokens.hrl").
 -include("internal/yamerl_parser.hrl").
