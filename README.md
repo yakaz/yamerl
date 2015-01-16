@@ -1,6 +1,6 @@
 # yamerl: YAML 1.2 parser in Erlang
 
-YAML is a human friendly data serialization format. The specification
+YAML is a human-friendly data serialization format. The specification
 for this language and many examples are available from the [Official
 YAML web site](http://www.yaml.org/). You may also want to check the
 [YAML Wikipedia article](http://en.wikipedia.org/wiki/YAML).
@@ -8,7 +8,7 @@ YAML web site](http://www.yaml.org/). You may also want to check the
 **yamerl** is a pure [Erlang application](http://www.erlang.org/)
 which is able to parse [YAML 1.1](http://yaml.org/spec/1.1/) and [YAML
 1.2](http://www.yaml.org/spec/1.2/spec.html) documents, as well as
-JSON documents. It only depends on standard Erlang/OTP applications,
+JSON documents. It only depends on standard Erlang/OTP applications;
 no external dependency is required. It doesn't use native code either
 (neither port drivers nor NIFs).
 
