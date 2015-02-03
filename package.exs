@@ -1,4 +1,4 @@
-defmodule Poolboy.Mixfile do
+defmodule Yamerl.Mixfile do
   use Mix.Project
 
   def project do
