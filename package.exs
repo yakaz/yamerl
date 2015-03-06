@@ -19,7 +19,7 @@ defmodule Yamerl.Mixfile do
 
   defp package do
     [
-      files: ~w(src doc include testsuite rebar.config README.md AUTHORS COPYING),
+      files: ~w(src doc include testsuite configure.ac rebar.config README.md AUTHORS COPYING),
       contributors: ["Yakaz", "Jean-Sébastien Pédron"],
       licenses: ["BSD 2-Clause"],
       links: %{
