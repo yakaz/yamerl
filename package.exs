@@ -4,7 +4,7 @@ defmodule Yamerl.Mixfile do
   def project do
     [
       app: :yamerl,
-      version: "0.3.1-1",
+      version: "0.3.2-1",
       description: description,
       package: package,
       deps: []

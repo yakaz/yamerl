@@ -1,3 +1,11 @@
+erlang-yamerl (0.3.2-1) stable; urgency=low
+
+  * yamerl_parser: Don't build with HiPE by default
+  * Elixir/hex.pm support
+  * Fix generation of yamerl.app with nawk(1)
+
+ -- Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>  Sat, 28 Mar 2015 01:43:31 +0100
+
 erlang-yamerl (0.3.1-1) stable; urgency=low
 
   * Fix bug with re:run/3 usage and Unicode string (#5).
