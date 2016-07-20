@@ -30,7 +30,14 @@
         {"Doc", "https://github.com/yakaz/yamerl/tree/master/doc"}
       ]},
     {files, [
-        "src", "doc", "include", "testsuite", "configure.ac", "rebar.config",
-        "README.md", "AUTHORS", "COPYING"
+        "rebar.config",
+        "configure.ac", % The package version is taken there.
+        "include/*.hrl",
+        "include/internal/*.hrl",
+        "src/yamerl.app.src",
+        "src/*.erl",
+        "README.md",
+        "AUTHORS",
+        "COPYING"
       ]}
   ]}.
