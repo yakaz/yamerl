@@ -26,6 +26,7 @@ debian/files
 /deps/
 /test/
 /ebin/yamerl.app
+/rebar.lock
 
 # Elixir Support
 /_build/
