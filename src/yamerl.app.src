@@ -22,7 +22,7 @@
       ]},
     {maintainers, [
         "Yakaz",
-        "Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>"
+        "Jean-Sebastien Pedron <jean-sebastien.pedron@dumbbell.fr>"
       ]},
     {licenses, ["BSD 2-Clause"]},
     {links, [
