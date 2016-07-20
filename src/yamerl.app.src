@@ -19,5 +19,18 @@
         %% Configuration default values.
         %% DO NOT EDIT: The final configuration is made in sys.config.
         {node_mods, []}
+      ]},
+    {maintainers, [
+        "Yakaz",
+        "Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>"
+      ]},
+    {licenses, ["BSD 2-Clause"]},
+    {links, [
+        {"GitHub", "https://github.com/yakaz/yamerl"},
+        {"Doc", "https://github.com/yakaz/yamerl/tree/master/doc"}
+      ]},
+    {files, [
+        "src", "doc", "include", "testsuite", "configure.ac", "rebar.config",
+        "README.md", "AUTHORS", "COPYING"
       ]}
   ]}.
