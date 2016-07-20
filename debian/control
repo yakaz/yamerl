@@ -1,8 +1,9 @@
 Source: erlang-yamerl
 Section: devel
 Priority: optional
-Maintainer: Jean-Sébastien Pédron <jean-sebastien@yakaz.com>
-Uploaders: Christopher Faulet <christopher@yakaz.com>
+Maintainer: Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
+Uploaders: Christopher Faulet <christopher@yakaz.com>,
+ Jean-Sébastien Pédron <jean-sebastien@yakaz.com>
 Build-Depends: debhelper (>= 9),
  dh-autoreconf,
  erlang-base-hipe | erlang-base,
