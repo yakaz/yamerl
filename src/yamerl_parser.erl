@@ -746,6 +746,10 @@ determine_token_type([$: | _] = Chars, Line, Col, Delta,
     %% This is a key: value pair indicator only when the last token is
     %% JSON-like and we're in flow context.
     parse_mapping_value(Chars, Line, Col, Delta, Parser);
+determine_token_type([$:] = Chars, Line, Col, Delta,
+  #yamerl_parser{raw_eos = true} = Parser)
+  when ?IN_BLOCK_CTX(Parser) ->
+    parse_mapping_value(Chars, Line, Col, Delta, Parser);
 
 %% Anchor and alias indicator.
 determine_token_type([$& | _] = Chars, Line, Col, Delta, Parser) ->
