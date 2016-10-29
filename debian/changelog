@@ -1,3 +1,9 @@
+erlang-yamerl (0.3.3-1) stable; urgency=low
+
+  * yamerl_parser: Fix an infinite loop with "key:"
+
+ -- Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>  Sun, 30 Oct 2016 00:38:26 +0200
+
 erlang-yamerl (0.3.2-1) stable; urgency=low
 
   * yamerl_parser: Don't build with HiPE by default
