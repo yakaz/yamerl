@@ -1,4 +1,4 @@
-# yamerl Recipe: Basic parsing
+# Recipe: Basic parsing
 
 1. Start the yamerl application. This is a mandatory step.
 

@@ -1,4 +1,4 @@
-# yamerl Installation
+# Installation
 
 ## tl;dr
 

@@ -30,4 +30,7 @@ debian/files
 
 # Elixir Support
 /_build/
+/doc/
+/mix.lock
+/yamerl-*-contents.tar.gz
 *.ez

@@ -1,4 +1,4 @@
-# yamerl Features
+# Features
 
 ## When to use or not yamerl
 

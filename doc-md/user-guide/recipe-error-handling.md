@@ -1,4 +1,4 @@
-# yamerl Recipe: Error handling
+# Recipe: Error handling
 
 yamerl **throws an exception when an error occurs**.
 
