@@ -1,35 +1,14 @@
 .sw?
 .*.sw?
 *.beam
-Makefile.in
-/ac-aux/
-/aclocal.m4
-/autom4te.cache/
-/config.h.in
-/config.h.in~
-/configure
-
-# Files produced by Debian package.
-build-stamp
-configure-stamp
-debian/*.debhelper.log
-debian/*.substvars
-debian/*/
-debian/build/
-debian/files
-!debian/source/
 
 # Files produced by rebar.
-/.eunit/
-/.rebar/
-/rebar
-/deps/
-/ebin/yamerl.app
+/_build/
+/doc/
+/ebin
 /rebar.lock
 
 # Elixir Support
-/_build/
-/doc/
 /mix.lock
 /yamerl-*-contents.tar.gz
 *.ez
