@@ -1,0 +1,73 @@
+-module('ex_6.29_node_anchors').
+
+-include_lib("eunit/include/eunit.hrl").
+
+-define(FILENAME, "test/parsing/" ?MODULE_STRING ".yaml").
+
+single_test_() ->
+    ?_assertMatch(
+      {yamerl_parser,
+        {file,?FILENAME},
+        [],
+        <<>>,
+        59,
+        true,
+        [],
+        0,
+        60,
+        3,
+        1,
+        false,
+        2,
+        27,
+        utf8,
+        false,
+        undefined,
+        _,
+        _,
+        [],
+        {bcoll,root,0,-1,1,1,-1,1,1},
+        false,
+        false,
+        false,
+        [{impl_key,false,undefined,undefined,undefined,undefined,undefined}],
+        false,
+        false,
+        _,
+        [],
+        0,
+        16,
+        15,
+        undefined,
+        undefined,
+        _,
+        false,
+        [],
+        [
+          {yamerl_stream_end,2,27},
+          {yamerl_doc_end,2,27},
+          {yamerl_collection_end,2,27,block,mapping},
+          {yamerl_alias,2,20,"anchor"},
+          {yamerl_mapping_value,2,18},
+          {yamerl_scalar,2,1,
+            {yamerl_tag,2,1,{non_specific,"?"}},
+            flow,plain,"Second occurrence"},
+          {yamerl_mapping_key,2,1},
+          {yamerl_scalar,1,27,
+            {yamerl_tag,1,27,{non_specific,"?"}},
+            flow,plain,"Value"},
+          {yamerl_anchor,1,19,"anchor"},
+          {yamerl_mapping_value,1,17},
+          {yamerl_scalar,1,1,
+            {yamerl_tag,1,1,{non_specific,"?"}},
+            flow,plain,"First occurrence"},
+          {yamerl_mapping_key,1,1},
+          {yamerl_collection_start,1,1,
+            {yamerl_tag,1,1,{non_specific,"?"}},
+            block,mapping},
+          {yamerl_doc_start,1,1,{1,2},_},
+          {yamerl_stream_start,1,1,utf8}
+        ]
+      },
+      yamerl_parser:file(?FILENAME)
+    ).

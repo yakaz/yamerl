@@ -24,7 +24,6 @@ debian/files
 /.rebar/
 /rebar
 /deps/
-/test/
 /ebin/yamerl.app
 /rebar.lock
 

@@ -1,0 +1,83 @@
+-module('ex_5.10_reserved_indicators').
+
+-include_lib("eunit/include/eunit.hrl").
+
+-define(FILENAME, "test/parsing/" ?MODULE_STRING ".yaml").
+
+single_test_() ->
+    ?_assertMatch(
+      {yamerl_parser,
+        {file,?FILENAME},
+        [],
+        <<>>,
+        41,
+        true,
+        [],
+        0,
+        42,
+        3,
+        1,
+        false,
+        2,
+        20,
+        utf8,
+        false,
+        undefined,
+        _,
+        _,
+        [],
+        {bcoll,root,0,-1,1,1,-1,1,1},
+        false,
+        false,
+        false,
+        [{impl_key,false,undefined,undefined,undefined,undefined,undefined}],
+        false,
+        false,
+        _,
+        [],
+        0,
+        15,
+        14,
+        undefined,
+        undefined,
+        _,
+        false,
+        [
+          {yamerl_parsing_error,warning,
+            "The reserved indicator \"`\" is not allowed at the beginning of a plain scalar",
+            2,15,reserved_indicator,
+            undefined,[]},
+          {yamerl_parsing_error,warning,
+            "The reserved indicator \"@\" is not allowed at the beginning of a plain scalar",
+            1,16,reserved_indicator,
+            undefined,[]}
+        ],
+        [
+          {yamerl_stream_end,2,20},
+          {yamerl_doc_end,2,20},
+          {yamerl_collection_end,2,20,block,mapping},
+          {yamerl_scalar,2,15,
+            {yamerl_tag,2,15,{non_specific,"?"}},
+            flow,plain,"`text"},
+          {yamerl_mapping_value,2,13},
+          {yamerl_scalar,2,1,
+            {yamerl_tag,2,1,{non_specific,"?"}},
+            flow,plain,"grave-accent"},
+          {yamerl_mapping_key,2,1},
+          {yamerl_scalar,1,16,
+            {yamerl_tag,1,16,{non_specific,"?"}},
+            flow,plain,"@text"},
+          {yamerl_mapping_value,1,14},
+          {yamerl_scalar,1,1,
+            {yamerl_tag,1,1,{non_specific,"?"}},
+            flow,plain,"commercial-at"},
+          {yamerl_mapping_key,1,1},
+          {yamerl_collection_start,1,1,
+            {yamerl_tag,1,1,{non_specific,"?"}},
+            block,mapping},
+          {yamerl_doc_start,1,1,{1,2},_},
+          {yamerl_stream_start,1,1,utf8}
+        ]
+      },
+      yamerl_parser:file(?FILENAME)
+    ).

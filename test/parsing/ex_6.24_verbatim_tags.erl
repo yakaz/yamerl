@@ -1,0 +1,66 @@
+-module('ex_6.24_verbatim_tags').
+
+-include_lib("eunit/include/eunit.hrl").
+
+-define(FILENAME, "test/parsing/" ?MODULE_STRING ".yaml").
+
+single_test_() ->
+    ?_assertMatch(
+      {yamerl_parser,
+        {file,?FILENAME},
+        [],
+        <<>>,
+        45,
+        true,
+        [],
+        0,
+        46,
+        3,
+        1,
+        false,
+        2,
+        14,
+        utf8,
+        false,
+        undefined,
+        _,
+        _,
+        [],
+        {bcoll,root,0,-1,1,1,-1,1,1},
+        false,
+        false,
+        false,
+        [{impl_key,false,undefined,undefined,undefined,undefined,undefined}],
+        false,
+        false,
+        _,
+        [],
+        0,
+        13,
+        10,
+        undefined,
+        undefined,
+        _,
+        false,
+        [],
+        [
+          {yamerl_stream_end,2,14},
+          {yamerl_doc_end,2,14},
+          {yamerl_collection_end,2,14,block,mapping},
+          {yamerl_scalar,2,11,
+            {yamerl_tag,2,3,"!bar"},
+            flow,plain,"baz"},
+          {yamerl_mapping_value,1,30},
+          {yamerl_scalar,1,26,
+            {yamerl_tag,1,1,"tag:yaml.org,2002:str"},
+            flow,plain,"foo"},
+          {yamerl_mapping_key,1,1},
+          {yamerl_collection_start,1,1,
+            {yamerl_tag,1,1,{non_specific,"?"}},
+            block,mapping},
+          {yamerl_doc_start,1,1,{1,2},_},
+          {yamerl_stream_start,1,1,utf8}
+        ]
+      },
+      yamerl_parser:file(?FILENAME)
+    ).

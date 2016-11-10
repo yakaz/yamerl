@@ -1,0 +1,63 @@
+-module('ex_6.18_primary_tag_handle').
+
+-include_lib("eunit/include/eunit.hrl").
+
+-define(FILENAME, "test/parsing/" ?MODULE_STRING ".yaml").
+
+single_test_() ->
+    ?_assertMatch(
+      {yamerl_parser,
+        {file,?FILENAME},
+        [],
+        <<>>,
+        82,
+        true,
+        [],
+        0,
+        83,
+        8,
+        1,
+        false,
+        7,
+        11,
+        utf8,
+        false,
+        undefined,
+        _,
+        _,
+        [],
+        {bcoll,root,0,-1,1,1,-1,1,1},
+        false,
+        false,
+        false,
+        [{impl_key,false,undefined,undefined,undefined,undefined,undefined}],
+        false,
+        false,
+        _,
+        [],
+        0,
+        12,
+        9,
+        undefined,
+        undefined,
+        _,
+        false,
+        [],
+        [
+          {yamerl_stream_end,7,11},
+          {yamerl_doc_end,7,11},
+          {yamerl_scalar,7,6,
+            {yamerl_tag,7,1,"tag:example.com,2000:app/foo"},
+            flow,double_quoted,"bar"},
+          {yamerl_doc_start,6,1,{1,2},_},
+          {yamerl_tag_directive,5,1,"!","tag:example.com,2000:app/"},
+          {yamerl_doc_end,3,1},
+          {yamerl_scalar,2,6,
+            {yamerl_tag,2,1,"!foo"},
+            flow,double_quoted,"bar"},
+          {yamerl_doc_start,2,1,{1,2},_},
+          {yamerl_stream_start,1,1,utf8}
+        ]
+      },
+      yamerl_parser:file(?FILENAME)
+    ).
