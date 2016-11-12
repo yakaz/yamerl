@@ -1,15 +1,19 @@
+# vim:sw=2:et:
+
 language: erlang
 otp_release:
-  - 19.0
-  - 18.0
-  - 17.0
-  - R16B03-1
-  - R16B03
-  - R16B02
-  - R16B01
-  - R15B03
-  - R15B02
-  - R15B01
+  - '19.1'
+  - '18.3'
+  - '17.5'
+  - 'R16B03-1'
+
+install:
+  - curl -O -L https://s3.amazonaws.com/rebar3/rebar3
+  - chmod +x rebar3
+  - ./rebar3 update
+
+script:
+  - ./rebar3 eunit
 
 notifications:
   email:
