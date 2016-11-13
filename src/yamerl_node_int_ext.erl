@@ -39,7 +39,11 @@
     try_construct_token/3,
     construct_token/3,
     node_pres/1,
-    string_to_integer/1,
+    string_to_integer/1
+  ]).
+
+%% Internal use only.
+-export([
     base2_to_integer/2,
     base8_to_integer/2,
     base10_to_integer/2,
