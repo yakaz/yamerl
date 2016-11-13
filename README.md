@@ -1,7 +1,7 @@
 # yamerl: YAML 1.2 and JSON parser in Erlang
 
 [![Build Status](https://travis-ci.org/yakaz/yamerl.svg?branch=master)](https://travis-ci.org/yakaz/yamerl)
-[![Coverage Status](https://coveralls.io/repos/github/yakaz/yamerl/badge.svg?branch=master)](https://coveralls.io/github/yakaz/yamerl?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/yakaz/yamerl/badge.svg?branch=master)](https://coveralls.io/github/yakaz/yamerl)
 [![Hex version](https://img.shields.io/hexpm/v/yamerl.svg "Hex version")](https://hex.pm/packages/yamerl)
 
 YAML is a human-friendly data serialization format. The specification
