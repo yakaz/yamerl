@@ -24,6 +24,16 @@
 % OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 % SUCH DAMAGE.
 
+%% @author Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
+%% @copyright
+%% 2012-2014 Yakaz,
+%% 2016 Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
+%%
+%% @doc {@module} implements the <em>yamerl</em> API above {@link
+%% yamerl_constr}.
+%%
+%% See <em>yamler</em> documentation: [https://github.com/goertzenator/yamler].
+
 -module(yamerl_yamler_compat).
 
 -include("yamerl_errors.hrl").
@@ -50,6 +60,8 @@
 %% Public API.
 %% -------------------------------------------------------------------
 
+%% @equiv load(String, [])
+
 -spec load(String) ->
         Result | Error when
           String  :: binary(),
@@ -59,6 +71,10 @@
 
 load(String) ->
     load(String, []).
+
+%% @doc Constructs a YAML document from an in-memory string.
+%%
+%% The `yamerl' application must be started to use this wrapper.
 
 -spec load(String, Options) ->
         Result | Error when
@@ -78,6 +94,8 @@ load(String, Options) ->
             format_error(Error)
     end.
 
+%% @equiv load_file(Filename, [])
+
 -spec load_file(Filename) ->
         Result | Error when
           Filename :: string(),
@@ -87,6 +105,8 @@ load(String, Options) ->
 
 load_file(Filename) ->
     load_file(Filename, []).
+
+%% @doc Constructs a YAML document from a regular file.
 
 -spec load_file(Filename, Options) ->
         Result | Error when
@@ -106,6 +126,8 @@ load_file(Filename, Options) ->
             format_error(Error)
     end.
 
+%% @private
+
 -spec convert_options(Options) ->
         Converted when
           Options   :: [yamler_option()],
@@ -117,6 +139,8 @@ load_file(Filename, Options) ->
 
 convert_options(Options) ->
     convert_options(Options, []).
+
+%% @private
 
 convert_options([{schema, yaml_schema_failsafe} | Rest], Converted) ->
     Converted1 = [

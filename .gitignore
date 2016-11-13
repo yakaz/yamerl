@@ -7,8 +7,4 @@
 /doc/
 /ebin
 /rebar.lock
-
-# Elixir Support
-/mix.lock
-/yamerl-*-contents.tar.gz
-*.ez
+/rebar3.crashdump
