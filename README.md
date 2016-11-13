@@ -1,5 +1,8 @@
 # yamerl: YAML 1.2 and JSON parser in Erlang
 
+[![Build Status](https://travis-ci.org/yakaz/yamerl.svg?branch=master)](https://travis-ci.org/yakaz/yamerl)
+[![Hex version](https://img.shields.io/hexpm/v/yamerl.svg "Hex version")](https://hex.pm/packages/yamerl)
+
 YAML is a human-friendly data serialization format. The specification
 for this language and many examples are available from the [Official
 YAML web site](http://www.yaml.org/). You may also want to check the
@@ -14,8 +17,6 @@ use native code either (neither port drivers nor NIFs).
 
 yamerl is distributed under the terms of the **2-clause BSD license**;
 see `COPYING`.
-
-[![Build Status](https://travis-ci.org/yakaz/yamerl.svg?branch=master)](https://travis-ci.org/yakaz/yamerl)
 
 ## Integrate to your project
 
