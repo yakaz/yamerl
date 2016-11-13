@@ -6,45 +6,52 @@ YAML web site](http://www.yaml.org/). You may also want to check the
 [YAML Wikipedia article](http://en.wikipedia.org/wiki/YAML).
 
 **yamerl** is a pure [Erlang application](http://www.erlang.org/)
-which is able to parse [YAML 1.1](http://yaml.org/spec/1.1/) and [YAML
-1.2](http://www.yaml.org/spec/1.2/spec.html) documents, as well as
-JSON documents. It only depends on standard Erlang/OTP applications;
-no external dependency is required. It doesn't use native code either
-(neither port drivers nor NIFs).
+which is able to parse [YAML 1.1](http://yaml.org/spec/1.1/) and
+[YAML 1.2](http://www.yaml.org/spec/1.2/spec.html) documents, as well
+as [JSON](http://json.org/) documents. It only depends on standard
+Erlang/OTP applications; no external dependency is required. It doesn't
+use native code either (neither port drivers nor NIFs).
 
 yamerl is distributed under the terms of the **2-clause BSD license**;
 see `COPYING`.
 
 [![Build Status](https://travis-ci.org/yakaz/yamerl.svg?branch=master)](https://travis-ci.org/yakaz/yamerl)
 
-## Installation
+## Integrate to your project
+
+yamerl uses [Rebar 3](http://www.rebar3.org/) as its build system so
+it can be integrated to many common build systems.
 
 ### Rebar
 
-If you use rebar, you can run the following command to build the
-application:
-```bash
-rebar compile
+yamerl is available as a [Hex.pm package](https://hex.pm/packages/yamerl).
+Thus you can simply list it as a package dependency in your `rebar.config`:
+
+```erlang
+{deps, [yamerl]}.
 ```
 
-### Autotools
+### Erlang.mk
 
-If you use the Autotools and `make(1)`, run the following commands to
-build the application:
-```bash
-# Generate Autotools files.
-autoreconf -vif
+Erlang.mk knows about yamerl. You just need to add `yamerl` as a
+dependency in your `Makefile`:
 
-# Build the application.
-./configure
-make
-
-# Install it.
-sudo make install
+```make
+DEPS = yamerl
 ```
 
-The default installation path is your Erlang's distribution libraries
-directory (see `code:lib_dir()`).
+### Mix
+
+yamerl is available as a [Hex.pm package](https://hex.pm/packages/yamerl).
+Thus you can simply list its name in your `mix.exs`:
+
+```elixir
+def project do
+  [
+    deps: [{:yamerl, ">= 0.4.0"}]
+  ]
+end
+```
 
 ## Getting started
 
@@ -56,7 +63,7 @@ application:start(yamerl).
 Now, one can use the `yamerl_constr` module to parse and construct a
 list of documents from:
 * an in-memory document (string or binary);
-* a file;
+* a regualr file;
 * a stream.
 
 Because a YAML input stream may contain multiple documents,
@@ -205,5 +212,5 @@ yamerl_constr:file("system.yaml", [{detailed_constr, true}]).
 
 ## Complete documentation
 
-See the `doc` subdirectory for a complete user guide and reference
+See https://hexdocs.pm/yamerl/ for a complete user guide and reference
 manual.

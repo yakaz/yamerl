@@ -24,6 +24,8 @@
 % OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 % SUCH DAMAGE.
 
+%% @private
+
 -module(yamerl_node_int_ext).
 
 -include("yamerl_errors.hrl").

@@ -24,6 +24,16 @@
 % OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 % SUCH DAMAGE.
 
+%% @author Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
+%% @copyright
+%% 2012-2014 Yakaz,
+%% 2016 Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
+%%
+%% @doc {@module} implements a YAML parser. It is not meant to be used
+%% directly. Instead, you should use {@link yamerl_constr}.
+%%
+%% The `yamerl' application must be started to use the parser.
+
 -module(yamerl_parser).
 
 -include("yamerl_errors.hrl").
@@ -68,32 +78,32 @@
 %% -------------------------------------------------------------------
 
 -record(directive_ctx, {
-    line      :: position(),
-    col       :: position(),
+    line = 1  :: position(),
+    col  = 1  :: position(),
     name = "" :: string()
   }).
 
 -record(yaml_directive_ctx, {
-    line  :: position(),
-    col   :: position(),
-    major :: non_neg_integer(),
-    minor :: non_neg_integer()
+    line  = 1 :: position(),
+    col   = 1 :: position(),
+    major     :: non_neg_integer() | undefined,
+    minor     :: non_neg_integer() | undefined
   }).
 
 -record(tag_directive_ctx, {
-    line   :: position(),
-    col    :: position(),
-    handle :: tag_handle() | [] | undefined,
-    prefix :: tag_prefix() | [] | undefined
+    line  = 1 :: position(),
+    col   = 1 :: position(),
+    handle    :: tag_handle() | [] | undefined,
+    prefix    :: tag_prefix() | [] | undefined
   }).
 
 -record(reserved_directive_ctx, {
-    line           :: position(),
-    col            :: position(),
-    name           :: string(),
-    current        :: string(),
-    args = []      :: [string()],
-    args_count = 0 :: non_neg_integer()
+    line       = 1  :: position(),
+    col        = 1  :: position(),
+    name       = "" :: string(),
+    current         :: string() | undefined,
+    args       = [] :: [string()],
+    args_count = 0  :: non_neg_integer()
   }).
 
 -type whitespace() :: [9 | 10 | 32].
@@ -276,6 +286,8 @@
 %% Public API: chunked stream scanning.
 %% -------------------------------------------------------------------
 
+%% @equiv new(Source, [])
+
 -spec new(Source) ->
         Parser | no_return() when
           Source :: term(),
@@ -283,6 +295,8 @@
 
 new(Source) ->
     new(Source, []).
+
+%% @doc Creates and returns a new YAML parser state.
 
 -spec new(Source, Options) ->
         Parser | no_return() when
@@ -300,6 +314,8 @@ new(Source, Options) ->
       token_fun    = proplists:get_value(token_fun, Options0, acc)
     }.
 
+%% @equiv next_chunk(Parser, Chunk, false)
+
 -spec next_chunk(Parser, Chunk) ->
         Ret | no_return() when
           Parser     :: yamerl_parser(),
@@ -309,6 +325,8 @@ new(Source, Options) ->
 
 next_chunk(Parser, Chunk) ->
     next_chunk(Parser, Chunk, false).
+
+%% @doc Feeds the parser with the next chunk from the YAML stream.
 
 -spec next_chunk(Parser, Chunk, Last_Chunk) ->
         Ret | no_return() when
@@ -331,6 +349,8 @@ next_chunk(#yamerl_parser{raw_data = Data} = Parser, Chunk, EOS) ->
     },
     decode_unicode(Parser1).
 
+%% @equiv next_chunk(Parser, Chunk, true)
+
 -spec last_chunk(Parser, Chunk) ->
         Ret | no_return() when
           Parser     :: yamerl_parser(),
@@ -345,6 +365,8 @@ last_chunk(Parser, Chunk) ->
 %% Public API: common stream sources.
 %% -------------------------------------------------------------------
 
+%% @equiv string(String, [])
+
 -spec string(String) ->
         Parser | no_return() when
           String :: unicode_data(),
@@ -352,6 +374,8 @@ last_chunk(Parser, Chunk) ->
 
 string(String) ->
     string(String, []).
+
+%% @doc Parses a YAML document from an in-memory YAML string.
 
 -spec string(String, Options) ->
         Parser | no_return() when
@@ -365,6 +389,8 @@ string(String, Options) when is_binary(String) ->
 string(String, Options) when is_list(String) ->
     string(unicode:characters_to_binary(String), Options).
 
+%% @equiv file(Filename, [])
+
 -spec file(Filename) ->
         Parser | no_return() when
           Filename :: string(),
@@ -372,6 +398,8 @@ string(String, Options) when is_list(String) ->
 
 file(Filename) ->
     file(Filename, []).
+
+%% @doc Parses a YAML document from a regular file.
 
 -spec file(Filename, Options) ->
         Parser | no_return() when
@@ -440,8 +468,12 @@ file2(#yamerl_parser{source = {file, Filename}} = Parser, FD, Blocksize) ->
 %% Public API: get/set the token function.
 %% -------------------------------------------------------------------
 
+%% @doc Returns the constructor callback function
+
 get_token_fun(#yamerl_parser{token_fun = Fun}) ->
     Fun.
+
+%% @doc Sets the constructor callback function
 
 set_token_fun(Parser, Fun) when is_function(Fun, 1) ->
     Parser#yamerl_parser{token_fun = Fun}.
@@ -4202,6 +4234,8 @@ setup_default_tags(#yamerl_parser{options = Options} = Parser) ->
 %% -------------------------------------------------------------------
 %% Internal functions.
 %% -------------------------------------------------------------------
+
+%% @private
 
 option_names() ->
     [

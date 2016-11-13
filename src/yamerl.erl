@@ -24,6 +24,13 @@
 % OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 % SUCH DAMAGE.
 
+%% @author Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
+%% @copyright
+%% 2012-2014 Yakaz,
+%% 2016 Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
+%%
+%% @doc Wrappers for common uses of {@link yamerl_constr}.
+
 -module(yamerl).
 
 -include("yamerl_nodes.hrl").
@@ -44,6 +51,8 @@
 %% All those functions are only wrapper above yamerl_constr common
 %% functions. The purpose is just to avoid some typing.
 
+%% @equiv yamerl_constr:string(String)
+
 -spec decode(String) ->
         Result | no_return() when
           String :: unicode_data(),
@@ -53,6 +62,8 @@
 
 decode(String) ->
     yamerl_constr:string(String).
+
+%% @equiv yamerl_constr:string(String, Options)
 
 -spec decode(String, Options) ->
         Result | no_return() when
@@ -67,6 +78,8 @@ decode(String) ->
 decode(String, Options) ->
     yamerl_constr:string(String, Options).
 
+%% @equiv yamerl_constr:file(Filename)
+
 -spec decode_file(Filename) ->
         Result | no_return() when
           Filename :: string(),
@@ -76,6 +89,8 @@ decode(String, Options) ->
 
 decode_file(Filename) ->
     yamerl_constr:file(Filename).
+
+%% @equiv yamerl_constr:file(Filename, Options)
 
 -spec decode_file(Filename, Options) ->
         Result | no_return() when

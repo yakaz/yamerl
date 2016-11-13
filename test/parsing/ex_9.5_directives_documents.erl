@@ -1,0 +1,64 @@
+-module('ex_9.5_directives_documents').
+
+-include_lib("eunit/include/eunit.hrl").
+
+-define(FILENAME, "test/parsing/" ?MODULE_STRING ".yaml").
+
+single_test_() ->
+    ?_assertMatch(
+      {yamerl_parser,
+        {file,?FILENAME},
+        [],
+        <<>>,
+        61,
+        true,
+        [],
+        0,
+        62,
+        9,
+        1,
+        false,
+        8,
+        4,
+        utf8,
+        false,
+        undefined,
+        _,
+        _,
+        [],
+        {bcoll,root,0,-1,1,1,-1,1,1},
+        false,
+        false,
+        false,
+        [{impl_key,false,false,undefined,undefined,1,1}],
+        false,
+        false,
+        _,
+        [],
+        0,
+        11,
+        10,
+        undefined,
+        undefined,
+        _,
+        false,
+        [],
+        [
+          {yamerl_stream_end,8,4},
+          {yamerl_doc_end,8,1},
+          {yamerl_scalar,8,1,
+            {yamerl_tag,8,1,{non_specific,"?"}},
+            flow,plain,[]},
+          {yamerl_doc_start,6,1,{1,2},_},
+          {yamerl_yaml_directive,5,1,{1,2}},
+          {yamerl_doc_end,4,1},
+          {yamerl_scalar,2,5,
+            {yamerl_tag,2,5,{non_specific,"!"}},
+            block,literal,"%!PS-Adobe-2.0\n"},
+          {yamerl_doc_start,2,1,{1,2},_},
+          {yamerl_yaml_directive,1,1,{1,2}},
+          {yamerl_stream_start,1,1,utf8}
+        ]
+      },
+      yamerl_parser:file(?FILENAME)
+    ).

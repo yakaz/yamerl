@@ -48,12 +48,12 @@
 %% -------------------------------------------------------------------
 
 -record(impl_key, {
-    possible = false  :: boolean(),
-    required          :: boolean(),
-    line              :: position(),
-    col               :: position(),
-    chars_idx         :: pos_integer(),
-    token_idx         :: pos_integer()
+    possible  = false :: boolean(),
+    required  = false :: boolean(),
+    line              :: position() | undefined,
+    col               :: position() | undefined,
+    chars_idx = 1     :: pos_integer(),
+    token_idx = 1     :: pos_integer()
   }).
 
 -record(bcoll, {

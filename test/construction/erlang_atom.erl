@@ -1,0 +1,147 @@
+-module(erlang_atom).
+
+-include_lib("eunit/include/eunit.hrl").
+
+-define(FILENAME, "test/construction/" ?MODULE_STRING ".yaml").
+
+setup() ->
+    application:start(yamerl),
+    yamerl_app:set_param(node_mods, [yamerl_node_erlang_atom]).
+
+simple_test_() ->
+    {setup,
+      fun setup/0,
+      [
+        ?_assertMatch(
+          [
+            [
+              atom,
+              'atom requiring quoting!',
+              "atom",
+              "node@domain",
+              "not an atom",
+              "NotAnAtom",
+              "Not an atom",
+              "Not an atom"
+            ]
+          ],
+          yamerl_constr:file(?FILENAME, [{detailed_constr, false}])
+        )
+      ]
+    }.
+
+autodetection_simple_test_() ->
+    {setup,
+      fun setup/0,
+      [
+        ?_assertMatch(
+          [
+            [
+              atom,
+              'atom requiring quoting!',
+              atom,
+              node@domain,
+              "not an atom",
+              "NotAnAtom",
+              "Not an atom",
+              "Not an atom"
+            ]
+          ],
+          yamerl_constr:file(?FILENAME, [
+              {detailed_constr, false},
+              {erlang_atom_autodetection, true}
+            ])
+        )
+      ]
+    }.
+
+detailed_test_() ->
+    {setup,
+      fun setup/0,
+      [
+        ?_assertMatch(
+          [
+            {yamerl_doc,
+              {yamerl_seq,yamerl_node_seq,"tag:yaml.org,2002:seq",
+                [{line,1},{column,1}],
+                [
+                  {yamerl_erlang_atom,yamerl_node_erlang_atom,
+                    "tag:yamerl,2012:atom",
+                    [{line,1},{column,27}],
+                    atom},
+                  {yamerl_erlang_atom,yamerl_node_erlang_atom,
+                    "tag:yamerl,2012:atom",
+                    [{line,2},{column,27}],
+                    'atom requiring quoting!'},
+                  {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+                    [{line,4},{column,3}],
+                    "atom"},
+                  {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+                    [{line,5},{column,3}],
+                    "node@domain"},
+                  {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+                    [{line,7},{column,3}],
+                    "not an atom"},
+                  {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+                    [{line,8},{column,3}],
+                    "NotAnAtom"},
+                  {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+                    [{line,9},{column,3}],
+                    "Not an atom"},
+                  {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+                    [{line,10},{column,3}],
+                    "Not an atom"}],
+                8}}
+          ],
+          yamerl_constr:file(?FILENAME, [{detailed_constr, true}])
+        )
+      ]
+    }.
+
+autodetection_detailed_test_() ->
+    {setup,
+      fun setup/0,
+      [
+        ?_assertMatch(
+          [
+            {yamerl_doc,
+              {yamerl_seq,yamerl_node_seq,"tag:yaml.org,2002:seq",
+                [{line,1},{column,1}],
+                [
+                  {yamerl_erlang_atom,yamerl_node_erlang_atom,
+                    "tag:yamerl,2012:atom",
+                    [{line,1},{column,27}],
+                    atom},
+                  {yamerl_erlang_atom,yamerl_node_erlang_atom,
+                    "tag:yamerl,2012:atom",
+                    [{line,2},{column,27}],
+                    'atom requiring quoting!'},
+                  {yamerl_erlang_atom,yamerl_node_erlang_atom,
+                    "tag:yamerl,2012:atom",
+                    [{line,4},{column,3}],
+                    atom},
+                  {yamerl_erlang_atom,yamerl_node_erlang_atom,
+                    "tag:yamerl,2012:atom",
+                    [{line,5},{column,3}],
+                    node@domain},
+                  {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+                    [{line,7},{column,3}],
+                    "not an atom"},
+                  {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+                    [{line,8},{column,3}],
+                    "NotAnAtom"},
+                  {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+                    [{line,9},{column,3}],
+                    "Not an atom"},
+                  {yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+                    [{line,10},{column,3}],
+                    "Not an atom"}],
+                8}}
+          ],
+          yamerl_constr:file(?FILENAME, [
+              {detailed_constr, true},
+              {erlang_atom_autodetection, true}
+            ])
+        )
+      ]
+    }.

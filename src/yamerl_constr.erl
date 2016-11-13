@@ -24,6 +24,64 @@
 % OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 % SUCH DAMAGE.
 
+%% @author Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
+%% @copyright
+%% 2012-2014 Yakaz,
+%% 2016 Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
+%%
+%% @doc {@module} implements a YAML constructor. It uses {@link
+%% yamerl_parser} as the underlying parser. The parser emits YAML nodes
+%% which are assembled as structured YAML documents by the constructor.
+%%
+%% It is able to construct YAML documents from in-memory strings (see
+%% {@link string/1} and {@link string/2}), regular files (see {@link
+%% file/1} and {@link file/2}) or streams (see {@link new/1}, {@link
+%% new/2} and {@link next_chunk/3}).
+%%
+%% YAML documents can be constructed in simple or detailed modes. In
+%% simple mode, they are made of simple builting Erlang types. In
+%% detailed mode, they are made of records, holding more informations
+%% about YAML nodes and their presentation.
+%%
+%% The `yamerl' application must be started to use the constructor.
+%%
+%% <strong>Example: parse a string in simple mode</strong>
+%% ```
+%% yamerl_constr:string("Hello!").
+%% '''
+%%
+%% It returns:
+%% ```
+%% % List of documents; here, only one.
+%% [
+%%   % Document root node: a string.
+%%   "Hello!"
+%% ].
+%% '''
+%%
+%% <strong>Example: parse a stream in detailed mode</strong>
+%% ```
+%% Stream_St1 = yamerl_constr:new({file, "<stdin>"}, [{detailed_constr, true}]),
+%% {continue, Stream_St2} = yamerl_constr:next_chunk(Stream_St1, <<"He">>),
+%% {continue, Stream_St3} = yamerl_constr:next_chunk(Stream_St2, <<"ll">>),
+%% yamerl_constr:last_chunk(Stream_St3, <<"o!">>).
+%% '''
+%%
+%% It returns:
+%% ```
+%% % List of documents; here, only one.
+%% [
+%%   % Document #1.
+%%   {yamerl_doc,
+%%     % Document root node: a string.
+%%     {yamerl_str, yamerl_node_str, "tag:yaml.org,2002:str",
+%%       [{line, 1}, {column, 1}], % Node location in the original string.
+%%       "Hello!"                  % String value.
+%%     }
+%%   }
+%% ].
+%% '''
+
 -module(yamerl_constr).
 
 -include("yamerl_errors.hrl").
@@ -96,6 +154,8 @@
 %% Public API: chunked stream scanning.
 %% -------------------------------------------------------------------
 
+%% @equiv new(Source, [])
+
 -spec new(Source) ->
         Constr | no_return() when
           Source :: term(),
@@ -104,29 +164,141 @@
 new(Source) ->
     new(Source, []).
 
+%% @doc Creates and returns a new YAML construction state.
+%%
+%% When you want to parse a stream (as opposed to in-memory strings or
+%% regular files), this is the first function you call before feeding
+%% the constructor with stream "chunks".
+%%
+%% `Source' can be any term describing the stream. {@link string/1} and
+%% {@link string/2} sets it to the atom `string'. {@link file/1} and
+%% {@link file/2} sets it to `{file, Filename}'. The constructor doesn't
+%% use that value.
+%%
+%% `Options' is a list of options for the parser and the constructor.
+%% Valid options are:
+%%
+%% <dl>
+%% <dt>`{detailed_constr, boolean()}'</dt>
+%% <dd>Flag to enable/disable the detailed construction mode. In simple
+%% construction mode, YAML nodes are returned as Erlang integers,
+%% strings, lists, proplists, etc. In other words, only simple builtin
+%% types. In detailed construction mode, YAML nodes are returned using
+%% records. Those records gives additional informations such as the YAML
+%% node type, the location in the stream (line and column number) and so
+%% on.</dd>
+%% <dd>Default: `false'</dd>
+%% <dt>`{schema, failsafe | json | core | yaml11}'</dt>
+%% <dd>Name of the official schema to use.</dd>
+%% <dd>Default: `core'.</dd>
+%% <dt>`{node_mods, Mods_List}'</dt>
+%% <dd>List of Erlang modules to extend support node types.</dd>
+%% <dd>Default: `[]'.</dd>
+%% </dl>
+%%
+%% The returned state is opaque value. You then pass it to {@link
+%% next_chunk/2}, {@link next_chunk/3} and {@link last_chunk/2}.
+%%
+%% If an option is invalid, an exception is thrown.
+%%
+%% <strong>Example: parse a valid stream</strong>
+%% ```
+%% Stream_St1 = yamerl_constr:new({file, "<stdin>"}),
+%% {continue, Stream_St2} = yamerl_constr:next_chunk(Stream_St1, <<"He">>),
+%% {continue, Stream_St3} = yamerl_constr:next_chunk(Stream_St2, <<"ll">>),
+%% yamerl_constr:last_chunk(Stream_St3, <<"o!">>).
+%% '''
+%% It returns:
+%%
+%% ```
+%% % List of documents; here, only one.
+%% [
+%%   % Document root node: a string.
+%%   "Hello!"
+%% ].
+%% '''
+%%
+%% <strong>Example: parse an invalid stream</strong>
+%% ```
+%% Stream_St1 = yamerl_constr:new({file, "<stdin>"}),
+%% {continue, Stream_St2} = yamerl_constr:next_chunk(Stream_St1, <<"'He">>),
+%% {continue, Stream_St3} = yamerl_constr:next_chunk(Stream_St2, <<"ll">>),
+%% yamerl_constr:last_chunk(Stream_St3, <<"o!">>) % Unfinished single-quoted scalar.
+%% '''
+%%
+%% It throws:
+%% ```
+%% {yamerl_exception,
+%%   % List of warnings and errors; here, one fatal error.
+%%   [
+%%     % Error #1.
+%%     {yamerl_parsing_error, error,
+%%       "Unexpected end-of-stream while parsing flow scalar",          % Human-readable message.
+%%       1, 8,                                                          % Error location.
+%%       unexpected_eos,
+%%       {yamerl_scalar, 1, 1, {yamerl_tag, 1, 1, {non_specific, "!"}}, % Token being parsed.
+%%         flow, single_quoted,
+%%         "Hello!"},
+%%       []
+%%     }
+%%   ]
+%% }
+%% '''
+%%
+%% @see new/1.
+
 -spec new(Source, Options) ->
-        Constr | no_return() when
-          Source  :: term(),
-          Options :: [
-            yamerl_constr_option() |
-            yamerl_parser:yamerl_parser_option() |
-            proplists:property()
-          ],
-          Constr  :: yamerl_parser:yamerl_parser().
+    Constr | no_return() when
+      Source  :: term(),
+      Options :: [
+        yamerl_constr_option() |
+        yamerl_parser:yamerl_parser_option() |
+        proplists:property()
+      ],
+      Constr  :: yamerl_parser:yamerl_parser().
 
 new(Source, Options) ->
-    Parser_Options = initialize(Options),
-    yamerl_parser:new(Source, Parser_Options).
+Parser_Options = initialize(Options),
+yamerl_parser:new(Source, Parser_Options).
+
+%% @equiv next_chunk(Constr, Chunk, false)
 
 -spec next_chunk(Constr, Chunk) ->
-        Ret | no_return() when
-          Constr     :: yamerl_parser:yamerl_parser(),
-          Chunk      :: unicode_binary(),
-          Ret        :: {continue, New_Constr},
-          New_Constr :: yamerl_parser:yamerl_parser().
+    Ret | no_return() when
+      Constr     :: yamerl_parser:yamerl_parser(),
+      Chunk      :: unicode_binary(),
+      Ret        :: {continue, New_Constr},
+      New_Constr :: yamerl_parser:yamerl_parser().
 
 next_chunk(Constr, Chunk) ->
-    next_chunk(Constr, Chunk, false).
+next_chunk(Constr, Chunk, false).
+
+%% @doc Feeds the constructor with the next chunk from the YAML stream.
+%%
+%% `Constr' is the constructor state returned by a previous call
+%% to {@link new/1}, {@link new/2}, {@link next_chunk/2} or {@link
+%% next_chunk/3}.
+%%
+%% `Chunk' must be an Erlang binary using the UTF-8, UTF-16 or UTF-32
+%% Unicode encoding. A leading BOM character in the first chunk is used
+%% to determine the encoding and endianness. If no BOM is present, UTF-8
+%% is assumed.
+%%
+%% `EOS' indicates the constructor if this is the last chunk from the
+%% stream.
+%%
+%% If this is not the last chunk (`EOS = false'), it returns `{continue,
+%% New_Constr}' where `New_Constr' is an updated state which replaces
+%% `Constr'. The new state is to be passed to future calls to {@link
+%% next_chunk/2}, {@link next_chunk/3} or {@link last_chunk/2}.
+%%
+%% If this is the last chunk (`EOS = true'), it returns a list of YAML
+%% documents. Documents are made of simple builtin Erlang types if the
+%% detailed construction mode is disabled, or records if the detailed
+%% construction mode is enabled (`{detailed_constr, boolean()}' passed
+%% as an option; default is `false').
+%%
+%% It throws an exception if there is a parsing or construction error.
 
 -spec next_chunk(Constr, Chunk, false) ->
         Ret | no_return() when
@@ -147,6 +319,8 @@ next_chunk(Constr, Chunk, EOS) ->
         EOS  -> get_docs(Ret);
         true -> Ret
     end.
+
+%% @equiv next_chunk(Constr, Chunk, true)
 
 -spec last_chunk(Constr, Chunk) ->
         Result | no_return() when
@@ -179,6 +353,8 @@ get_docs(Constr) ->
 %% Public API: common stream sources.
 %% -------------------------------------------------------------------
 
+%% @equiv string(String, [])
+
 -spec string(String) ->
         Result | no_return() when
           String :: unicode_data(),
@@ -188,6 +364,89 @@ get_docs(Constr) ->
 
 string(String) ->
     string(String, []).
+
+%% @doc Constructs a YAML document from an in-memory YAML string.
+%%
+%% `String' must be an Erlang list or binary containing one or more YAML
+%% documents. If it is a binary, it must be encoded using UTF-8, UTF-16
+%% or UTF-32. A leading BOM character is used to determine the encoding
+%% and endianness. If no BOM is present, UTF-8 is assumed.
+%%
+%% `Options' is a list of options for the parser and the constructor.
+%% See {@link new/2} for valid options.
+%%
+%% It returns a list of YAML documents. See {@link next_chunk/3} for
+%% more details about the returned documents.
+%%
+%% It throws an exception if there is a parsing or construction error.
+%%
+%% <strong>Example: parse an Erlang list</strong>
+%% ```
+%% yamerl_constr:string("This is a string").
+%% '''
+%%
+%% <strong>Example: parse an UTF-8-encoded Erlang binary</strong>
+%% ```
+%% yamerl_constr:string(<<50,32,226,130,172>>). % The string "2 €" encoded in UTF-8.
+%% '''
+%%
+%% <strong>Example: parse a string in simple mode</strong>
+%% ```
+%% yamerl_constr:string("Hello!").
+%% '''
+%%
+%% It returns:
+%% ```
+%% % List of documents; here, only one.
+%% [
+%%   % Document root node: a string.
+%%   "Hello!"
+%% ].
+%% '''
+%%
+%% <strong>Example: parse a string in detailed mode</strong>
+%% ```
+%% yamerl_constr:string("Hello!", [{detailed_constr, true}]).
+%% '''
+%%
+%% It returns:
+%% ```
+%% % List of documents; here, only one.
+%% [
+%%   % Document #1.
+%%   {yamerl_doc,
+%%     % Document root node: a string.
+%%     {yamerl_str, yamerl_node_str, "tag:yaml.org,2002:str",
+%%       [{line, 1}, {column, 1}], % Node location in the original string.
+%%       "Hello!"                  % String value.
+%%     }
+%%   }
+%% ].
+%% '''
+%%
+%% <strong>Example: parse an invalid document</strong>
+%% ```
+%% yamerl_constr:string(<<"'Oh-oh...">>). % Unfinished single-quoted scalar.
+%% '''
+%%
+%% It throws:
+%% ```
+%% {yamerl_exception,
+%%   % List of warnings and errors; here, one fatal error.
+%%   [
+%%     % Error #1.
+%%     {yamerl_parsing_error, error,
+%%       "Unexpected end-of-stream while parsing flow scalar",          % Human-readable message.
+%%       1, 10,                                                         % Error location.
+%%       unexpected_eos,
+%%       {yamerl_scalar, 1, 1, {yamerl_tag, 1, 1, {non_specific, "!"}}, % Token being parsed.
+%%         flow, single_quoted,
+%%         "Oh-oh..."},
+%%       []
+%%     }
+%%   ]
+%% }.
+%% '''
 
 -spec string(String, Options) ->
         Result | no_return() when
@@ -211,8 +470,27 @@ string(String, Options) ->
                     | [yamerl_simple_doc()]
                     | term().
 
+%% @equiv file(Filename, [])
+
 file(Filename) ->
     file(Filename, []).
+
+%% @doc Constructs a YAML document from a regular file.
+%%
+%% `Filename' must be a string indicating the filename. The file must
+%% contain one or more YAML documents. The file must be encoded using
+%% UTF-8, UTF-16 or UTF-32. A leading BOM character is used to determine
+%% the encoding and endianness. If no BOM is present, UTF-8 is assumed.
+%%
+%% `Options' is a list of options for the parser and the constructor.
+%% See {@link new/2} for valid options.
+%%
+%% It returns a list of YAML documents. See {@link next_chunk/3} for
+%% more details about the returned documents.
+%%
+%% It throws an exception if there is a parsing or construction error.
+%%
+%% See {@link string/2} for some examples.
 
 -spec file(Filename, Options) ->
         Result | no_return() when
@@ -233,6 +511,13 @@ file(Filename, Options) ->
 %% Presentation details.
 %% -------------------------------------------------------------------
 
+%% @doc Returns presentation informations in the stream for the given
+%% node.
+%%
+%% This only makes sense when the detailed construction mode is enabled
+%% (ie. `{detailed_constr, true}' was passed as an option to {@link
+%% new/2}, {@link file/2} or {@link string/2}).
+
 get_pres_details(Token) ->
     Line   = ?TOKEN_LINE(Token),
     Column = ?TOKEN_COLUMN(Token),
@@ -242,11 +527,23 @@ get_pres_details(Token) ->
 %% Node informations.
 %% -------------------------------------------------------------------
 
+%% @doc Returns the line number in the stream for the given node.
+%%
+%% This only makes sense when the detailed construction mode is enabled
+%% (ie. `{detailed_constr, true}' was passed as an option to {@link
+%% new/2}, {@link file/2} or {@link string/2}).
+
 node_line(Node) ->
     case node_pres(Node) of
         undefined -> undefined;
         Pres      -> proplists:get_value(line, Pres)
     end.
+
+%% @doc Returns the column number in the stream for the given node.
+%%
+%% This only makes sense when the detailed construction mode is enabled
+%% (ie. `{detailed_constr, true}' was passed as an option to {@link
+%% new/2}, {@link file/2} or {@link string/2}).
 
 node_column(Node) ->
     case node_pres(Node) of
@@ -552,6 +849,8 @@ filter_options2([], _, _, Constr_Options, Parser_Options, Ext_Options) ->
       lists:reverse(Parser_Options),
       lists:reverse(Ext_Options)
     }.
+
+%% @private
 
 option_names() ->
     [

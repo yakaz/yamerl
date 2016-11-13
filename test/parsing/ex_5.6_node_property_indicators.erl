@@ -1,0 +1,73 @@
+-module('ex_5.6_node_property_indicators').
+
+-include_lib("eunit/include/eunit.hrl").
+
+-define(FILENAME, "test/parsing/" ?MODULE_STRING ".yaml").
+
+single_test_() ->
+    ?_assertMatch(
+      {yamerl_parser,
+        {file,?FILENAME},
+        [],
+        <<>>,
+        46,
+        true,
+        [],
+        0,
+        47,
+        3,
+        1,
+        false,
+        2,
+        15,
+        utf8,
+        false,
+        undefined,
+        _,
+        _,
+        [],
+        {bcoll,root,0,-1,1,1,-1,1,1},
+        false,
+        false,
+        false,
+        [{impl_key,false,false,undefined,undefined,1,1}],
+        false,
+        false,
+        _,
+        [],
+        0,
+        17,
+        15,
+        undefined,
+        undefined,
+        _,
+        false,
+        [],
+        [
+          {yamerl_stream_end,2,15},
+          {yamerl_doc_end,2,15},
+          {yamerl_collection_end,2,15,block,mapping},
+          {yamerl_alias,2,8,"anchor"},
+          {yamerl_mapping_value,2,6},
+          {yamerl_scalar,2,1,
+            {yamerl_tag,2,1,{non_specific,"?"}},
+            flow,plain,"alias"},
+          {yamerl_mapping_key,2,1},
+          {yamerl_scalar,1,26,
+            {yamerl_tag,1,11,"!local"},
+            flow,plain,"value"},
+          {yamerl_anchor,1,18,"anchor"},
+          {yamerl_mapping_value,1,9},
+          {yamerl_scalar,1,1,
+            {yamerl_tag,1,1,{non_specific,"?"}},
+            flow,plain,"anchored"},
+          {yamerl_mapping_key,1,1},
+          {yamerl_collection_start,1,1,
+            {yamerl_tag,1,1,{non_specific,"?"}},
+            block,mapping},
+          {yamerl_doc_start,1,1,{1,2},_},
+          {yamerl_stream_start,1,1,utf8}
+        ]
+      },
+      yamerl_parser:file(?FILENAME)
+    ).
