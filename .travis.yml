@@ -13,8 +13,12 @@ install:
   - ./rebar3 update
 
 script:
-  - ./rebar3 eunit
+  - ./rebar3 compile
+  - ./rebar3 eunit skip_deps=true
   - ./rebar3 dialyzer
+
+after_success:
+  - ./rebar3 coveralls send
 
 notifications:
   email:
