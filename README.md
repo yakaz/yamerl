@@ -42,8 +42,9 @@ DEPS = yamerl
 
 ### Mix
 
-yamerl is available as a [Hex.pm package](https://hex.pm/packages/yamerl).
-Thus you can simply list its name in your `mix.exs`:
+You can use yamerl in your Elixir project. yamerl is available as a
+[Hex.pm package](https://hex.pm/packages/yamerl). Thus you can simply
+list its name in your `mix.exs`:
 
 ```elixir
 def project do
