@@ -16,6 +16,9 @@ as [JSON](http://json.org/) documents. It only depends on standard
 Erlang/OTP applications; no external dependency is required. It doesn't
 use native code either (neither port drivers nor NIFs).
 
+yamerl can be used inside Elixir projects, like any other Erlang
+library. You can find an example later in this README.
+
 yamerl is distributed under the terms of the **2-clause BSD license**;
 see `LICENSE`.
 
@@ -51,7 +54,7 @@ list its name in your `mix.exs`:
 ```elixir
 def project do
   [
-    deps: [{:yamerl, ">= 0.4.0"}]
+    deps: [{:yamerl, "~> 0.4.0"}]
   ]
 end
 ```
@@ -209,6 +212,136 @@ yamerl_constr:file("system.yaml", [{detailed_constr, true}]).
    ]}
   ],
   1}
+ }
+]
+```
+
+## Use yamerl in an Elixir project
+
+Here is a complete example:
+
+1. You first need to add `yamerl` to the dependencies list in `mix.exs`:
+
+ ```elixir
+# mix.exs, created with `mix new myapp` and updated to have `yamerl` as
+# a dependency.
+defmodule Myapp.Mixfile do
+  use Mix.Project
+
+  def project do
+    [app: :myapp,
+     version: "0.1.0",
+     elixir: "~> 1.3",
+     build_embedded: Mix.env == :prod,
+     start_permanent: Mix.env == :prod,
+     deps: deps()]
+  end
+
+  # Configuration for the OTP application
+  #
+  # Type "mix help compile.app" for more information
+  def application do
+    [applications: [:logger]]
+  end
+
+  # Dependencies can be Hex packages:
+  #
+  #   {:mydep, "~> 0.3.0"}
+  #
+  # Or git/path repositories:
+  #
+  #   {:mydep, git: "https://github.com/elixir-lang/mydep.git", tag: "0.1.0"}
+  #
+  # Type "mix help deps" for more examples and options
+  defp deps do
+    [
+      {:yamerl, "~> 0.4.0"}
+    ]
+  end
+end
+```
+
+2. Start the `yamerl` application and use the constructor, either in
+ simple or detailed mode:
+
+ ```elixir
+# lib/myapp.ex
+defmodule Myapp do
+  def simple(filename) do
+    # The yamerl application must be started before any use of it.
+    Application.start(:yamerl)
+
+    :yamerl_constr.file(filename)
+  end
+
+  def detailed(filename) do
+    # The yamerl application must be started before any use of it.
+    Application.start(:yamerl)
+
+    :yamerl_constr.file(filename, [:detailed_constr])
+  end
+end
+```
+
+Now let's use the `Myapp` module to parse the same YAML example file as
+above:
+
+```yaml
+# system.yaml
+- os: FreeBSD
+  version: 9.0-RELEASE-p3
+```
+
+Parsing in simple mode:
+
+ ```elixir
+Myapp.simple("system.yaml")
+```
+
+ ```
+# List of documents.
+[
+ # List of mappings.
+ [
+  # Mapping with two entries.
+  [
+   {'os', 'FreeBSD'},
+   {'version', '9.0-RELEASE-p3'}
+  ]
+ ]
+]
+```
+
+Parsing in detailed mode:
+
+ ```elixir
+Myapp.detailed("system.yaml")
+```
+
+ ```
+# List of documents.
+[
+ # Document with a list as its root node.
+ yamerl_doc:
+ {:yamerl_seq, :yamerl_node_seq, 'tag:yaml.org,2002:seq', [line: 2, column: 1],
+  [
+   # Mapping #1.
+   {:yamerl_map, :yamerl_node_map, 'tag:yaml.org,2002:map', [line: 2, column: 3],
+    [
+     # Mapping entry #1.
+     {
+      {:yamerl_str, :yamerl_node_str, 'tag:yaml.org,2002:str', [line: 2, column: 3], 'os'},
+      {:yamerl_str, :yamerl_node_str, 'tag:yaml.org,2002:str', [line: 2, column: 7], 'FreeBSD'}
+     },
+     # Mapping entry #2.
+     {
+      {:yamerl_str, :yamerl_node_str, 'tag:yaml.org,2002:str', [line: 3, column: 3], 'version'},
+      {:yamerl_str, :yamerl_node_str, 'tag:yaml.org,2002:str', [line: 3, column: 12], '9.0-RELEASE-p3'}
+     }
+    ]
+   }
+  ],
+  1
  }
 ]
 ```
