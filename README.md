@@ -16,7 +16,7 @@ Erlang/OTP applications; no external dependency is required. It doesn't
 use native code either (neither port drivers nor NIFs).
 
 yamerl is distributed under the terms of the **2-clause BSD license**;
-see `COPYING`.
+see `LICENSE`.
 
 ## Integrate to your project
 
