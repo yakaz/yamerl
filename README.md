@@ -1,4 +1,4 @@
-# yamerl: YAML 1.2 parser in Erlang
+# yamerl: YAML 1.2 and JSON parser in Erlang
 
 YAML is a human-friendly data serialization format. The specification
 for this language and many examples are available from the [Official
