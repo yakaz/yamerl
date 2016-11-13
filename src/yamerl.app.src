@@ -3,7 +3,7 @@
 
 {application, yamerl, [
     {description,
-      "YAML parser in pure Erlang"
+      "YAML 1.2 and JSON parser in pure Erlang"
     },
     {vsn, "0.4.0"},
     {modules, []},
