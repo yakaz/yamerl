@@ -170,49 +170,53 @@ If we use the following YAML document:
   version: 9.0-RELEASE-p3
 ```
 
-Simple documents:
-```erlang
+* Simple documents:
+
+ ```erlang
 yamerl_constr:file("system.yaml").
 ```
-```erlang
+
+ ```erlang
 % List of documents.
 [
- % List of mappings.
- [
-  % Mapping with two entries.
-  [
-   {"os", "FreeBSD"},
-   {"version","9.0-RELEASE-p3"}
-  ]
- ]
+     % List of mappings.
+     [
+      % Mapping with two entries.
+      [
+       {"os", "FreeBSD"},
+       {"version","9.0-RELEASE-p3"}
+      ]
+     ]
 ]
 ```
 
-Full documents:
-```erlang
+* Full documents:
+
+ ```erlang
 yamerl_constr:file("system.yaml", [{detailed_constr, true}]).
 ```
-```erlang
+
+ ```erlang
 % List of documents.
 [
- % Document with a list as its root node.
- {yamerl_doc,
-  {yamerl_seq, yamerl_node_seq, "tag:yaml.org,2002:seq", [{line, 2}, {column, 1}], [
-   % Mapping #1.
-   {yamerl_map, yamerl_node_map, "tag:yaml.org,2002:map", [{line, 2}, {column, 3}], [
-    {
-     % Mapping entry #1.
-     {yamerl_str, yamerl_node_str, "tag:yaml.org,2002:str", [{line, 2}, {column, 3}], "os"},
-     {yamerl_str, yamerl_node_str, "tag:yaml.org,2002:str", [{line, 2}, {column, 7}], "FreeBSD"}
-    }, {
-     % Mapping entry #2.
-     {yamerl_str, yamerl_node_str, "tag:yaml.org,2002:str", [{line, 3}, {column, 3}], "version"},
-     {yamerl_str, yamerl_node_str, "tag:yaml.org,2002:str", [{line, 3}, {column, 12}], "9.0-RELEASE-p3"}
-    }
-   ]}
-  ],
-  1}
- }
+     % Document with a list as its root node.
+     {yamerl_doc,
+      {yamerl_seq, yamerl_node_seq, "tag:yaml.org,2002:seq", [{line, 2}, {column, 1}], [
+       % Mapping #1.
+       {yamerl_map, yamerl_node_map, "tag:yaml.org,2002:map", [{line, 2}, {column, 3}], [
+        {
+         % Mapping entry #1.
+         {yamerl_str, yamerl_node_str, "tag:yaml.org,2002:str", [{line, 2}, {column, 3}], "os"},
+         {yamerl_str, yamerl_node_str, "tag:yaml.org,2002:str", [{line, 2}, {column, 7}], "FreeBSD"}
+        }, {
+         % Mapping entry #2.
+         {yamerl_str, yamerl_node_str, "tag:yaml.org,2002:str", [{line, 3}, {column, 3}], "version"},
+         {yamerl_str, yamerl_node_str, "tag:yaml.org,2002:str", [{line, 3}, {column, 12}], "9.0-RELEASE-p3"}
+        }
+       ]}
+      ],
+      1}
+     }
 ]
 ```
 
