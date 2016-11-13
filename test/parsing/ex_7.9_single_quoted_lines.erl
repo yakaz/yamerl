@@ -30,7 +30,7 @@ single_test_() ->
         false,
         false,
         false,
-        [{impl_key,false,undefined,undefined,undefined,undefined,undefined}],
+        [{impl_key,false,false,undefined,undefined,1,1}],
         false,
         false,
         _,

@@ -78,32 +78,32 @@
 %% -------------------------------------------------------------------
 
 -record(directive_ctx, {
-    line      :: position(),
-    col       :: position(),
+    line = 1  :: position(),
+    col  = 1  :: position(),
     name = "" :: string()
   }).
 
 -record(yaml_directive_ctx, {
-    line  :: position(),
-    col   :: position(),
-    major :: non_neg_integer(),
-    minor :: non_neg_integer()
+    line  = 1 :: position(),
+    col   = 1 :: position(),
+    major     :: non_neg_integer() | undefined,
+    minor     :: non_neg_integer() | undefined
   }).
 
 -record(tag_directive_ctx, {
-    line   :: position(),
-    col    :: position(),
-    handle :: tag_handle() | [] | undefined,
-    prefix :: tag_prefix() | [] | undefined
+    line  = 1 :: position(),
+    col   = 1 :: position(),
+    handle    :: tag_handle() | [] | undefined,
+    prefix    :: tag_prefix() | [] | undefined
   }).
 
 -record(reserved_directive_ctx, {
-    line           :: position(),
-    col            :: position(),
-    name           :: string(),
-    current        :: string(),
-    args = []      :: [string()],
-    args_count = 0 :: non_neg_integer()
+    line       = 1  :: position(),
+    col        = 1  :: position(),
+    name       = "" :: string(),
+    current         :: string() | undefined,
+    args       = [] :: [string()],
+    args_count = 0  :: non_neg_integer()
   }).
 
 -type whitespace() :: [9 | 10 | 32].
