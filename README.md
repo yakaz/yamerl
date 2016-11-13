@@ -292,13 +292,13 @@ above:
   version: 9.0-RELEASE-p3
 ```
 
-Parsing in simple mode:
+* Parsing in simple mode:
 
  ```elixir
 Myapp.simple("system.yaml")
 ```
 
- ```
+ ```elixir
 # List of documents.
 [
  # List of mappings.
@@ -312,13 +312,13 @@ Myapp.simple("system.yaml")
 ]
 ```
 
-Parsing in detailed mode:
+* Parsing in detailed mode:
 
  ```elixir
 Myapp.detailed("system.yaml")
 ```
 
- ```
+ ```elixir
 # List of documents.
 [
  # Document with a list as its root node.
