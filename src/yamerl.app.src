@@ -5,7 +5,7 @@
     {description,
       "YAML 1.2 and JSON parser in pure Erlang"
     },
-    {vsn, "0.4.0"},
+    {vsn, "0.5.0"},
     {modules, []},
     {registered, [yamerl_sup]},
     {applications, [
