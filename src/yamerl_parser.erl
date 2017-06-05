@@ -723,12 +723,18 @@ determine_token_type([$-, $-, $-, C | _] = Chars, Line, 1 = Col, Delta,
   when ?IS_NEWLINE(C) orelse ?IS_SPACE(C) orelse
   (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
     parse_document_sep(Chars, Line, Col, Delta, Parser, directives_end);
+determine_token_type([$-, $-, $-] = Chars, Line, 1 = Col, Delta,
+  #yamerl_parser{raw_eos = true} = Parser) ->
+    parse_document_sep(Chars, Line, Col, Delta, Parser, directives_end);
 
 %% Document end indicator.
 determine_token_type([$., $., $., C | _] = Chars, Line, 1 = Col, Delta,
   #yamerl_parser{doc_version = Version} = Parser)
   when ?IS_NEWLINE(C) orelse ?IS_SPACE(C) orelse
   (Version == {1,1} andalso ?IS_NEWLINE_11(C)) ->
+    parse_document_sep(Chars, Line, Col, Delta, Parser, document_end);
+determine_token_type([$., $., $.] = Chars, Line, 1 = Col, Delta,
+  #yamerl_parser{raw_eos = true} = Parser) ->
     parse_document_sep(Chars, Line, Col, Delta, Parser, document_end);
 
 %% Directive indicator.
