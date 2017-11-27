@@ -1,3 +1,5 @@
+%% vim:ft=erlang:
+
 case os:getenv("TRAVIS_JOB_ID") of
     false -> CONFIG;
     JobId ->
