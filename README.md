@@ -69,7 +69,7 @@ application:start(yamerl).
 Now, one can use the `yamerl_constr` module to parse and construct a
 list of documents from:
 * an in-memory document (string or binary);
-* a regualr file;
+* a regular file;
 * a stream.
 
 Because a YAML input stream may contain multiple documents,
