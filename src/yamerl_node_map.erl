@@ -56,38 +56,51 @@ try_construct_token(Constr, Node,
 try_construct_token(_, _, _) ->
     unrecognized.
 
-construct_token(_, undefined, #yamerl_collection_start{} = Token) ->
+construct_token(Constr, undefined, #yamerl_collection_start{} = Token) ->
+    Map = case node_as_proplist_or_map(Constr) of
+        proplist -> [];
+        map      -> maps:new()
+    end,
     Pres = yamerl_constr:get_pres_details(Token),
     Node = #unfinished_node{
       path = {map, undefined},
       pres = Pres,
-      priv = []
+      priv = Map
     },
     {unfinished, Node, false};
-construct_token(_, #unfinished_node{priv = Pairs} = Node,
+construct_token(_, #unfinished_node{priv = Map} = Node,
   #yamerl_mapping_key{}) ->
     Node1 = Node#unfinished_node{
-      priv = [{'$insert_here', undefined} | Pairs]
+      priv = {'$expecting_key', Map}
     },
     {unfinished, Node1, false};
-construct_token(_, #unfinished_node{priv = [{Key, undefined} | Pairs]} = Node,
-  #yamerl_mapping_value{}) ->
+construct_token(_, #unfinished_node{priv = {Key, Map}} = Node,
+  #yamerl_mapping_value{}) when Key =/= '$expecting_key' ->
     Node1 = Node#unfinished_node{
-      priv = [{Key, '$insert_here'} | Pairs]
+      priv = {Key, '$expecting_value', Map}
     },
     {unfinished, Node1, false};
 
 construct_token(#yamerl_constr{detailed_constr = false},
-  #unfinished_node{priv = Pairs}, #yamerl_collection_end{}) ->
-    Node = lists:reverse(Pairs),
+  #unfinished_node{priv = Map}, #yamerl_collection_end{})
+  when not is_tuple(Map) ->
+    Node = case is_list(Map) of
+        true  -> lists:reverse(Map);
+        false -> Map
+    end,
     {finished, Node};
 construct_token(#yamerl_constr{detailed_constr = true},
-  #unfinished_node{pres = Pres, priv = Pairs}, #yamerl_collection_end{}) ->
+  #unfinished_node{pres = Pres, priv = Map}, #yamerl_collection_end{})
+  when not is_tuple(Map) ->
+    Map1 = case is_list(Map) of
+        true  -> lists:reverse(Map);
+        false -> Map
+    end,
     Node = #yamerl_map{
       module = ?MODULE,
       tag    = ?TAG,
       pres   = Pres,
-      pairs  = lists:reverse(Pairs)
+      pairs  = Map1
     },
     {finished, Node};
 
@@ -103,22 +116,29 @@ construct_token(_, _, Token) ->
 
 construct_node(_,
   #unfinished_node{path = {map, undefined},
-    priv = [{'$insert_here', undefined} | Pairs]} = Node,
+    priv = {'$expecting_key', Map}} = Node,
   Key) ->
     Node1 = Node#unfinished_node{
       path = {map, Key},
-      priv = [{Key, undefined} | Pairs]
+      priv = {Key, Map}
     },
     {unfinished, Node1, false};
 construct_node(_,
   #unfinished_node{path = {map, _},
-    priv = [{Key, '$insert_here'} | Pairs]} = Node,
+    priv = {Key, '$expecting_value', Map}} = Node,
   Value) ->
+    Map1 = case is_list(Map) of
+        true  -> [{Key, Value} | Map];
+        false -> maps:put(Key, Value, Map)
+    end,
     Node1 = Node#unfinished_node{
       path = {map, undefined},
-      priv = [{Key, Value} | Pairs]
+      priv = Map1
     },
     {unfinished, Node1, false}.
 
 node_pres(Node) ->
     ?NODE_PRES(Node).
+
+node_as_proplist_or_map(#yamerl_constr{ext_options = Options}) ->
+    proplists:get_value(map_node_format, Options, proplist).
