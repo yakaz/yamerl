@@ -1,22 +1,20 @@
 # vim:sw=2:et:
 
 language: erlang
+sudo: false
 otp_release:
-  - '20.0'
-  - '19.3'
-  - '18.3'
-  - '17.5'
-  - 'R16B03-1'
+  - 20.0
+  - 19.3
+  - 18.3
+  - 17.5
+  - R16B03-1
 
 install:
   - curl -O -L https://s3.amazonaws.com/rebar3/rebar3
   - chmod +x rebar3
-  - ./rebar3 update
 
 script:
-  - ./rebar3 compile
-  - ./rebar3 eunit skip_deps=true
-  - ./rebar3 dialyzer
+  - ./rebar3 do compile,eunit,dialyzer
 
 after_success:
   - ./rebar3 coveralls send
@@ -27,3 +25,8 @@ notifications:
       - jean-sebastien.pedron@dumbbell.fr
     on_success: change
     on_failure: always
+
+cache:
+  directories:
+    - $HOME/.cache/rebar3/hex/default
+    - $HOME/_build/default/rebar3_${TRAVIS_OTP_RELEASE}_plt
