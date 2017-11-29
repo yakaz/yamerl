@@ -4028,7 +4028,7 @@ check_tokens_in_a_row(Parser, Token1, Token2) when
    is_record(Token2, yamerl_collection_start)) ->
     %% Token2 can't follow Token1.
     Error = #yamerl_parsing_error{
-      name   = unpected_token,
+      name   = unexpected_token,
       token  = Token2,
       line   = ?TOKEN_LINE(Token2),
       column = ?TOKEN_COLUMN(Token2)

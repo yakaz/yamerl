@@ -10,7 +10,7 @@ single_test_() ->
         [
           {yamerl_parsing_error,error,
             "Unexpected \"yamerl_scalar\" token following a \"yamerl_scalar\" token",
-            3,1,unpected_token,
+            3,1,unexpected_token,
             {yamerl_scalar,3,1,
               {yamerl_tag,3,1,{non_specific,"!"}},
               flow,double_quoted,"item2"},
