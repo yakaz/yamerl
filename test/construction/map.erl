@@ -7,7 +7,7 @@
 setup() ->
     application:start(yamerl).
 
-simple_test_() ->
+proplist_simple_test_() ->
     {setup,
       fun setup/0,
       [
@@ -23,7 +23,7 @@ simple_test_() ->
       ]
     }.
 
-detailed_test_() ->
+proplist_detailed_test_() ->
     {setup,
       fun setup/0,
       [
@@ -60,6 +60,91 @@ detailed_test_() ->
                             2}}]}}]}}
           ],
           yamerl_constr:file(?FILENAME, [{detailed_constr, true}])
+        )
+      ]
+    }.
+
+map_simple_test_() ->
+    case erlang:function_exported(maps, from_list, 1) of
+        true  -> map_simple();
+        false -> []
+    end.
+
+map_simple() ->
+    SubMap1 = maps:from_list([{"item", 1}]),
+    SubMap2 = maps:from_list([{"item", 2}]),
+    Map = maps:from_list([
+        {"first", SubMap1},
+        {"second", SubMap2}
+      ]),
+    {setup,
+      fun setup/0,
+      [
+        ?_assertMatch(
+          [
+            Map
+          ],
+          yamerl_constr:file(?FILENAME, [
+              {detailed_constr, false},
+              {map_node_format, map}
+            ])
+        )
+      ]
+    }.
+
+map_detailed_test_() ->
+    case erlang:function_exported(maps, from_list, 1) of
+        true  -> map_detailed();
+        false -> []
+    end.
+
+map_detailed() ->
+    SubMap1 = maps:from_list(
+                [{{yamerl_str,yamerl_node_str,
+                   "tag:yaml.org,2002:str",
+                   [{line,1},{column,11}],
+                   "item"},
+                  {yamerl_int,yamerl_node_int,
+                   "tag:yaml.org,2002:int",
+                   [{line,1},{column,17}],
+                   1}}
+                ]),
+    SubMap2 = maps:from_list(
+                [{{yamerl_str,yamerl_node_str,
+                   "tag:yaml.org,2002:str",
+                   [{line,2},{column,11}],
+                   "item"},
+                  {yamerl_int,yamerl_node_int,
+                   "tag:yaml.org,2002:int",
+                   [{line,2},{column,17}],
+                   2}}]),
+    Map = maps:from_list(
+            [{{yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+               [{line,1},{column,1}],
+               "first"},
+              {yamerl_map,yamerl_node_map,"tag:yaml.org,2002:map",
+               [{line,1},{column,9}],
+               SubMap1}},
+             {{yamerl_str,yamerl_node_str,"tag:yaml.org,2002:str",
+               [{line,2},{column,1}],
+               "second"},
+              {yamerl_map,yamerl_node_map,"tag:yaml.org,2002:map",
+               [{line,2},{column,9}],
+               SubMap2}}]),
+    {setup,
+      fun setup/0,
+      [
+        ?_assertMatch(
+          [
+            {yamerl_doc,
+              {yamerl_map,yamerl_node_map,"tag:yaml.org,2002:map",
+                [{line,1},{column,1}],
+                Map}}
+          ],
+          yamerl_constr:file(?FILENAME, [
+              {detailed_constr, true},
+              {map_node_format, map}
+            ])
         )
       ]
     }.
