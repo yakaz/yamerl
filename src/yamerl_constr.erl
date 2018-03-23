@@ -194,6 +194,13 @@ new(Source) ->
 %% <dt>`{node_mods, Mods_List}'</dt>
 %% <dd>List of Erlang modules to extend support node types.</dd>
 %% <dd>Default: `[]'.</dd>
+%% <dt>`{ignore_unrecognized_tags, boolean()}'</dt>
+%% <dd>Indicate if unrecognized tags should be ignored. When `false'
+%% (the default), a node with an unrecognized tag can't be constructed
+%% because yamerl doesn't know how to interpret the node. When this
+%% happens an exception is raised. When set to `true', the node is
+%% constructed as if it was a plain YAML node without any tag.</dd>
+%% <dd>Default: `false'.</dd>
 %% </dl>
 %%
 %% The returned state is opaque value. You then pass it to {@link
@@ -616,9 +623,13 @@ construct(
             try_construct(Constr, Mods, Token);
         #yamerl_tag{uri = URI} ->
             %% We look up this URI in the tag's index.
+            IgnoreUnrecognizedTags = proplists:get_value(
+              ignore_unrecognized_tags, Constr#yamerl_constr.options, false),
             case proplists:get_value(URI, Tags) of
                 Mod when Mod /= undefined ->
                     Mod:construct_token(Constr, undefined, Token);
+                undefined when IgnoreUnrecognizedTags ->
+                    try_construct(Constr, Mods, Token);
                 undefined ->
                     %% This tag isn't handled by anything!
                     Error = #yamerl_parsing_error{
@@ -864,7 +875,8 @@ option_names() ->
     [
       node_mods,
       schema,
-      detailed_constr
+      detailed_constr,
+      ignore_unrecognized_tags
     ].
 
 check_options([Option | Rest]) ->
@@ -889,7 +901,10 @@ is_option_valid({schema, Schema})
 when Schema == failsafe
 orelse Schema == json
 orelse Schema == core
-orelse Schema == yaml11 ->
+orelse Schema == yaml11
+orelse Schema == auto ->
+    true;
+is_option_valid({ignore_unrecognized_tags, Flag}) when is_boolean(Flag) ->
     true;
 is_option_valid(_) ->
     false.
