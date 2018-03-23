@@ -258,8 +258,8 @@ new(Source) ->
       Constr  :: yamerl_parser:yamerl_parser().
 
 new(Source, Options) ->
-Parser_Options = initialize(Options),
-yamerl_parser:new(Source, Parser_Options).
+    Parser_Options = initialize(Options),
+    yamerl_parser:new(Source, Parser_Options).
 
 %% @equiv next_chunk(Constr, Chunk, false)
 
