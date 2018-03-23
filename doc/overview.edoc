@@ -90,7 +90,7 @@ yamerl_app:set_param(node_mods, [yamerl_node_erlang_fun]),
 Plus_One_Fun(2). % Return 3.
 '''</li>
 <li>Provides a <strong>yamler compatibility layer</strong>:
-```erlang
+```
 % Both calls return the same value.
 yaml:load_file("input.yaml", [{schema, yaml_schema_failsafe}]),
 yamerl_yamler_compat:load_file("input.yaml", [{schema, yaml_schema_failsafe}])
