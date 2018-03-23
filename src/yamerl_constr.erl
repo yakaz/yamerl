@@ -187,13 +187,6 @@ new(Source) ->
 %% records. Those records gives additional informations such as the YAML
 %% node type, the location in the stream (line and column number) and so
 %% on.</dd>
-%% <dd>Default: `false'</dd>
-%% <dt>`{schema, failsafe | json | core | yaml11}'</dt>
-%% <dd>Name of the official schema to use.</dd>
-%% <dd>Default: `core'.</dd>
-%% <dt>`{node_mods, Mods_List}'</dt>
-%% <dd>List of Erlang modules to extend support node types.</dd>
-%% <dd>Default: `[]'.</dd>
 %% <dt>`{ignore_unrecognized_tags, boolean()}'</dt>
 %% <dd>Indicate if unrecognized tags should be ignored. When `false'
 %% (the default), a node with an unrecognized tag can't be constructed
@@ -201,6 +194,13 @@ new(Source) ->
 %% happens an exception is raised. When set to `true', the node is
 %% constructed as if it was a plain YAML node without any tag.</dd>
 %% <dd>Default: `false'.</dd>
+%% <dd>Default: `false'</dd>
+%% <dt>`{node_mods, Mods_List}'</dt>
+%% <dd>List of Erlang modules to extend support node types.</dd>
+%% <dd>Default: `[]'.</dd>
+%% <dt>`{schema, failsafe | json | core | yaml11}'</dt>
+%% <dd>Name of the official schema to use.</dd>
+%% <dd>Default: `core'.</dd>
 %% </dl>
 %%
 %% The returned state is opaque value. You then pass it to {@link
