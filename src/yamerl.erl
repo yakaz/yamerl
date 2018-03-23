@@ -1,6 +1,6 @@
 %-
 % Copyright (c) 2012-2014 Yakaz
-% Copyright (c) 2016-2017 Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
+% Copyright (c) 2016-2018 Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
 % All rights reserved.
 %
 % Redistribution and use in source and binary forms, with or without
@@ -27,7 +27,7 @@
 %% @author Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
 %% @copyright
 %% 2012-2014 Yakaz,
-%% 2016-2017 Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
+%% 2016-2018 Jean-Sébastien Pédron <jean-sebastien.pedron@dumbbell.fr>
 %%
 %% @doc Wrappers for common uses of {@link yamerl_constr}.
 
