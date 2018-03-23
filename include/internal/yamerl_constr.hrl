@@ -33,9 +33,10 @@
 %% Options.
 %% -------------------------------------------------------------------
 
+-type schema() :: failsafe | json | core | yaml11.
 -type yamerl_constr_option() :: {detailed_constr, boolean()}
                               | {node_mods, [atom()]}
-                              | {schema, failsafe | json | core | yaml11}.
+                              | {schema, schema() | auto}.
 
 %% -------------------------------------------------------------------
 %% Representation state.

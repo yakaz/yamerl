@@ -576,13 +576,16 @@ node_pres(Node) when is_tuple(Node) ->
 %% Construction.
 %% -------------------------------------------------------------------
 
-construct(Constr, #yamerl_doc_start{}) ->
+construct(Constr, #yamerl_doc_start{version = Version}) ->
+    %% Select schema and assocated modules, possibly based on the
+    %% document version.
+    Constr1 = setup_node_mods(Constr, Version),
     %% Prepare a document node.
     Doc = #yamerl_doc{},
-    Constr1 = Constr#yamerl_constr{
+    Constr2 = Constr1#yamerl_constr{
       current_doc = [Doc]
     },
-    return_new_fun(Constr1);
+    return_new_fun(Constr2);
 
 construct(_, Token) when
   is_record(Token, yamerl_stream_start) orelse
@@ -741,25 +744,30 @@ return_new_fun(#yamerl_constr{detailed_constr = Detailed} = Constr) ->
 %% Node modules.
 %% -------------------------------------------------------------------
 
-setup_node_mods(Constr) ->
+setup_node_mods(Constr, Version) ->
     Mods1 = umerge_unsorted(
       proplists:get_value(node_mods, Constr#yamerl_constr.options, []),
       yamerl_app:get_param(node_mods)
     ),
-    Schema = proplists:get_value(schema, Constr#yamerl_constr.options, core),
+    DefaultSchema = case Version of
+        {1, 0} -> ?YAML11_SCHEMA_MODS;
+        {1, 1} -> ?YAML11_SCHEMA_MODS;
+        _      -> ?CORE_SCHEMA_MODS
+    end,
+    Schema = proplists:get_value(schema, Constr#yamerl_constr.options, auto),
     Mods   = case Schema of
         failsafe -> umerge_unsorted(Mods1, ?FAILSAFE_SCHEMA_MODS);
         json     -> umerge_unsorted(Mods1, ?JSON_SCHEMA_MODS);
         core     -> umerge_unsorted(Mods1, ?CORE_SCHEMA_MODS);
-        yaml11   -> umerge_unsorted(Mods1, ?YAML11_SCHEMA_MODS)
+        yaml11   -> umerge_unsorted(Mods1, ?YAML11_SCHEMA_MODS);
+        auto     -> umerge_unsorted(Mods1, DefaultSchema)
     end,
     Auto    = filter_autodetection_capable_mods(Mods, []),
     Tags    = index_tags(Mods, []),
-    Constr1 = Constr#yamerl_constr{
-      mods = Auto,
-      tags = Tags
-    },
-    return_new_fun(Constr1).
+    Constr#yamerl_constr{
+      mods   = Auto,
+      tags   = Tags
+    }.
 
 umerge_unsorted(List1, List2) ->
     Fun = fun(Mod, List) ->
@@ -814,7 +822,7 @@ initialize(Options) ->
       ext_options     = Ext_Options,
       detailed_constr = Detailed
     },
-    {ok, Token_Fun} = setup_node_mods(Constr),
+    {ok, Token_Fun} = return_new_fun(Constr),
     [{token_fun, Token_Fun} | Parser_Options].
 
 filter_options(Options) ->
