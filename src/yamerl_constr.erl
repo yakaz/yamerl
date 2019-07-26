@@ -129,6 +129,7 @@
     yamerl_bool/0,
     yamerl_int/0,
     yamerl_float/0,
+    yamerl_binary/0,
     yamerl_timestamp/0,
     yamerl_erlang_atom/0,
     yamerl_erlang_fun/0,
@@ -565,6 +566,7 @@ node_pres(Node) when
   is_record(Node, yamerl_null) orelse
   is_record(Node, yamerl_bool) orelse
   is_record(Node, yamerl_int) orelse
+  is_record(Node, yamerl_binary) orelse
   is_record(Node, yamerl_timestamp) orelse
   is_record(Node, yamerl_erlang_atom) orelse
   is_record(Node, yamerl_erlang_fun) ->
