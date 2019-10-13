@@ -18,6 +18,11 @@ test: $(REBAR)
 clean: $(REBAR)
 	$(REBAR) clean
 
+distclean:
+	rm -rf _build
+	rm -rf ebin
+	rm $(REBAR)
+
 ./rebar3:
 	$(ERL) -noshell -s inets -s ssl \
 	  -eval '{ok, saved_to_file} = httpc:request(get, {"$(REBAR_URL)", []}, [], [{stream, "./rebar3"}])' \
