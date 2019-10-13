@@ -14,12 +14,8 @@ matrix:
       - otp_release: R16B03-1
         dist: trusty
 
-install:
-  - curl -O -L https://s3.amazonaws.com/rebar3/rebar3
-  - chmod +x rebar3
-
 script:
-  - ./rebar3 do compile,eunit,dialyzer
+  - make test
 
 after_success:
   - ./rebar3 coveralls send
