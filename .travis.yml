@@ -2,23 +2,20 @@
 
 language: erlang
 sudo: false
-otp_release:
-  - 21.0
-  - 20.3
-  - 19.3
-  - 18.3
-  - 17.5
-  - R16B03-1
-
-install:
-  - curl -O -L https://s3.amazonaws.com/rebar3/rebar3
-  - chmod +x rebar3
+matrix:
+  include:
+    - otp_release: 21.3
+      env: COVERALLS=true
+    - otp_release: 20.3
+    - otp_release: 19.3
+    - otp_release: 18.3
+      dist: trusty
 
 script:
-  - ./rebar3 do compile,eunit,dialyzer
+  - make test
 
 after_success:
-  - ./rebar3 coveralls send
+  - if [[ "$COVERALLS" = true ]]; then ./rebar3 coveralls send; fi
 
 notifications:
   email:

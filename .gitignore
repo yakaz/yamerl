@@ -2,6 +2,8 @@
 .*.sw?
 *.beam
 
+rebar3
+
 # Files produced by rebar.
 /_build/
 /doc/
