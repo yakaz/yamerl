@@ -4,8 +4,9 @@ language: erlang
 sudo: false
 matrix:
   include:
-    - otp_release: 21.3
+    - otp_release: 22.3
       env: COVERALLS=true
+    - otp_release: 21.3
     - otp_release: 20.3
     - otp_release: 19.3
     - otp_release: 18.3
