@@ -88,6 +88,16 @@
 -type yamerl_float()              :: #yamerl_float{}.
 -type yamerl_simple_float()       :: float().
 
+%% Binary (Core Schema).
+-record(yamerl_binary, {
+    module = undefined            :: atom(),
+    tag    = "!"                  :: tag_uri(),
+    pres   = []                   :: list(),
+    data   = <<"">>               :: bitstring()
+  }).
+-type yamerl_binary()                :: #yamerl_binary{}.
+-type yamerl_simple_binary()         :: bitstring().
+
 %% Erlang atom.
 -record(yamerl_erlang_atom, {
     module = undefined            :: atom(),
@@ -276,6 +286,7 @@
     yamerl_node_int,
     yamerl_node_float,
     yamerl_node_str,
+    yamerl_node_binary,
     yamerl_node_seq,
     yamerl_node_map
   ]).
@@ -286,6 +297,7 @@
     yamerl_node_int_ext,
     yamerl_node_float_ext,
     yamerl_node_str,
+    yamerl_node_binary,
     yamerl_node_seq,
     yamerl_node_map
   ]).
