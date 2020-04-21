@@ -20,9 +20,6 @@
       ]},
 
     %% Hex.pm package informations.
-    {maintainers, [
-        "Jean-Sebastien Pedron <jean-sebastien.pedron@dumbbell.fr>"
-      ]},
     {licenses, ["BSD 2-Clause"]},
     {links, [
         {"GitHub", "https://github.com/yakaz/yamerl"}
