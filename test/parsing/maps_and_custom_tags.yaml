@@ -1,0 +1,10 @@
+- foo: bar
+  bar: foo
+
+- {foo: bar, bar: foo}
+
+- !<tag:example.org,2002:custom>
+  foo: bar
+  bar: foo
+
+- !<tag:example.org,2002:custom> {foo: bar, bar: foo}

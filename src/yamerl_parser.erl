@@ -4066,6 +4066,11 @@ handle_tag_property(
   #yamerl_parser{last_tag = Tag} = Parser, Token) when
   (is_record(Token, yamerl_collection_start) andalso
    Tag#yamerl_tag.line < Token#yamerl_collection_start.line) orelse
+  (is_record(Token, yamerl_collection_start) andalso
+   Token#yamerl_collection_start.style =:= flow andalso
+   (Tag#yamerl_tag.line < Token#yamerl_collection_start.line orelse
+    (Tag#yamerl_tag.line == Token#yamerl_collection_start.line andalso
+     Tag#yamerl_tag.column =< Token#yamerl_collection_start.column))) orelse
   (is_record(Token, yamerl_scalar) andalso
    (Tag#yamerl_tag.line < Token#yamerl_scalar.line orelse
     (Tag#yamerl_tag.line == Token#yamerl_scalar.line andalso
