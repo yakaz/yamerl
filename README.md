@@ -54,7 +54,7 @@ list its name in your `mix.exs`:
 ```elixir
 def project do
   [
-    deps: [{:yamerl, "~> 0.7.0"}]
+    deps: [{:yamerl, "~> 0.8.0"}]
   ]
 end
 ```
