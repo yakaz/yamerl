@@ -44,6 +44,11 @@
 
 -define(TAG, "tag:yaml.org,2002:map").
 
+-record(map_builder,
+    {format,
+     state,
+     keys,
+     data}).
 %% -------------------------------------------------------------------
 %% Public API.
 %% -------------------------------------------------------------------
@@ -57,10 +62,7 @@ try_construct_token(_, _, _) ->
     unrecognized.
 
 construct_token(Constr, undefined, #yamerl_collection_start{} = Token) ->
-    Map = case node_as_proplist_or_map(Constr) of
-        proplist -> [];
-        map      -> maps:new()
-    end,
+    Map = new_builder(Constr),
     Pres = yamerl_constr:get_pres_details(Token),
     Node = #unfinished_node{
       path = {map, undefined},
@@ -71,31 +73,23 @@ construct_token(Constr, undefined, #yamerl_collection_start{} = Token) ->
 construct_token(_, #unfinished_node{priv = Map} = Node,
   #yamerl_mapping_key{}) ->
     Node1 = Node#unfinished_node{
-      priv = {'$expecting_key', Map}
+      priv = Map#map_builder{state = '$expecting_key'}
     },
     {unfinished, Node1, false};
-construct_token(_, #unfinished_node{priv = {Key, Map}} = Node,
-  #yamerl_mapping_value{}) when Key =/= '$expecting_key' ->
+construct_token(_, #unfinished_node{priv = #map_builder{state = State} = Map} = Node,
+  #yamerl_mapping_value{}) when State =/= '$expecting_key' ->
     Node1 = Node#unfinished_node{
-      priv = {Key, '$expecting_value', Map}
+      priv = Map#map_builder{state = {'$expecting_value', Map#map_builder.state}}
     },
     {unfinished, Node1, false};
 
 construct_token(#yamerl_constr{detailed_constr = false},
-  #unfinished_node{priv = Map}, #yamerl_collection_end{})
-  when not is_tuple(Map) ->
-    Node = case is_list(Map) of
-        true  -> lists:reverse(Map);
-        false -> Map
-    end,
+  #unfinished_node{priv = #map_builder{state = none} = Builder}, #yamerl_collection_end{}) ->
+    Node = finalize_builder(Builder),
     {finished, Node};
 construct_token(#yamerl_constr{detailed_constr = true},
-  #unfinished_node{pres = Pres, priv = Map}, #yamerl_collection_end{})
-  when not is_tuple(Map) ->
-    Map1 = case is_list(Map) of
-        true  -> lists:reverse(Map);
-        false -> Map
-    end,
+  #unfinished_node{pres = Pres, priv = #map_builder{state = none} = Builder}, #yamerl_collection_end{}) ->
+    Map1 = finalize_builder(Builder),
     Node = #yamerl_map{
       module = ?MODULE,
       tag    = ?TAG,
@@ -116,21 +110,18 @@ construct_token(_, _, Token) ->
 
 construct_node(_,
   #unfinished_node{path = {map, undefined},
-    priv = {'$expecting_key', Map}} = Node,
+    priv = #map_builder{state = '$expecting_key'} = Builder} = Node,
   Key) ->
     Node1 = Node#unfinished_node{
       path = {map, Key},
-      priv = {Key, Map}
+      priv = Builder#map_builder{state = Key}
     },
     {unfinished, Node1, false};
-construct_node(_,
+construct_node(Constr,
   #unfinished_node{path = {map, _},
-    priv = {Key, '$expecting_value', Map}} = Node,
+    priv = #map_builder{state= {'$expecting_value', Key}} = Builder} = Node,
   Value) ->
-    Map1 = case is_list(Map) of
-        true  -> [{Key, Value} | Map];
-        false -> maps:put(Key, Value, Map)
-    end,
+    Map1 = set_kv(Constr, Key, Value, Builder),
     Node1 = Node#unfinished_node{
       path = {map, undefined},
       priv = Map1
@@ -142,3 +133,72 @@ node_pres(Node) ->
 
 node_as_proplist_or_map(#yamerl_constr{ext_options = Options}) ->
     proplists:get_value(map_node_format, Options, proplist).
+
+new_builder(Constr) ->
+    Format = node_as_proplist_or_map(Constr),
+    Map = #map_builder{
+        format = Format,
+        state = none,
+        keys = []},
+    case Format of
+        proplist ->
+            Map#map_builder{data = []};
+        map ->
+            Map#map_builder{data = maps:new()}
+    end.
+
+finalize_builder(#map_builder{data = Map}) when is_list(Map) ->
+    lists:reverse(Map);
+finalize_builder(#map_builder{data = Map}) ->
+    Map.
+
+set_kv(#yamerl_constr{detailed_constr = false},
+       Key,
+       Value,
+       #map_builder{format = proplist, data = Map} = Builder) ->
+    case lists:keymember(Key, 1, Map) of
+        true ->
+            Builder#map_builder{state = none, data = lists:keyreplace(Key, 1, Map, {Key, Value})};
+        false ->
+            Builder#map_builder{state = none, data = [{Key, Value} | Map]}
+    end;
+set_kv(#yamerl_constr{detailed_constr = false},
+       Key,
+       Value,
+       #map_builder{format = map, data = Map} = Builder) ->
+    Builder#map_builder{state = none, data = maps:put(Key, Value, Map)};
+
+set_kv(#yamerl_constr{detailed_constr = true},
+       Key,
+       Value,
+       #map_builder{format = proplist, keys = Keys, data = Map} = Builder) ->
+    case find(Key, Keys) of
+        none ->
+            RawKey = erlang:delete_element(#yamerl_str.pres, Key),
+            Builder#map_builder{state = none, keys = [{RawKey, Key} | Keys], data = [{Key, Value} | Map]};
+        {RawKey, MapKey} ->
+            Fun = fun({K, _V}) when K == MapKey ->
+                    {Key, Value};
+                (Else) ->
+                    Else
+                end,
+            Keys1 = [{RawKey, Key} | lists:delete({RawKey, MapKey}, Keys)],
+            Builder#map_builder{state = none, keys = Keys1, data = lists:map(Fun, Map)}
+    end;
+set_kv(#yamerl_constr{detailed_constr = true},
+       Key,
+       Value,
+       #map_builder{format = map, keys = Keys, data = Map} = Builder) ->
+    case find(Key, Keys) of
+        none ->
+            RawKey = erlang:delete_element(#yamerl_str.pres, Key),
+            Builder#map_builder{state = none, keys = [{RawKey, Key} | Keys], data = maps:put(Key, Value, Map)};
+        {RawKey, MapKey} ->
+            Keys1 = [{RawKey, Key} | lists:delete({RawKey, MapKey}, Keys)],
+            Maps1 = maps:put(Key, Value, maps:remove(MapKey, Map)),
+            Builder#map_builder{state = none, keys = Keys1, data = Maps1}
+    end.
+
+find(Key0, Keys) ->
+    Key = erlang:delete_element(#yamerl_str.pres, Key0),
+    proplists:lookup(Key, Keys).
