@@ -46,7 +46,7 @@
     module = ?MODULE :: atom(),
     path  :: tuple(),
     pres  :: [tuple()],
-    priv  :: tuple() | map() | list()
+    priv  :: any()
   }).
 
 -record(node_anchor, {
