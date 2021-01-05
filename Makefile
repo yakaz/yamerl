@@ -1,4 +1,4 @@
-REBAR := ./rebar3
+REBAR := rebar3
 REBAR_URL := https://s3.amazonaws.com/rebar3/rebar3
 ERL       ?= erl
 
