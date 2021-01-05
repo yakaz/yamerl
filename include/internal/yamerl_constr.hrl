@@ -43,14 +43,14 @@
 %% -------------------------------------------------------------------
 
 -record(unfinished_node, {
-    module = ?MODULE,
-    path,
-    pres,
-    priv
+    module = ?MODULE :: atom(),
+    path  :: tuple(),
+    pres  :: [tuple()],
+    priv  :: tuple() | map() | list()
   }).
 
 -record(node_anchor, {
-    name = ""
+    name = "" :: string()
   }).
 
 -record(yamerl_constr, {
