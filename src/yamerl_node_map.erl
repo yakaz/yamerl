@@ -45,10 +45,10 @@
 -define(TAG, "tag:yaml.org,2002:map").
 
 -record(map_builder,
-    {format,
-     state,
-     keys,
-     data}).
+    {format :: proplist | map,
+     state  :: none | '$expecting_key' | {'$expecting_value', term()},
+     keys   :: map:map(),
+     data   :: proplist:proplist() | map:map()}).
 %% -------------------------------------------------------------------
 %% Public API.
 %% -------------------------------------------------------------------
@@ -139,7 +139,7 @@ new_builder(Constr) ->
     Map = #map_builder{
         format = Format,
         state = none,
-        keys = []},
+        keys = maps:new()},
     case Format of
         proplist ->
             Map#map_builder{data = []};
@@ -172,33 +172,33 @@ set_kv(#yamerl_constr{detailed_constr = true},
        Key,
        Value,
        #map_builder{format = proplist, keys = Keys, data = Map} = Builder) ->
-    case find(Key, Keys) of
-        none ->
-            RawKey = erlang:delete_element(#yamerl_str.pres, Key),
-            Builder#map_builder{state = none, keys = [{RawKey, Key} | Keys], data = [{Key, Value} | Map]};
-        {RawKey, MapKey} ->
+    RawKey = strip_key(Key),
+    case maps:is_key(RawKey, Keys) of
+        false ->
+            Builder#map_builder{state = none, keys = maps:put(RawKey, Key, Keys), data = [{Key, Value} | Map]};
+        true ->
+            MapKey = maps:get(RawKey, Keys),
             Fun = fun({K, _V}) when K == MapKey ->
                     {Key, Value};
                 (Else) ->
                     Else
                 end,
-            Keys1 = [{RawKey, Key} | lists:delete({RawKey, MapKey}, Keys)],
-            Builder#map_builder{state = none, keys = Keys1, data = lists:map(Fun, Map)}
+            Builder#map_builder{state = none, keys = maps:put(RawKey, Key, Keys), data = lists:map(Fun, Map)}
     end;
 set_kv(#yamerl_constr{detailed_constr = true},
        Key,
        Value,
        #map_builder{format = map, keys = Keys, data = Map} = Builder) ->
-    case find(Key, Keys) of
-        none ->
-            RawKey = erlang:delete_element(#yamerl_str.pres, Key),
-            Builder#map_builder{state = none, keys = [{RawKey, Key} | Keys], data = maps:put(Key, Value, Map)};
-        {RawKey, MapKey} ->
-            Keys1 = [{RawKey, Key} | lists:delete({RawKey, MapKey}, Keys)],
+    RawKey = strip_key(Key),
+    case maps:is_key(RawKey, Keys) of
+        false ->
+            Builder#map_builder{state = none, keys = maps:put(RawKey, Key, Keys), data = maps:put(Key, Value, Map)};
+        true ->
+            MapKey = maps:get(RawKey, Keys),
             Maps1 = maps:put(Key, Value, maps:remove(MapKey, Map)),
-            Builder#map_builder{state = none, keys = Keys1, data = Maps1}
+            Builder#map_builder{state = none, keys = maps:put(RawKey, Key, Keys), data = Maps1}
     end.
 
-find(Key0, Keys) ->
-    Key = erlang:delete_element(#yamerl_str.pres, Key0),
-    proplists:lookup(Key, Keys).
+%% strip detailed construction info so that duplicate keys aren't added.
+strip_key(Key) ->
+    erlang:delete_element(#yamerl_str.pres, Key).
