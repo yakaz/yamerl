@@ -50,24 +50,35 @@
 
 tags() -> [?TAG].
 
-%try_construct_token(Constr, Node,
-%  #yamerl_collection_start{kind = sequence
-%                           %,tag = #yamerl_tag{uri = "tag:yaml.org,2002:merge"}
-%                          } = Token) ->
-%    construct_token(Constr, Node, Token);
+try_construct_token(Constr, Node,
+  #yamerl_collection_start{kind = sequence} = Token) ->
+    construct_token(Constr, Node, Token);
 try_construct_token(Constr, Node,
   #yamerl_collection_start{kind = mapping} = Token) ->
     construct_token(Constr, Node, Token);
 try_construct_token(_, _, _) ->
     unrecognized.
 
-construct_token(_Constr, undefined, #yamerl_scalar{tag = #yamerl_tag{uri = "tag:yaml.org,2002:merge"}}) ->
+construct_token(_Constr,
+                undefined,
+                #yamerl_scalar{tag = #yamerl_tag{uri = "tag:yaml.org,2002:merge"},
+                               text = Text}) ->
+    {finished, {'$merge', Text}}; 
+construct_token(_Constr,
+                undefined,
+                #yamerl_collection_start{kind = sequence,
+                                         tag = #yamerl_tag{uri = "tag:yaml.org,2002:merge"}}) ->
     {finished, '$merge'}; 
 construct_token(Constr, undefined, #yamerl_collection_start{kind = mapping} = Token) ->
     {_, Node0, Is_Leaf} = yamerl_node_map:construct_token(Constr, undefined, Token),
     {unfinished, Node0#unfinished_node{module = ?MODULE}, Is_Leaf};
+construct_token(Constr, undefined, #yamerl_collection_start{kind = sequence} = Token) ->
+    {_, Node0, Is_Leaf} = yamerl_node_seq:construct_token(Constr, undefined, Token),
+    {unfinished, Node0#unfinished_node{module = ?MODULE}, Is_Leaf};
 construct_token(Constr, #unfinished_node{path = {map, _}} = Node, Token) ->
     yamerl_node_map:construct_token(Constr, Node, Token);
+construct_token(Constr, #unfinished_node{path = {seq, _}} = Node, Token) ->
+    yamerl_node_seq:construct_token(Constr, Node, Token);
 
 construct_token(_, _, Token) ->
     Error = #yamerl_parsing_error{
@@ -81,7 +92,7 @@ construct_token(_, _, Token) ->
 
 construct_node(_,
   #unfinished_node{path = {map, _},
-    priv = {'$merge', '$expecting_value', Map}} = Node,
+    priv = {{'$merge', _}, '$expecting_value', Map}} = Node,
   Value) ->
     Map1 = case is_list(Map) of
         true  -> Value ++ Map;
@@ -92,6 +103,19 @@ construct_node(_,
       priv = Map1
     },
     {unfinished, Node1, false};
+construct_node(_,
+  #unfinished_node{path = {seq, Length},
+                   priv = ['$insert_here', L | T]} = Node,
+  {'$merge', Value}) ->
+    Node1 = Node#unfinished_node{
+      path = {seq, Length + length(L) - 1},
+      priv = [Value | lists:reverse(L) ++ T]
+    },
+    {unfinished, Node1, false};
+construct_node(Constr,
+  #unfinished_node{path = {seq, _}} = Node,
+  Value) ->
+    yamerl_node_seq:construct_node(Constr, Node, Value);
 construct_node(Constr,
   #unfinished_node{path = {map, _}} = Node,
   Value) ->
