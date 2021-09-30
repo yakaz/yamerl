@@ -92,7 +92,7 @@ construct_token(_, _, Token) ->
 
 construct_node(_,
   #unfinished_node{path = {map, _},
-    priv = {{'$merge', _}, '$expecting_value', Map}} = Node,
+    priv = {"<<", '$expecting_value', Map}} = Node,
   Value) ->
     Map1 = case is_list(Map) of
         true  -> Value ++ Map;
@@ -103,6 +103,12 @@ construct_node(_,
       priv = Map1
     },
     {unfinished, Node1, false};
+construct_node(Constr,
+  #unfinished_node{path = {map, _},
+    priv = {{'$merge', _}, '$expecting_value', Map}} = Node,
+  Value) ->
+    Priv = {"<<", '$expecting_value', Map},
+    construct_node(Constr, Node#unfinished_node{priv = Priv}, Value);
 construct_node(_,
   #unfinished_node{path = {seq, Length},
                    priv = ['$insert_here', L | T]} = Node,
