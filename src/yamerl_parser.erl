@@ -4071,6 +4071,10 @@ handle_tag_property(
    (Tag#yamerl_tag.line < Token#yamerl_collection_start.line orelse
     (Tag#yamerl_tag.line == Token#yamerl_collection_start.line andalso
      Tag#yamerl_tag.column =< Token#yamerl_collection_start.column))) orelse
+  (is_record(Token, yamerl_alias) andalso
+   (Tag#yamerl_tag.line < Token#yamerl_alias.line orelse
+    (Tag#yamerl_tag.line == Token#yamerl_alias.line andalso
+     Tag#yamerl_tag.column =< Token#yamerl_alias.column))) orelse
   (is_record(Token, yamerl_scalar) andalso
    (Tag#yamerl_tag.line < Token#yamerl_scalar.line orelse
     (Tag#yamerl_tag.line == Token#yamerl_scalar.line andalso
@@ -4079,6 +4083,10 @@ handle_tag_property(
     Token1 = case Token of
         #yamerl_scalar{} ->
             Token#yamerl_scalar{
+              tag = Tag
+            };
+        #yamerl_alias{} ->
+            Token#yamerl_alias{
               tag = Tag
             };
         #yamerl_collection_start{} ->
