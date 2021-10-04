@@ -111,11 +111,11 @@ construct_node(Constr,
     construct_node(Constr, Node#unfinished_node{priv = Priv}, Value);
 construct_node(_,
   #unfinished_node{path = {seq, Length},
-                   priv = ['$insert_here', L | T]} = Node,
+                   priv = ['$insert_here' | T]} = Node,
   {'$merge', Value}) ->
     Node1 = Node#unfinished_node{
-      path = {seq, Length + length(L) - 1},
-      priv = [Value | lists:reverse(L) ++ T]
+      path = {seq, Length - 1 + length(Value)},
+      priv = lists:reverse(Value) ++  T
     },
     {unfinished, Node1, false};
 construct_node(Constr,
