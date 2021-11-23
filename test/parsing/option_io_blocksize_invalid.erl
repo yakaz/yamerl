@@ -8,7 +8,7 @@ single_test_() ->
     ?_assertThrow(
       {yamerl_exception, [
           {yamerl_invalid_option,error,
-            "Invalid value for option \"io_blocksize\": it must be a positive interger, expressed in bytes",
+            "Invalid value for option \"io_blocksize\": it must be a positive integer, expressed in bytes",
             {io_blocksize,invalid}}
         ]
       },

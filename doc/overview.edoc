@@ -162,7 +162,7 @@ Documents = yamerl_constr:last_chunk(Constr_State2, Last_Chunk).
 </ul></li>
 </ol>
 
-See {@link yamerl_constr} for more informations.
+See {@link yamerl_constr} for more information.
 
 === Error handling ===
 
@@ -213,7 +213,7 @@ defined:
 <li>`#yamerl_parsing_error{}'.</li>
 </ul>
 
-See {@link yamerl_constr} for more informations.
+See {@link yamerl_constr} for more information.
 
 == Alternatives to yamerl ==
 
