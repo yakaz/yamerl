@@ -40,7 +40,7 @@
 %%
 %% YAML documents can be constructed in simple or detailed modes. In
 %% simple mode, they are made of simple builting Erlang types. In
-%% detailed mode, they are made of records, holding more informations
+%% detailed mode, they are made of records, holding more information
 %% about YAML nodes and their presentation.
 %%
 %% The `yamerl' application must be started to use the constructor.
@@ -185,7 +185,7 @@ new(Source) ->
 %% construction mode, YAML nodes are returned as Erlang integers,
 %% strings, lists, proplists, etc. In other words, only simple builtin
 %% types. In detailed construction mode, YAML nodes are returned using
-%% records. Those records gives additional informations such as the YAML
+%% records. Those records gives additional information such as the YAML
 %% node type, the location in the stream (line and column number) and so
 %% on.</dd>
 %% <dt>`{ignore_unrecognized_tags, boolean()}'</dt>
@@ -519,7 +519,7 @@ file(Filename, Options) ->
 %% Presentation details.
 %% -------------------------------------------------------------------
 
-%% @doc Returns presentation informations in the stream for the given
+%% @doc Returns presentation information in the stream for the given
 %% node.
 %%
 %% This only makes sense when the detailed construction mode is enabled
@@ -532,7 +532,7 @@ get_pres_details(Token) ->
     [{line, Line}, {column, Column}].
 
 %% -------------------------------------------------------------------
-%% Node informations.
+%% Node information.
 %% -------------------------------------------------------------------
 
 %% @doc Returns the line number in the stream for the given node.
@@ -586,7 +586,7 @@ node_pres(Node) when is_tuple(Node) ->
 %% -------------------------------------------------------------------
 
 construct(Constr, #yamerl_doc_start{version = Version}) ->
-    %% Select schema and assocated modules, possibly based on the
+    %% Select schema and associated modules, possibly based on the
     %% document version.
     Constr1 = setup_node_mods(Constr, Version),
     %% Prepare a document node.

@@ -1615,7 +1615,7 @@ parse_flow_entry([_ | Rest], Line, Col, Delta,
   #yamerl_parser{cur_coll = #fcoll{kind = Kind}} = Parser) when
   (Kind == sequence andalso ?MISSING_ENTRY(Parser)) orelse
   (Kind == mapping  andalso ?MISSING_KVPAIR(Parser)) ->
-    %% In a flow collection, the "," entry indicator immediatly follows a
+    %% In a flow collection, the "," entry indicator immediately follows a
     %% collection-start or a previous entry indicator.
     Error = #yamerl_parsing_error{
       name   = flow_collection_entry_not_allowed,
@@ -2925,7 +2925,7 @@ do_parse_flow_scalar([C | Rest], Line, Col, Delta, Parser,
 
 do_parse_flow_scalar([$# | _] = Chars, Line, Col, Delta, Parser,
   #flow_scalar_ctx{style = plain, spaces = Spaces} = Ctx) when Spaces /= [] ->
-    %% A '#' character preceeded by white spaces is a comment. The plain
+    %% A '#' character preceded by white spaces is a comment. The plain
     %% scalar terminates with the first white spaces because trailing
     %% white spaces are ignored. [130]
     queue_flow_scalar_token(Chars, Line, Col, Delta, Parser,
@@ -4315,7 +4315,7 @@ invalid_option(Option) ->
         {io_blocksize, _} ->
             Error#yamerl_invalid_option{
               text = "Invalid value for option \"io_blocksize\": "
-              "it must be a positive interger, expressed in bytes"
+              "it must be a positive integer, expressed in bytes"
             };
         {token_fun, _} ->
             Error#yamerl_invalid_option{

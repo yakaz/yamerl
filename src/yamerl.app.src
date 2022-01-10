@@ -19,7 +19,7 @@
         {node_mods, []}
       ]},
 
-    %% Hex.pm package informations.
+    %% Hex.pm package information.
     {licenses, ["BSD 2-Clause"]},
     {links, [
         {"GitHub", "https://github.com/yakaz/yamerl"}
