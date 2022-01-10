@@ -1,0 +1,136 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module yamerl_parser</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module yamerl_parser</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>yamerl_parser implements a YAML parser.
+<p>Copyright © 
+  2012-2014 Yakaz,
+  2016-2021 Jean-Sébastien Pédron &lt;jean-sebastien.pedron@dumbbell.fr&gt;
+ </p>
+
+<p><b>Authors:</b> Jean-Sébastien Pédron (<a href="mailto:jean-sebastien.pedron@dumbbell.fr"><tt>jean-sebastien.pedron@dumbbell.fr</tt></a>).</p>
+
+<h2><a name="description">Description</a></h2><p>yamerl_parser implements a YAML parser. It is not meant to be used
+  directly. Instead, you should use <a docgen-rel="seeerl" docgen-href="yamerl_constr" href="yamerl_constr.html"><code>yamerl_constr</code></a>.</p>
+ 
+  The <code>yamerl</code> application must be started to use the parser.
+<h2><a name="types">Data Types</a></h2>
+
+<h3 class="typedecl"><a name="type-yamerl_parser">yamerl_parser()</a></h3>
+<p><tt>yamerl_parser() = #yamerl_parser{}</tt></p>
+
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#file-1">file/1</a></td><td>Equivalent to <a href="#file-2"><tt>file(Filename, [])</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#file-2">file/2</a></td><td>Parses a YAML document from a regular file.</td></tr>
+<tr><td valign="top"><a href="#get_token_fun-1">get_token_fun/1</a></td><td>Returns the constructor callback function.</td></tr>
+<tr><td valign="top"><a href="#last_chunk-2">last_chunk/2</a></td><td>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Parser, Chunk, true)</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#new-1">new/1</a></td><td>Equivalent to <a href="#new-2"><tt>new(Source, [])</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#new-2">new/2</a></td><td>Creates and returns a new YAML parser state.</td></tr>
+<tr><td valign="top"><a href="#next_chunk-2">next_chunk/2</a></td><td>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Parser, Chunk, false)</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#next_chunk-3">next_chunk/3</a></td><td>Feeds the parser with the next chunk from the YAML stream.</td></tr>
+<tr><td valign="top"><a href="#set_token_fun-2">set_token_fun/2</a></td><td>Sets the constructor callback function.</td></tr>
+<tr><td valign="top"><a href="#string-1">string/1</a></td><td>Equivalent to <a href="#string-2"><tt>string(String, [])</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#string-2">string/2</a></td><td>Parses a YAML document from an in-memory YAML string.</td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="file-1">file/1</a></h3>
+<div class="spec">
+<p><tt>file(Filename) -&gt; Parser | no_return()</tt>
+<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="#file-2"><tt>file(Filename, [])</tt></a>.</p>
+
+
+<h3 class="function"><a name="file-2">file/2</a></h3>
+<div class="spec">
+<p><tt>file(Filename, Options) -&gt; Parser | no_return()</tt>
+<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Options = [<a href="#type-yamerl_parser_option">yamerl_parser_option()</a>]</tt></li><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p> </p>
+</div><p>Parses a YAML document from a regular file.</p>
+
+<h3 class="function"><a name="get_token_fun-1">get_token_fun/1</a></h3>
+<div class="spec">
+<p><tt>get_token_fun(Yamerl_parser) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Returns the constructor callback function</p>
+
+<h3 class="function"><a name="last_chunk-2">last_chunk/2</a></h3>
+<div class="spec">
+<p><tt>last_chunk(Parser, Chunk) -&gt; Ret | no_return()</tt>
+<ul class="definitions"><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Ret = {continue, New_Parser} | New_Parser</tt></li><li><tt>New_Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Parser, Chunk, true)</tt></a>.</p>
+
+
+<h3 class="function"><a name="new-1">new/1</a></h3>
+<div class="spec">
+<p><tt>new(Source) -&gt; Parser | no_return()</tt>
+<ul class="definitions"><li><tt>Source = term()</tt></li><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="#new-2"><tt>new(Source, [])</tt></a>.</p>
+
+
+<h3 class="function"><a name="new-2">new/2</a></h3>
+<div class="spec">
+<p><tt>new(Source, Options) -&gt; Parser | no_return()</tt>
+<ul class="definitions"><li><tt>Source = term()</tt></li><li><tt>Options = [<a href="#type-yamerl_parser_option">yamerl_parser_option()</a>]</tt></li><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p> </p>
+</div><p>Creates and returns a new YAML parser state.</p>
+
+<h3 class="function"><a name="next_chunk-2">next_chunk/2</a></h3>
+<div class="spec">
+<p><tt>next_chunk(Parser, Chunk) -&gt; Ret | no_return()</tt>
+<ul class="definitions"><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Ret = {continue, New_Parser}</tt></li><li><tt>New_Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Parser, Chunk, false)</tt></a>.</p>
+
+
+<h3 class="function"><a name="next_chunk-3">next_chunk/3</a></h3>
+<div class="spec">
+<p><tt>next_chunk(Parser, Chunk, Last_Chunk) -&gt; Ret | no_return()</tt>
+<ul class="definitions"><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Last_Chunk = boolean()</tt></li><li><tt>Ret = {continue, New_Parser} | New_Parser</tt></li><li><tt>New_Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p> </p>
+</div><p>Feeds the parser with the next chunk from the YAML stream.</p>
+
+<h3 class="function"><a name="set_token_fun-2">set_token_fun/2</a></h3>
+<div class="spec">
+<p><tt>set_token_fun(Parser, Fun) -&gt; any()</tt></p>
+<p> </p>
+</div><p>Sets the constructor callback function</p>
+
+<h3 class="function"><a name="string-1">string/1</a></h3>
+<div class="spec">
+<p><tt>string(String) -&gt; Parser | no_return()</tt>
+<ul class="definitions"><li><tt>String = <a href="#type-unicode_data">unicode_data()</a></tt></li><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="#string-2"><tt>string(String, [])</tt></a>.</p>
+
+
+<h3 class="function"><a name="string-2">string/2</a></h3>
+<div class="spec">
+<p><tt>string(String, Options) -&gt; Parser | no_return()</tt>
+<ul class="definitions"><li><tt>String = <a href="#type-unicode_data">unicode_data()</a></tt></li><li><tt>Options = [<a href="#type-yamerl_parser_option">yamerl_parser_option()</a>]</tt></li><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p> </p>
+</div><p>Parses a YAML document from an in-memory YAML string.</p>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module yamerl</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module yamerl</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>Wrappers for common uses of <a docgen-rel="seeerl" docgen-href="yamerl_constr" href="yamerl_constr.html"><code>yamerl_constr</code></a>.
+<p>Copyright © 
+  2012-2014 Yakaz,
+  2016-2021 Jean-Sébastien Pédron &lt;jean-sebastien.pedron@dumbbell.fr&gt;
+ </p>
+
+<p><b>Authors:</b> Jean-Sébastien Pédron (<a href="mailto:jean-sebastien.pedron@dumbbell.fr"><tt>jean-sebastien.pedron@dumbbell.fr</tt></a>).</p>
+
+<h2><a name="description">Description</a></h2>Wrappers for common uses of <a docgen-rel="seeerl" docgen-href="yamerl_constr" href="yamerl_constr.html"><code>yamerl_constr</code></a>.
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#decode-1">decode/1</a></td><td>Equivalent to <a href="yamerl_constr.html#string-1"><tt>yamerl_constr:string(String)</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#decode-2">decode/2</a></td><td>Equivalent to <a href="yamerl_constr.html#string-2"><tt>yamerl_constr:string(String, Options)</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#decode_file-1">decode_file/1</a></td><td>Equivalent to <a href="yamerl_constr.html#file-1"><tt>yamerl_constr:file(Filename)</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#decode_file-2">decode_file/2</a></td><td>Equivalent to <a href="yamerl_constr.html#file-2"><tt>yamerl_constr:file(Filename, Options)</tt></a>.
+</td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="decode-1">decode/1</a></h3>
+<div class="spec">
+<p><tt>decode(String) -&gt; Result | no_return()</tt>
+<ul class="definitions"><li><tt>String = <a href="#type-unicode_data">unicode_data()</a></tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="yamerl_constr.html#string-1"><tt>yamerl_constr:string(String)</tt></a>.</p>
+
+
+<h3 class="function"><a name="decode-2">decode/2</a></h3>
+<div class="spec">
+<p><tt>decode(String, Options) -&gt; Result | no_return()</tt>
+<ul class="definitions"><li><tt>String = <a href="#type-unicode_data">unicode_data()</a></tt></li><li><tt>Options = [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option">yamerl_parser:yamerl_parser_option()</a> | <a href="#type-yamerl_constr_option">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property">proplists:property()</a>]</tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="yamerl_constr.html#string-2"><tt>yamerl_constr:string(String, Options)</tt></a>.</p>
+
+
+<h3 class="function"><a name="decode_file-1">decode_file/1</a></h3>
+<div class="spec">
+<p><tt>decode_file(Filename) -&gt; Result | no_return()</tt>
+<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="yamerl_constr.html#file-1"><tt>yamerl_constr:file(Filename)</tt></a>.</p>
+
+
+<h3 class="function"><a name="decode_file-2">decode_file/2</a></h3>
+<div class="spec">
+<p><tt>decode_file(Filename, Options) -&gt; Result | no_return()</tt>
+<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Options = [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option">yamerl_parser:yamerl_parser_option()</a> | <a href="#type-yamerl_constr_option">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property">proplists:property()</a>]</tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="yamerl_constr.html#file-2"><tt>yamerl_constr:file(Filename, Options)</tt></a>.</p>
+
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>

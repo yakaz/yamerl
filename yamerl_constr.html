@@ -1,0 +1,375 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Module yamerl_constr</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<hr>
+
+<h1>Module yamerl_constr</h1>
+<ul class="index"><li><a href="#description">Description</a></li><li><a href="#types">Data Types</a></li><li><a href="#index">Function Index</a></li><li><a href="#functions">Function Details</a></li></ul>yamerl_constr implements a YAML constructor.
+<p>Copyright © 
+  2012-2014 Yakaz,
+  2016-2021 Jean-Sébastien Pédron &lt;jean-sebastien.pedron@dumbbell.fr&gt;
+ </p>
+
+<p><b>Authors:</b> Jean-Sébastien Pédron (<a href="mailto:jean-sebastien.pedron@dumbbell.fr"><tt>jean-sebastien.pedron@dumbbell.fr</tt></a>).</p>
+
+<h2><a name="description">Description</a></h2><p>yamerl_constr implements a YAML constructor. It uses <a docgen-rel="seeerl" docgen-href="yamerl_parser" href="yamerl_parser.html"><code>yamerl_parser</code></a> as the underlying parser. The parser emits YAML nodes  
+which are assembled as structured YAML documents by the constructor.</p>
+ 
+  <p>It is able to construct YAML documents from in-memory strings (see
+  <a docgen-rel="seemfa" docgen-href="#string/1" href="#string-1"><code>string/1</code></a> and <a docgen-rel="seemfa" docgen-href="#string/2" href="#string-2"><code>string/2</code></a>), regular files (see <a docgen-rel="seemfa" docgen-href="#file/1" href="#file-1"><code>file/1</code></a> and <a docgen-rel="seemfa" docgen-href="#file/2" href="#file-2"><code>file/2</code></a>) or streams (see <a docgen-rel="seemfa" docgen-href="#new/1" href="#new-1"><code>new/1</code></a>, <a docgen-rel="seemfa" docgen-href="#new/2" href="#new-2"><code>new/2</code></a> and <a docgen-rel="seemfa" docgen-href="#next_chunk/3" href="#next_chunk-3"><code>next_chunk/3</code></a>).</p>
+ 
+  <p>YAML documents can be constructed in simple or detailed modes. In  
+simple mode, they are made of simple builting Erlang types. In  
+detailed mode, they are made of records, holding more informations  
+about YAML nodes and their presentation.</p>
+ 
+  <p>The <code>yamerl</code> application must be started to use the constructor.</p>
+ 
+  <strong>Example: parse a string in simple mode</strong>
+  <pre>  yamerl_constr:string("Hello!").</pre>
+ 
+  It returns:
+  <pre>  % List of documents; here, only one.
+  [
+    % Document root node: a string.
+    "Hello!"
+  ].</pre>
+ 
+  <strong>Example: parse a stream in detailed mode</strong>
+  <pre>  Stream_St1 = yamerl_constr:new({file, "&lt;stdin&gt;"}, [{detailed_constr, true}]),
+  {continue, Stream_St2} = yamerl_constr:next_chunk(Stream_St1, &lt;&lt;"He"&gt;&gt;),
+  {continue, Stream_St3} = yamerl_constr:next_chunk(Stream_St2, &lt;&lt;"ll"&gt;&gt;),
+  yamerl_constr:last_chunk(Stream_St3, &lt;&lt;"o!"&gt;&gt;).</pre>
+ 
+  It returns:
+  <pre>  % List of documents; here, only one.
+  [
+    % Document #1.
+    {yamerl_doc,
+      % Document root node: a string.
+      {yamerl_str, yamerl_node_str, "tag:yaml.org,2002:str",
+        [{line, 1}, {column, 1}], % Node location in the original string.
+        "Hello!"                  % String value.
+      }
+    }
+  ].</pre>
+<h2><a name="types">Data Types</a></h2>
+
+<h3 class="typedecl"><a name="type-yamerl_constr">yamerl_constr()</a></h3>
+<p><tt>yamerl_constr() = #yamerl_constr{}</tt></p>
+
+
+<h2><a name="index">Function Index</a></h2>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#file-1">file/1</a></td><td>Equivalent to <a href="#file-2"><tt>file(Filename, [])</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#file-2">file/2</a></td><td>Constructs a YAML document from a regular file.</td></tr>
+<tr><td valign="top"><a href="#get_pres_details-1">get_pres_details/1</a></td><td>Returns presentation informations in the stream for the given  
+node.</td></tr>
+<tr><td valign="top"><a href="#last_chunk-2">last_chunk/2</a></td><td>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Constr, Chunk, true)</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#new-1">new/1</a></td><td>Equivalent to <a href="#new-2"><tt>new(Source, [])</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#new-2">new/2</a></td><td>Creates and returns a new YAML construction state.</td></tr>
+<tr><td valign="top"><a href="#next_chunk-2">next_chunk/2</a></td><td>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Constr, Chunk, false)</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#next_chunk-3">next_chunk/3</a></td><td>Feeds the constructor with the next chunk from the YAML stream.</td></tr>
+<tr><td valign="top"><a href="#node_column-1">node_column/1</a></td><td>Returns the column number in the stream for the given node.</td></tr>
+<tr><td valign="top"><a href="#node_line-1">node_line/1</a></td><td>Returns the line number in the stream for the given node.</td></tr>
+<tr><td valign="top"><a href="#string-1">string/1</a></td><td>Equivalent to <a href="#string-2"><tt>string(String, [])</tt></a>.
+</td></tr>
+<tr><td valign="top"><a href="#string-2">string/2</a></td><td>Constructs a YAML document from an in-memory YAML string.</td></tr>
+</table>
+
+<h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="file-1">file/1</a></h3>
+<div class="spec">
+<p><tt>file(Filename) -&gt; Result | no_return()</tt>
+<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="#file-2"><tt>file(Filename, [])</tt></a>.</p>
+
+
+<h3 class="function"><a name="file-2">file/2</a></h3>
+<div class="spec">
+<p><tt>file(Filename, Options) -&gt; Result | no_return()</tt>
+<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Options = [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option">yamerl_parser:yamerl_parser_option()</a> | <a href="#type-yamerl_constr_option">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property">proplists:property()</a>]</tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p> </p>
+</div><p><p>Constructs a YAML document from a regular file.</p>
+ 
+  <p><code>Filename</code> must be a string indicating the filename. The file must  
+contain one or more YAML documents. The file must be encoded using  
+UTF-8, UTF-16 or UTF-32. A leading BOM character is used to determine  
+the encoding and endianness. If no BOM is present, UTF-8 is assumed.</p>
+ 
+  <p><code>Options</code> is a list of options for the parser and the constructor.
+  See <a docgen-rel="seemfa" docgen-href="#new/2" href="#new-2"><code>new/2</code></a> for valid options.</p>
+ 
+  <p>It returns a list of YAML documents. See <a docgen-rel="seemfa" docgen-href="#next_chunk/3" href="#next_chunk-3"><code>next_chunk/3</code></a> for  
+more details about the returned documents.</p>
+ 
+  <p>It throws an exception if there is a parsing or construction error.</p>
+ 
+  See <a docgen-rel="seemfa" docgen-href="#string/2" href="#string-2"><code>string/2</code></a> for some examples.</p>
+
+<h3 class="function"><a name="get_pres_details-1">get_pres_details/1</a></h3>
+<div class="spec">
+<p><tt>get_pres_details(Token) -&gt; any()</tt></p>
+<p> </p>
+</div><p><p>Returns presentation informations in the stream for the given  
+node.</p>
+ 
+  This only makes sense when the detailed construction mode is enabled
+  (ie. <code>{detailed_constr, true}</code> was passed as an option to <a docgen-rel="seemfa" docgen-href="#new/2" href="#new-2"><code>new/2</code></a>, <a docgen-rel="seemfa" docgen-href="#file/2" href="#file-2"><code>file/2</code></a> or <a docgen-rel="seemfa" docgen-href="#string/2" href="#string-2"><code>string/2</code></a>).</p>
+
+<h3 class="function"><a name="last_chunk-2">last_chunk/2</a></h3>
+<div class="spec">
+<p><tt>last_chunk(Constr, Chunk) -&gt; Result | no_return()</tt>
+<ul class="definitions"><li><tt>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>]</tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Constr, Chunk, true)</tt></a>.</p>
+
+
+<h3 class="function"><a name="new-1">new/1</a></h3>
+<div class="spec">
+<p><tt>new(Source) -&gt; Constr | no_return()</tt>
+<ul class="definitions"><li><tt>Source = term()</tt></li><li><tt>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="#new-2"><tt>new(Source, [])</tt></a>.</p>
+
+
+<h3 class="function"><a name="new-2">new/2</a></h3>
+<div class="spec">
+<p><tt>new(Source, Options) -&gt; Constr | no_return()</tt>
+<ul class="definitions"><li><tt>Source = term()</tt></li><li><tt>Options = [<a href="#type-yamerl_constr_option">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option">yamerl_parser:yamerl_parser_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property">proplists:property()</a>]</tt></li><li><tt>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li></ul></p>
+<p> </p>
+</div><p><p>Creates and returns a new YAML construction state.</p>
+ 
+  <p>When you want to parse a stream (as opposed to in-memory strings or  
+regular files), this is the first function you call before feeding  
+the constructor with stream "chunks".</p>
+ 
+  <p><code>Source</code> can be any term describing the stream. <a docgen-rel="seemfa" docgen-href="#string/1" href="#string-1"><code>string/1</code></a> and
+  <a docgen-rel="seemfa" docgen-href="#string/2" href="#string-2"><code>string/2</code></a> sets it to the atom <code>string</code>. <a docgen-rel="seemfa" docgen-href="#file/1" href="#file-1"><code>file/1</code></a> and
+  <a docgen-rel="seemfa" docgen-href="#file/2" href="#file-2"><code>file/2</code></a> sets it to <code>{file, Filename}</code>. The constructor doesn't  
+use that value.</p>
+ 
+  <p><code>Options</code> is a list of options for the parser and the constructor.  
+Valid options are:</p>
+ 
+  <dl>
+  <dt><code>{detailed_constr, boolean()}</code></dt>
+  <dd>Flag to enable/disable the detailed construction mode. In simple
+  construction mode, YAML nodes are returned as Erlang integers,
+  strings, lists, proplists, etc. In other words, only simple builtin
+  types. In detailed construction mode, YAML nodes are returned using
+  records. Those records gives additional informations such as the YAML
+  node type, the location in the stream (line and column number) and so
+  on.</dd>
+  <dt><code>{ignore_unrecognized_tags, boolean()}</code></dt>
+  <dd>Indicate if unrecognized tags should be ignored. When <code>false</code>
+  (the default), a node with an unrecognized tag can't be constructed
+  because yamerl doesn't know how to interpret the node. When this
+  happens an exception is raised. When set to <code>true</code>, the node is
+  constructed as if it was a plain YAML node without any tag.</dd>
+  <dd>Default: <code>false</code>.</dd>
+  <dd>Default: <code>false</code></dd>
+  <dt><code>{node_mods, Mods_List}</code></dt>
+  <dd>List of Erlang modules to extend support node types.</dd>
+  <dd>Default: <code>[]</code>.</dd>
+  <dt><code>{schema, failsafe | json | core | yaml11}</code></dt>
+  <dd>Name of the official schema to use.</dd>
+  <dd>Default: <code>core</code>.</dd>
+  </dl>
+ 
+  <p>The returned state is opaque value. You then pass it to <a docgen-rel="seemfa" docgen-href="#next_chunk/2" href="#next_chunk-2"><code>next_chunk/2</code></a>, <a docgen-rel="seemfa" docgen-href="#next_chunk/3" href="#next_chunk-3"><code>next_chunk/3</code></a> and <a docgen-rel="seemfa" docgen-href="#last_chunk/2" href="#last_chunk-2"><code>last_chunk/2</code></a>.</p>
+ 
+  <p>If an option is invalid, an exception is thrown.</p>
+ 
+  <strong>Example: parse a valid stream</strong>
+  <pre>  Stream_St1 = yamerl_constr:new({file, "&lt;stdin&gt;"}),
+  {continue, Stream_St2} = yamerl_constr:next_chunk(Stream_St1, &lt;&lt;"He"&gt;&gt;),
+  {continue, Stream_St3} = yamerl_constr:next_chunk(Stream_St2, &lt;&lt;"ll"&gt;&gt;),
+  yamerl_constr:last_chunk(Stream_St3, &lt;&lt;"o!"&gt;&gt;).</pre><p>  
+It returns:</p>
+ 
+  <pre>  % List of documents; here, only one.
+  [
+    % Document root node: a string.
+    "Hello!"
+  ].</pre>
+ 
+  <strong>Example: parse an invalid stream</strong>
+  <pre>  Stream_St1 = yamerl_constr:new({file, "&lt;stdin&gt;"}),
+  {continue, Stream_St2} = yamerl_constr:next_chunk(Stream_St1, &lt;&lt;"'He"&gt;&gt;),
+  {continue, Stream_St3} = yamerl_constr:next_chunk(Stream_St2, &lt;&lt;"ll"&gt;&gt;),
+  yamerl_constr:last_chunk(Stream_St3, &lt;&lt;"o!"&gt;&gt;) % Unfinished single-quoted scalar.</pre>
+ 
+  It throws:
+  <pre>  {yamerl_exception,
+    % List of warnings and errors; here, one fatal error.
+    [
+      % Error #1.
+      {yamerl_parsing_error, error,
+        "Unexpected end-of-stream while parsing flow scalar",          % Human-readable message.
+        1, 8,                                                          % Error location.
+        unexpected_eos,
+        {yamerl_scalar, 1, 1, {yamerl_tag, 1, 1, {non_specific, "!"}}, % Token being parsed.
+          flow, single_quoted,
+          "Hello!"},
+        []
+      }
+    ]
+  }</pre>
+ </p>
+<p><b>See also:</b> <a href="#new-1">new/1</a>.</p>
+
+<h3 class="function"><a name="next_chunk-2">next_chunk/2</a></h3>
+<div class="spec">
+<p><tt>next_chunk(Constr, Chunk) -&gt; Ret | no_return()</tt>
+<ul class="definitions"><li><tt>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Ret = {continue, New_Constr}</tt></li><li><tt>New_Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Constr, Chunk, false)</tt></a>.</p>
+
+
+<h3 class="function"><a name="next_chunk-3">next_chunk/3</a></h3>
+<div class="spec">
+<p><tt>next_chunk(Constr, Chunk, EOS::false) -&gt; Ret | no_return()</tt>
+<ul class="definitions"><li><tt>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Ret = {continue, New_Constr}</tt></li><li><tt>New_Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li></ul></p><p><tt>next_chunk(Constr, Chunk, EOS::true) -&gt; Result | no_return()</tt>
+<ul class="definitions"><li><tt>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>]</tt></li></ul></p>
+<p> </p>
+<p> </p>
+</div><p><p>Feeds the constructor with the next chunk from the YAML stream.</p>
+ 
+  <p><code>Constr</code> is the constructor state returned by a previous call
+  to <a docgen-rel="seemfa" docgen-href="#new/1" href="#new-1"><code>new/1</code></a>, <a docgen-rel="seemfa" docgen-href="#new/2" href="#new-2"><code>new/2</code></a>, <a docgen-rel="seemfa" docgen-href="#next_chunk/2" href="#next_chunk-2"><code>next_chunk/2</code></a> or <a docgen-rel="seemfa" docgen-href="#next_chunk/3" href="#next_chunk-3"><code>next_chunk/3</code></a>.</p>
+ 
+  <p><code>Chunk</code> must be an Erlang binary using the UTF-8, UTF-16 or UTF-32  
+Unicode encoding. A leading BOM character in the first chunk is used  
+to determine the encoding and endianness. If no BOM is present, UTF-8  
+is assumed.</p>
+ 
+  <p><code>EOS</code> indicates the constructor if this is the last chunk from the  
+stream.</p>
+ 
+  <p>If this is not the last chunk (<code>EOS = false</code>), it returns <code>{continue,
+  New_Constr}</code> where <code>New_Constr</code> is an updated state which replaces
+  <code>Constr</code>. The new state is to be passed to future calls to <a docgen-rel="seemfa" docgen-href="#next_chunk/2" href="#next_chunk-2"><code>next_chunk/2</code></a>, <a docgen-rel="seemfa" docgen-href="#next_chunk/3" href="#next_chunk-3"><code>next_chunk/3</code></a> or <a docgen-rel="seemfa" docgen-href="#last_chunk/2" href="#last_chunk-2"><code>last_chunk/2</code></a>.</p>
+ 
+  <p>If this is the last chunk (<code>EOS = true</code>), it returns a list of YAML
+  documents. Documents are made of simple builtin Erlang types if the
+  detailed construction mode is disabled, or records if the detailed
+  construction mode is enabled (<code>{detailed_constr, boolean()}</code> passed
+  as an option; default is <code>false</code>).</p>
+ 
+  It throws an exception if there is a parsing or construction error.</p>
+
+<h3 class="function"><a name="node_column-1">node_column/1</a></h3>
+<div class="spec">
+<p><tt>node_column(Node) -&gt; any()</tt></p>
+<p> </p>
+</div><p><p>Returns the column number in the stream for the given node.</p>
+ 
+  This only makes sense when the detailed construction mode is enabled
+  (ie. <code>{detailed_constr, true}</code> was passed as an option to <a docgen-rel="seemfa" docgen-href="#new/2" href="#new-2"><code>new/2</code></a>, <a docgen-rel="seemfa" docgen-href="#file/2" href="#file-2"><code>file/2</code></a> or <a docgen-rel="seemfa" docgen-href="#string/2" href="#string-2"><code>string/2</code></a>).</p>
+
+<h3 class="function"><a name="node_line-1">node_line/1</a></h3>
+<div class="spec">
+<p><tt>node_line(Node) -&gt; any()</tt></p>
+<p> </p>
+</div><p><p>Returns the line number in the stream for the given node.</p>
+ 
+  This only makes sense when the detailed construction mode is enabled
+  (ie. <code>{detailed_constr, true}</code> was passed as an option to <a docgen-rel="seemfa" docgen-href="#new/2" href="#new-2"><code>new/2</code></a>, <a docgen-rel="seemfa" docgen-href="#file/2" href="#file-2"><code>file/2</code></a> or <a docgen-rel="seemfa" docgen-href="#string/2" href="#string-2"><code>string/2</code></a>).</p>
+
+<h3 class="function"><a name="string-1">string/1</a></h3>
+<div class="spec">
+<p><tt>string(String) -&gt; Result | no_return()</tt>
+<ul class="definitions"><li><tt>String = <a href="#type-unicode_data">unicode_data()</a></tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p> </p>
+</div><p>Equivalent to <a href="#string-2"><tt>string(String, [])</tt></a>.</p>
+
+
+<h3 class="function"><a name="string-2">string/2</a></h3>
+<div class="spec">
+<p><tt>string(String, Options) -&gt; Result | no_return()</tt>
+<ul class="definitions"><li><tt>String = <a href="#type-unicode_data">unicode_data()</a></tt></li><li><tt>Options = [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option">yamerl_parser:yamerl_parser_option()</a> | <a href="#type-yamerl_constr_option">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property">proplists:property()</a>]</tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p> </p>
+</div><p><p>Constructs a YAML document from an in-memory YAML string.</p>
+ 
+  <p><code>String</code> must be an Erlang list or binary containing one or more YAML  
+documents. If it is a binary, it must be encoded using UTF-8, UTF-16  
+or UTF-32. A leading BOM character is used to determine the encoding  
+and endianness. If no BOM is present, UTF-8 is assumed.</p>
+ 
+  <p><code>Options</code> is a list of options for the parser and the constructor.
+  See <a docgen-rel="seemfa" docgen-href="#new/2" href="#new-2"><code>new/2</code></a> for valid options.</p>
+ 
+  <p>It returns a list of YAML documents. See <a docgen-rel="seemfa" docgen-href="#next_chunk/3" href="#next_chunk-3"><code>next_chunk/3</code></a> for  
+more details about the returned documents.</p>
+ 
+  <p>It throws an exception if there is a parsing or construction error.</p>
+ 
+  <strong>Example: parse an Erlang list</strong>
+  <pre>  yamerl_constr:string("This is a string").</pre>
+ 
+  <strong>Example: parse an UTF-8-encoded Erlang binary</strong>
+  <pre>  yamerl_constr:string(&lt;&lt;50,32,226,130,172&gt;&gt;). % The string "2 €" encoded in UTF-8.</pre>
+ 
+  <strong>Example: parse a string in simple mode</strong>
+  <pre>  yamerl_constr:string("Hello!").</pre>
+ 
+  It returns:
+  <pre>  % List of documents; here, only one.
+  [
+    % Document root node: a string.
+    "Hello!"
+  ].</pre>
+ 
+  <strong>Example: parse a string in detailed mode</strong>
+  <pre>  yamerl_constr:string("Hello!", [{detailed_constr, true}]).</pre>
+ 
+  It returns:
+  <pre>  % List of documents; here, only one.
+  [
+    % Document #1.
+    {yamerl_doc,
+      % Document root node: a string.
+      {yamerl_str, yamerl_node_str, "tag:yaml.org,2002:str",
+        [{line, 1}, {column, 1}], % Node location in the original string.
+        "Hello!"                  % String value.
+      }
+    }
+  ].</pre>
+ 
+  <strong>Example: parse an invalid document</strong>
+  <pre>  yamerl_constr:string(&lt;&lt;"'Oh-oh..."&gt;&gt;). % Unfinished single-quoted scalar.</pre>
+ 
+  It throws:
+  <pre>  {yamerl_exception,
+    % List of warnings and errors; here, one fatal error.
+    [
+      % Error #1.
+      {yamerl_parsing_error, error,
+        "Unexpected end-of-stream while parsing flow scalar",          % Human-readable message.
+        1, 10,                                                         % Error location.
+        unexpected_eos,
+        {yamerl_scalar, 1, 1, {yamerl_tag, 1, 1, {non_specific, "!"}}, % Token being parsed.
+          flow, single_quoted,
+          "Oh-oh..."},
+        []
+      }
+    ]
+  }.</pre></p>
+<hr>
+
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>

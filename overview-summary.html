@@ -1,0 +1,221 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>The yamerl application</title>
+<link rel="stylesheet" type="text/css" href="stylesheet.css" title="EDoc">
+</head>
+<body bgcolor="white">
+<div class="navbar"><a name="#navbar_top"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<h1>The yamerl application</h1>
+<p>Copyright © 
+2012-2014 Yakaz,
+2016-2021 Jean-Sébastien Pédron &lt;jean-sebastien.pedron@dumbbell.fr&gt;
+</p>
+<p><b>Authors:</b> Jean-Sébastien Pédron (<a href="mailto:jean-sebastien.pedron@dumbbell.fr"><tt>jean-sebastien.pedron@dumbbell.fr</tt></a>).</p>
+
+
+<h3><a name="Introduction">Introduction</a></h3>
+
+<p>YAML is a human-friendly data serialization format. The specification
+for this language and many examples are available from the <a href="http://www.yaml.org/">Official YAML web site</a>. You may also
+want to check the <a href="http://en.wikipedia.org/wiki/YAML">YAML
+Wikipedia article</a>.</p>
+
+<p><strong><code>yamerl</code></strong> is a pure <a href="http://www.erlang.org/">Erlang application</a> which is able
+to parse <a href="http://yaml.org/spec/1.1/">YAML 1.1</a> and <a href="http://www.yaml.org/spec/1.2/spec.html">YAML 1.2</a> documents, as
+well as <a href="http://json.org/">JSON</a> documents. It only depends
+on standard Erlang/OTP applications; no external dependency is required.
+It doesn't use native code either (neither port drivers nor NIFs). At
+this time, it has no support to serialize a YAML document.</p>
+
+<p><code>yamerl</code> is distributed under the terms of the <strong>2-clause BSD
+license</strong>; see <code>COPYING</code>.</p>
+
+<h3><a name="When_to_use_yamerl_or_not">When to use yamerl or not</a></h3>
+
+<h4><a name="Advantages">Advantages</a></h4>
+
+<ul>
+<li>Pure Erlang implementation:
+<ul>
+<li>should scale more easily than a port-driver based implementation;</li>
+<li>won't take the whole VM down in case of a crash.</li>
+</ul></li>
+<li>YAML 1.2 support, which is not widely supported in many other languages.</li>
+</ul>
+
+<h4><a name="Caveats">Caveats</a></h4>
+
+<ul>
+<li>Current implementation is slow, compared to yamler (NIF-based) or any JSON-only parsers.</li>
+<li>Adding schemas is not easy.</li>
+<li>No support for YAML serialization.</li>
+</ul>
+
+
+<h3><a name="Features">Features</a></h3>
+
+<ul>
+<li>Supports <a href="http://www.yaml.org/spec/1.2/spec.html">YAML 1.2</a> parsing:
+<pre>yamerl_constr:string("YAML snippet").</pre></li>
+<li>Supports <a href="http://yaml.org/spec/1.1/">[YAML 1.1</a> parsing:
+<pre>yamerl_constr:string("YAML snippet", [{schema, yaml11}]).</pre></li>
+<li>Supports <a href="http://json.org/">JSON</a> parsing:
+<pre>yamerl_constr:string(&lt;&lt;"JSON snippet"&gt;&gt;, [{schema, json}]).</pre></li>
+<li>Supports <strong>Erlang atom</strong> node type, either when tagged
+as atom, or if autodetected in plain scalars, and, if asked, only if the
+atom already exists:
+<pre>% Enable support for Erlang atoms.
+yamerl_app:set_param(node_mods, [yamerl_node_erlang_atom]),
+yamerl_constr:string("!&lt;tag:yamerl,2012:atom&gt; atom").
+
+% Autodetect Erlang atoms in plain scalars.
+yamerl_app:set_param(node_mods, [yamerl_node_erlang_atom]),
+yamerl_constr:string("atom", [{erlang_atom_autodetection, true}]).
+
+% Atoms must already exist.
+yamerl_app:set_param(node_mods, [yamerl_node_erlang_atom]),
+yamerl_constr:string("atom", [
+    {erlang_atom_autodetection, true},
+    {erlang_atom_only_if_exist, true}
+]).</pre></li>
+<li>Supports <strong>Erlang fun()</strong> node type:
+<pre>% Enable support for Erlang fun().
+yamerl_app:set_param(node_mods, [yamerl_node_erlang_fun]),
+[Plus_One_Fun] = yamerl_constr:string(&lt;&lt;"!&lt;tag:yamerl,2012:fun&gt; fun(X) -&gt; X + 1 end."&gt;&gt;),
+
+Plus_One_Fun(2). % Return 3.</pre></li>
+<li>Provides a <strong>yamler compatibility layer</strong>:
+<pre>% Both calls return the same value.
+yaml:load_file("input.yaml", [{schema, yaml_schema_failsafe}]),
+yamerl_yamler_compat:load_file("input.yaml", [{schema, yaml_schema_failsafe}])</pre></li>
+</ul>
+
+<h3><a name="Prerequisites">Prerequisites</a></h3>
+
+Before using yamerl, the application must be started:
+<pre>application:start(yamerl).</pre>
+
+<p>This is required so that application environment variables are available.</p>
+
+Now, you can use the <a docgen-rel="seeerl" docgen-href="yamerl_constr" href="yamerl_constr.html"><code>yamerl_constr</code></a> module to parse and construct a
+list of documents from:
+<ul>
+<li>an in-memory document (string or binary);</li>
+<li>a regular file;</li>
+<li>a stream.</li>
+</ul>
+
+<p>Because a YAML input stream may contain multiple documents, <a docgen-rel="seeerl" docgen-href="yamerl_constr" href="yamerl_constr.html"><code>yamerl_constr</code></a> always returns a list of documents, even if the input
+stream only contains one.</p>
+
+<h3><a name="Examples">Examples</a></h3>
+
+<h4><a name="Basic_parsing">Basic parsing</a></h4>
+
+<ol>
+<li>Start the yamerl application. This is a mandatory step.
+<pre>application:start(yamerl).</pre></li>
+<li>You're now ready to parse a serialized document:
+<ul>
+<li>To parse an in-memory string or binary:
+<pre>Documents = yamerl_constr:string("Hello!").
+% Documents is a list of constructed documents.</pre></li>
+<li>To parse a file:
+<pre>Documents = yamerl_constr:file("input.yaml").
+% Documents is a list of constructed documents.</pre></li>
+<li>To parse a stream:
+<pre>% Create a new construction state. The only required argument is an
+% arbitrary term describing the source of the data. Here, we use the
+% same term structure as yamerl_constr:file/{1, 2}.
+Constr_State = yamerl_constr:new({file, "&lt;stdin&gt;"}),
+
+% Feed the parser with binary chunks. The developer is responsible for
+% reading the chunk from the backing source.
+%
+% The function returns an updated construction state, which replaces the
+% previous one.
+%
+% yamerl_constr:next_chunk/2 can be called as many times as necessary.
+{continue, Constr_State2} = yamerl_constr:next_chunk(Constr_State, Chunk),
+
+% When the last chunk is reached, call yamerl_constr:last_chunk/2.
+Documents = yamerl_constr:last_chunk(Constr_State2, Last_Chunk).
+% Documents is a list of constructed documents.</pre></li>
+</ul></li>
+</ol>
+
+<p>See <a docgen-rel="seeerl" docgen-href="yamerl_constr" href="yamerl_constr.html"><code>yamerl_constr</code></a> for more informations.</p>
+
+<h4><a name="Error_handling">Error handling</a></h4>
+
+<p>yamerl <strong>throws an exception when an error occurs</strong>.</p>
+
+<ol>
+<li>Start the yamerl application. This is a mandatory step.
+<pre>application:start(yamerl).</pre></li>
+<li>You're now ready to parse a serialized document. To parse an
+in-memory string or binary:
+<pre>-include_lib("yamerl/include/yamerl_errors.hrl").
+
+% ...
+
+try
+  Documents = yamerl_constr:string("Hello!"),
+  % Documents is a list of constructed documents.
+  Documents
+catch
+  throw:#yamerl_exception{errors = Errors} -&gt;
+    % Do something with the exception.
+    Errors
+end.</pre></li>
+</ol>
+
+As you can see, the <code>#yamerl_exception{}</code> record embeds all encountered
+errors:
+<pre>#yamerl_exception{
+  errors = [] % List of errors.
+}.</pre>
+
+Errors are records where the two first members are always:
+<ol>
+<li><code>type</code>, either <code>error</code> or <code>warning</code>;</li>
+<li><code>text</code>, a human-readable error message.</li>
+</ol>
+
+Following members depend on the error record. Two records are currently
+defined:
+<ul>
+<li><code>#yamerl_invalid_option{}</code>;</li>
+<li><code>#yamerl_parsing_error{}</code>.</li>
+</ul>
+
+<p>See <a docgen-rel="seeerl" docgen-href="yamerl_constr" href="yamerl_constr.html"><code>yamerl_constr</code></a> for more informations.</p>
+
+<h3><a name="Alternatives_to_yamerl">Alternatives to yamerl</a></h3>
+
+<h4><a name="YAML_parsers">YAML parsers</a></h4>
+
+<ul>
+<li><a href="https://github.com/goertzenator/yamler">yamler</a>:
+<ul>
+<li>Based on libyaml, wrapped in a NIF</li>
+<li>Supports YAML 1.1</li>
+<li>Faster than yamerl</li>
+<li>Supports Erlang atoms, however, single-quoted scalar are treated as
+atom, which breaks the YAML specifications</li>
+<li>Doesn't support Erlang fun()</li>
+</ul></li>
+</ul>
+
+<h4><a name="JSON_parsers">JSON parsers</a></h4>
+
+There are too many to choose from now to list them here. Use your
+preferred search engine :-)
+
+<hr>
+<div class="navbar"><a name="#navbar_bottom"></a><table width="100%" border="0" cellspacing="0" cellpadding="2" summary="navigation bar"><tr><td><a href="overview-summary.html" target="overviewFrame">Overview</a></td><td><a href="http://www.erlang.org/"><img src="erlang.png" align="right" border="0" alt="erlang logo"></a></td></tr></table></div>
+<p><i>Generated by EDoc</i></p>
+</body>
+</html>
