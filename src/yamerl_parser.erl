@@ -960,7 +960,20 @@ end_doc(Parser, Line, Col, Insert_At) ->
       line   = Line,
       column = Col
     },
-    queue_token(Parser2, Token, Insert_At).
+    %% We check if there is an unfinished flow collection.
+    Parser3 = case ?IN_FLOW_CTX(Parser) of
+        false ->
+            Parser2;
+        true ->
+            Error = #yamerl_parsing_error{
+              name   = unfinished_flow_collection,
+              token  = Token,
+              line   = Line,
+              column = Col
+            },
+            add_error(Parser2, Error, "Unfinished flow collection", [])
+    end,
+    queue_token(Parser3, Token, Insert_At).
 
 %% -------------------------------------------------------------------
 %% Directives.
