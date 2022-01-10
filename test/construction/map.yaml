@@ -1,2 +1,3 @@
 first:  { item: 1 }
 second: { item: 2 }
+third:  { item: 2, item: 3}
