@@ -26,7 +26,7 @@ which are assembled as structured YAML documents by the constructor.</p>
  
   <p>YAML documents can be constructed in simple or detailed modes. In  
 simple mode, they are made of simple builting Erlang types. In  
-detailed mode, they are made of records, holding more informations  
+detailed mode, they are made of records, holding more information  
 about YAML nodes and their presentation.</p>
  
   <p>The <code>yamerl</code> application must be started to use the constructor.</p>
@@ -69,7 +69,7 @@ about YAML nodes and their presentation.</p>
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#file-1">file/1</a></td><td>Equivalent to <a href="#file-2"><tt>file(Filename, [])</tt></a>.
 </td></tr>
 <tr><td valign="top"><a href="#file-2">file/2</a></td><td>Constructs a YAML document from a regular file.</td></tr>
-<tr><td valign="top"><a href="#get_pres_details-1">get_pres_details/1</a></td><td>Returns presentation informations in the stream for the given  
+<tr><td valign="top"><a href="#get_pres_details-1">get_pres_details/1</a></td><td>Returns presentation information in the stream for the given  
 node.</td></tr>
 <tr><td valign="top"><a href="#last_chunk-2">last_chunk/2</a></td><td>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Constr, Chunk, true)</tt></a>.
 </td></tr>
@@ -122,7 +122,7 @@ more details about the returned documents.</p>
 <div class="spec">
 <p><tt>get_pres_details(Token) -&gt; any()</tt></p>
 <p> </p>
-</div><p><p>Returns presentation informations in the stream for the given  
+</div><p><p>Returns presentation information in the stream for the given  
 node.</p>
  
   This only makes sense when the detailed construction mode is enabled
@@ -169,7 +169,7 @@ Valid options are:</p>
   construction mode, YAML nodes are returned as Erlang integers,
   strings, lists, proplists, etc. In other words, only simple builtin
   types. In detailed construction mode, YAML nodes are returned using
-  records. Those records gives additional informations such as the YAML
+  records. Those records gives additional information such as the YAML
   node type, the location in the stream (line and column number) and so
   on.</dd>
   <dt><code>{ignore_unrecognized_tags, boolean()}</code></dt>
