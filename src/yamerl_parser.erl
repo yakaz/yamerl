@@ -3955,7 +3955,7 @@ emit_tokens2(#yamerl_parser{last_token = Last} = Parser,
   [Token | Rest], Idx , Max)
   when Idx =< Max ->
     %% Run some checks:
-    %%   o  Can "Last" and "Token" be in a raw?
+    %%   o  Can "Last" and "Token" be in a row?
     %%   o  Do we need to insert an empty scalar?
     Parser1 = check_tokens_in_a_row(Parser, Last, Token),
     %% Handle properties and execute the specified callback function (or
