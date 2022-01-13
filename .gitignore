@@ -6,7 +6,8 @@ rebar3
 
 # Files produced by rebar.
 /_build/
-/doc/
+/doc/*
+!/doc/overview.edoc
 /ebin
 /rebar.lock
 /rebar3.crashdump
