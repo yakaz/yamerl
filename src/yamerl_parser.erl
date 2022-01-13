@@ -2597,30 +2597,6 @@ do_parse_block_scalar([$# | _] = Chars, Line, Col, Delta, Parser,
   when Col < Indent ->
     queue_block_scalar_token(Chars, Line, Col, Delta, Parser, Ctx);
 
-%% The next line is less indented than the block scalar, but more than
-%% the parent node: it's an error.
-do_parse_block_scalar([C | _] = Chars, Line, Col, Delta, Parser,
-  #block_scalar_ctx{indent = Indent, style = Style,
-    line = Token_Line, col = Token_Col, output = Output})
-  when C /= $\s andalso Col < Indent ->
-    Token = #yamerl_scalar{
-      style    = block,
-      substyle = Style,
-      text     = lists:reverse(Output),
-      line     = Token_Line,
-      column   = Token_Col,
-      tag      = ?BLOCK_SCALAR_DEFAULT_TAG(Token_Line, Token_Col)
-    },
-    Error  = #yamerl_parsing_error{
-      name   = invalid_block_scalar_indentation,
-      token  = Token,
-      line   = Line,
-      column = Col
-    },
-    Parser1 = add_error(Parser, Error,
-      "Invalid block scalar indentation", []),
-    return(Chars, Line, Col, Delta, Parser1);
-
 %% The next line has a directives end or document end marker: end the
 %% scalar.
 do_parse_block_scalar([C | _] = Chars, Line, 1 = Col, Delta,
@@ -2646,6 +2622,30 @@ do_parse_block_scalar([$-, $-, $-] = Chars, Line, 1 = Col, Delta,
 do_parse_block_scalar([$., $., $.] = Chars, Line, 1 = Col, Delta,
   #yamerl_parser{raw_eos = true} = Parser, Ctx) ->
     queue_block_scalar_token(Chars, Line, Col, Delta, Parser, Ctx);
+
+%% The next line is less indented than the block scalar, but more than
+%% the parent node: it's an error.
+do_parse_block_scalar([C | _] = Chars, Line, Col, Delta, Parser,
+  #block_scalar_ctx{indent = Indent, style = Style,
+    line = Token_Line, col = Token_Col, output = Output})
+  when C /= $\s andalso Col < Indent ->
+    Token = #yamerl_scalar{
+      style    = block,
+      substyle = Style,
+      text     = lists:reverse(Output),
+      line     = Token_Line,
+      column   = Token_Col,
+      tag      = ?BLOCK_SCALAR_DEFAULT_TAG(Token_Line, Token_Col)
+    },
+    Error  = #yamerl_parsing_error{
+      name   = invalid_block_scalar_indentation,
+      token  = Token,
+      line   = Line,
+      column = Col
+    },
+    Parser1 = add_error(Parser, Error,
+      "Invalid block scalar indentation", []),
+    return(Chars, Line, Col, Delta, Parser1);
 
 %%
 %% Content.
