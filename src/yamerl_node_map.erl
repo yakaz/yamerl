@@ -157,15 +157,20 @@ finalize_builder(#map_builder{data = Map}) when is_list(Map) ->
 finalize_builder(#map_builder{data = Map}) ->
     Map.
 
-set_kv(#yamerl_constr{detailed_constr = false},
+set_kv(#yamerl_constr{detailed_constr = false, ext_options = Options},
        Key,
        Value,
        #map_builder{format = proplist, data = Map} = Builder) ->
-    Data1 = case lists:keymember(Key, 1, Map) of
-        true  -> lists:keyreplace(Key, 1, Map, {Key, Value});
-        false -> [{Key, Value} | Map]
+    Map1 = case proplists:get_value(keep_duplicate_keys, Options, false) of
+      true ->
+         [{Key, Value} | Map];
+      false ->
+        case lists:keymember(Key, 1, Map) of
+            true  -> lists:keyreplace(Key, 1, Map, {Key, Value});
+            false -> [{Key, Value} | Map]
+        end
     end,
-    Builder#map_builder{state = none, data = Data1};
+    Builder#map_builder{state = none, data = Map1};
 set_kv(#yamerl_constr{detailed_constr = false},
        Key,
        Value,
@@ -173,42 +178,53 @@ set_kv(#yamerl_constr{detailed_constr = false},
     Data = maps:put(Key, Value, Map),
     Builder#map_builder{state = none, data = Data};
 
-set_kv(#yamerl_constr{detailed_constr = true},
+set_kv(#yamerl_constr{detailed_constr = true, ext_options = Options},
        Key,
        Value,
        #map_builder{format = proplist, keys = Keys, data = Map} = Builder) ->
     RawKey = strip_key(Key),
-    {Keys1, Data1} = case maps:is_key(RawKey, Keys) of
-        false ->
-            {maps:put(RawKey, Key, Keys),
-             [{Key, Value} | Map]};
-        true ->
-            MapKey = maps:get(RawKey, Keys),
-            Fun = fun({K, _V}) when K == MapKey ->
-                    {Key, Value};
-                (Else) ->
-                    Else
-                end,
-            {maps:put(RawKey, Key, Keys),
-             lists:map(Fun, Map)}
+    {Keys1, Map1} = case proplists:get_value(keep_duplicate_keys, Options, false) of
+      true ->
+        {Keys, [{Key, Value} | Map]};
+      false ->
+        case maps:is_key(RawKey, Keys) of
+          false ->
+              {maps:put(RawKey, Key, Keys),
+              [{Key, Value} | Map]};
+          true ->
+              MapKey = maps:get(RawKey, Keys),
+              Fun = fun({K, _V}) when K == MapKey ->
+                      {Key, Value};
+                  (Else) ->
+                      Else
+                  end,
+              {maps:put(RawKey, Key, Keys),
+              lists:map(Fun, Map)}
+      end
     end,
-    Builder#map_builder{state = none, keys = Keys1, data = Data1};
-set_kv(#yamerl_constr{detailed_constr = true},
+    Builder#map_builder{state = none, keys = Keys1, data = Map1};
+
+set_kv(#yamerl_constr{detailed_constr = true, ext_options = Options},
        Key,
        Value,
        #map_builder{format = map, keys = Keys, data = Map} = Builder) ->
     RawKey = strip_key(Key),
-    {Keys1, Data1} = case maps:is_key(RawKey, Keys) of
-        false ->
-            {maps:put(RawKey, Key, Keys),
-             maps:put(Key, Value, Map)};
-        true ->
-            MapKey = maps:get(RawKey, Keys),
-            Maps1 = maps:put(Key, Value, maps:remove(MapKey, Map)),
-            {maps:put(RawKey, Key, Keys),
-             Maps1}
+    {Keys1, Map1} = case proplists:get_value(keep_duplicate_keys, Options, false) of
+      true ->
+        {Keys, maps:put(Key, Value, Map)};
+      false ->
+        case maps:is_key(RawKey, Keys) of
+          false ->
+              {maps:put(RawKey, Key, Keys),
+              maps:put(Key, Value, Map)};
+          true ->
+              MapKey = maps:get(RawKey, Keys),
+              Maps1 = maps:put(Key, Value, maps:remove(MapKey, Map)),
+              {maps:put(RawKey, Key, Keys),
+              Maps1}
+        end
     end,
-    Builder#map_builder{state = none, keys = Keys1, data = Data1}.
+    Builder#map_builder{state = none, keys = Keys1, data = Map1}.
 
 %% Strip detailed construction info so that duplicate keys aren't added.
 %%

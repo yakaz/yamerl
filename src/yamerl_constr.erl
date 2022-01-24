@@ -195,6 +195,12 @@ new(Source) ->
 %% happens an exception is raised. When set to `true', the node is
 %% constructed as if it was a plain YAML node without any tag.</dd>
 %% <dd>Default: `false'.</dd>
+%% <dt>`{keep_duplicate_keys, boolean()}'</dt>
+%% <dd>Flag to keep duplicate keys in maps. By default all duplicate keys
+%% in maps/proplists will ignored and the last occurence of a key will
+%% prevail. If this flag is enabled all keys will remain. This flag only
+%% works when the `detailed_constr' flag is set to `true' or proplists
+%% are used instead of maps.</dd>
 %% <dd>Default: `false'</dd>
 %% <dt>`{node_mods, Mods_List}'</dt>
 %% <dd>List of Erlang modules to extend support node types.</dd>
