@@ -179,6 +179,12 @@ Valid options are:</p>
   happens an exception is raised. When set to <code>true</code>, the node is
   constructed as if it was a plain YAML node without any tag.</dd>
   <dd>Default: <code>false</code>.</dd>
+  <dt><code>{keep_duplicate_keys, boolean()}</code></dt>
+  <dd>Flag to keep duplicate keys in maps. By default all duplicate keys
+  in maps/proplists will ignored and the last occurence of a key will
+  prevail. If this flag is enabled all keys will remain. This flag only
+  works when the <code>detailed_constr</code> flag is set to <code>true</code> or proplists
+  are used instead of maps.</dd>
   <dd>Default: <code>false</code></dd>
   <dt><code>{node_mods, Mods_List}</code></dt>
   <dd>List of Erlang modules to extend support node types.</dd>
