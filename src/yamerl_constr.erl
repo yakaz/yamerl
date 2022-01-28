@@ -197,7 +197,7 @@ new(Source) ->
 %% <dd>Default: `false'.</dd>
 %% <dt>`{keep_duplicate_keys, boolean()}'</dt>
 %% <dd>Flag to keep duplicate keys in maps. By default all duplicate keys
-%% in maps/proplists will ignored and the last occurence of a key will
+%% in maps/proplists will be ignored and the last occurence of a key will
 %% prevail. If this flag is enabled all keys will remain. This flag only
 %% works when the `detailed_constr' flag is set to `true' or proplists
 %% are used instead of maps.</dd>
