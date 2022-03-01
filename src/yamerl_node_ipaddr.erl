@@ -32,7 +32,7 @@
 -include("yamerl_tokens.hrl").
 -include("yamerl_nodes.hrl").
 -include("yamerl_nodes_yamerl_extensions.hrl").
--include("internal/yamerl_constr.hrl").
+-include("yamerl_constr.hrl").
 
 %% Public API.
 -export([

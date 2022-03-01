@@ -38,7 +38,7 @@
 
 -include("yamerl_errors.hrl").
 -include("yamerl_tokens.hrl").
--include("internal/yamerl_parser.hrl").
+-include("yamerl_parser.hrl").
 
 %% Public API.
 -export([
