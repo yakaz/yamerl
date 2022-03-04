@@ -292,6 +292,7 @@
   ]).
 
 -define(YAML11_SCHEMA_MODS, [
+    yamerl_node_merge,
     yamerl_node_null,
     yamerl_node_bool_ext,
     yamerl_node_int_ext,

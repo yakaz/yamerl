@@ -139,7 +139,8 @@
 -record(yamerl_alias, {
     line   = 1                       :: position(),
     column = 1                       :: position(),
-    name   = "alias"                 :: nonempty_string()
+    name   = "alias"                 :: nonempty_string(),
+    tag                              :: yamerl_tag()
   }).
 -type yamerl_alias()                 :: #yamerl_alias{}.
 
