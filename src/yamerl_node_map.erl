@@ -47,8 +47,8 @@
 -record(map_builder,
         {format :: proplist | map,
          state  :: none | '$expecting_key' | {'$expecting_value', term()},
-         keys   :: map:map(),
-         data   :: proplist:proplist() | map:map()}).
+         keys   :: map(),
+         data   :: proplists:proplist() | map()}).
 
 %% -------------------------------------------------------------------
 %% Public API.
@@ -141,16 +141,15 @@ node_as_proplist_or_map(#yamerl_constr{ext_options = Options}) ->
 
 new_builder(Constr) ->
     Format = node_as_proplist_or_map(Constr),
-    Map = #map_builder{
+    Data = case Format of
+        proplist -> [];
+        map -> maps:new()
+    end,
+    #map_builder{
         format = Format,
         state = none,
-        keys = maps:new()},
-    case Format of
-        proplist ->
-            Map#map_builder{data = []};
-        map ->
-            Map#map_builder{data = maps:new()}
-    end.
+        keys = maps:new(),
+        data = Data}.
 
 finalize_builder(#map_builder{data = Map}) when is_list(Map) ->
     lists:reverse(Map);
