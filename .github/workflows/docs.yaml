@@ -14,8 +14,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: erlef/setup-beam@v1
         with:
-          otp-version: 24
-          rebar3-version: '3.16.1'
+          otp-version: 27
+          rebar3-version: '3.23.0'
 
       - name: Generate
         run: rebar3 edoc
