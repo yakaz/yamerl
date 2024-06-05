@@ -11,11 +11,11 @@ jobs:
 
     strategy:
       matrix:
-        otp_version: [24]
+        otp_version: [24, 25, 26, 27]
         os: [ubuntu-latest]
 
     env:
-      LATEST_OTP_RELEASE: 24
+      LATEST_OTP_RELEASE: 27
 
     steps:
       - uses: actions/checkout@v2
@@ -23,7 +23,7 @@ jobs:
         id: install-erlang
         with:
           otp-version: ${{matrix.otp_version}}
-          rebar3-version: '3.16.1'
+          rebar3-version: '3.23.0'
 
       - name: Restore Dialyzer PLT files from cache
         uses: actions/cache@v2
