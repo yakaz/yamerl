@@ -16,26 +16,26 @@
   2016-2022 Jean-Sébastien Pédron &lt;jean-sebastien.pedron@dumbbell.fr&gt;
  </p>
 
-<p><b>Authors:</b> Jean-Sébastien Pédron (<a href="mailto:jean-sebastien.pedron@dumbbell.fr"><tt>jean-sebastien.pedron@dumbbell.fr</tt></a>).</p>
+<p><b>Authors:</b> Jean-Sébastien Pédron (<a href="mailto:jean-sebastien.pedron@dumbbell.fr"><code>jean-sebastien.pedron@dumbbell.fr</code></a>).</p>
 
 <h2><a name="description">Description</a></h2><p>yamerl_yamler_compat implements the <em>yamerl</em> API above <a docgen-rel="seeerl" docgen-href="yamerl_constr" href="yamerl_constr.html"><code>yamerl_constr</code></a>.</p>
  
-  See <em>yamler</em> documentation: <a href="https://github.com/goertzenator/yamler" target="_top"><tt>https://github.com/goertzenator/yamler</tt></a>.
+  See <em>yamler</em> documentation: <a href="https://github.com/goertzenator/yamler" target="_top"><code>https://github.com/goertzenator/yamler</code></a>.
 <h2><a name="types">Data Types</a></h2>
 
 <h3 class="typedecl"><a name="type-yamler_option">yamler_option()</a></h3>
-<p><tt>yamler_option() = {schema, <a href="#type-yamler_schema">yamler_schema()</a>} | {implicit_atoms, boolean()} | implicit_atoms</tt></p>
+<p><code>yamler_option() = {schema, <a href="#type-yamler_schema" docgen-rel="seetype" docgen-href="#yamler_schema/0">yamler_schema()</a>} | {implicit_atoms, boolean()} | implicit_atoms</code></p>
 
 
 <h3 class="typedecl"><a name="type-yamler_schema">yamler_schema()</a></h3>
-<p><tt>yamler_schema() = yaml_schema_failsafe | yaml_schema_json | yaml_schema_core | yaml_schema_erlang</tt></p>
+<p><code>yamler_schema() = yaml_schema_failsafe | yaml_schema_json | yaml_schema_core | yaml_schema_erlang</code></p>
 
 
 <h2><a name="index">Function Index</a></h2>
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#load-1">load/1</a></td><td>Equivalent to <a href="#load-2"><tt>load(String, [])</tt></a>.
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#load-1">load/1</a></td><td>Equivalent to <a href="#load-2" docgen-rel="seemfa" docgen-href="#load/2"><code>load(String, [])</code></a>.
 </td></tr>
 <tr><td valign="top"><a href="#load-2">load/2</a></td><td>Constructs a YAML document from an in-memory string.</td></tr>
-<tr><td valign="top"><a href="#load_file-1">load_file/1</a></td><td>Equivalent to <a href="#load_file-2"><tt>load_file(Filename, [])</tt></a>.
+<tr><td valign="top"><a href="#load_file-1">load_file/1</a></td><td>Equivalent to <a href="#load_file-2" docgen-rel="seemfa" docgen-href="#load_file/2"><code>load_file(Filename, [])</code></a>.
 </td></tr>
 <tr><td valign="top"><a href="#load_file-2">load_file/2</a></td><td>Constructs a YAML document from a regular file.</td></tr>
 </table>
@@ -44,16 +44,16 @@
 
 <h3 class="function"><a name="load-1">load/1</a></h3>
 <div class="spec">
-<p><tt>load(String) -&gt; Result | Error</tt>
-<ul class="definitions"><li><tt>String = binary()</tt></li><li><tt>Result = {ok, [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_constr.html#type-yamerl_simple_doc">yamerl_constr:yamerl_simple_doc()</a>]}</tt></li><li><tt>Error = {error, Message}</tt></li><li><tt>Message = string()</tt></li></ul></p>
+<p><code>load(String) -&gt; Result | Error</code>
+<ul class="definitions"><li><code>String = binary()</code></li><li><code>Result = {ok, [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_constr.html#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="yamerl:yamerl_constr#yamerl_simple_doc/0">yamerl_constr:yamerl_simple_doc()</a>]}</code></li><li><code>Error = {error, Message}</code></li><li><code>Message = string()</code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="#load-2"><tt>load(String, [])</tt></a>.</p>
+</div><p>Equivalent to <a href="#load-2" docgen-rel="seemfa" docgen-href="#load/2"><code>load(String, [])</code></a>.</p>
 
 
 <h3 class="function"><a name="load-2">load/2</a></h3>
 <div class="spec">
-<p><tt>load(String, Options) -&gt; Result | Error</tt>
-<ul class="definitions"><li><tt>String = binary()</tt></li><li><tt>Options = [<a href="#type-yamler_option">yamler_option()</a>]</tt></li><li><tt>Result = {ok, [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_constr.html#type-yamerl_simple_doc">yamerl_constr:yamerl_simple_doc()</a>]}</tt></li><li><tt>Error = {error, Message}</tt></li><li><tt>Message = string()</tt></li></ul></p>
+<p><code>load(String, Options) -&gt; Result | Error</code>
+<ul class="definitions"><li><code>String = binary()</code></li><li><code>Options = [<a href="#type-yamler_option" docgen-rel="seetype" docgen-href="#yamler_option/0">yamler_option()</a>]</code></li><li><code>Result = {ok, [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_constr.html#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="yamerl:yamerl_constr#yamerl_simple_doc/0">yamerl_constr:yamerl_simple_doc()</a>]}</code></li><li><code>Error = {error, Message}</code></li><li><code>Message = string()</code></li></ul></p>
 <p> </p>
 </div><p><p>Constructs a YAML document from an in-memory string.</p>
  
@@ -61,16 +61,16 @@
 
 <h3 class="function"><a name="load_file-1">load_file/1</a></h3>
 <div class="spec">
-<p><tt>load_file(Filename) -&gt; Result | Error</tt>
-<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Result = {ok, [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_constr.html#type-yamerl_simple_doc">yamerl_constr:yamerl_simple_doc()</a>]}</tt></li><li><tt>Error = {error, Message}</tt></li><li><tt>Message = string()</tt></li></ul></p>
+<p><code>load_file(Filename) -&gt; Result | Error</code>
+<ul class="definitions"><li><code>Filename = string()</code></li><li><code>Result = {ok, [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_constr.html#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="yamerl:yamerl_constr#yamerl_simple_doc/0">yamerl_constr:yamerl_simple_doc()</a>]}</code></li><li><code>Error = {error, Message}</code></li><li><code>Message = string()</code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="#load_file-2"><tt>load_file(Filename, [])</tt></a>.</p>
+</div><p>Equivalent to <a href="#load_file-2" docgen-rel="seemfa" docgen-href="#load_file/2"><code>load_file(Filename, [])</code></a>.</p>
 
 
 <h3 class="function"><a name="load_file-2">load_file/2</a></h3>
 <div class="spec">
-<p><tt>load_file(Filename, Options) -&gt; Result | Error</tt>
-<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Options = [<a href="#type-yamler_option">yamler_option()</a>]</tt></li><li><tt>Result = {ok, [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_constr.html#type-yamerl_simple_doc">yamerl_constr:yamerl_simple_doc()</a>]}</tt></li><li><tt>Error = {error, Message}</tt></li><li><tt>Message = string()</tt></li></ul></p>
+<p><code>load_file(Filename, Options) -&gt; Result | Error</code>
+<ul class="definitions"><li><code>Filename = string()</code></li><li><code>Options = [<a href="#type-yamler_option" docgen-rel="seetype" docgen-href="#yamler_option/0">yamler_option()</a>]</code></li><li><code>Result = {ok, [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_constr.html#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="yamerl:yamerl_constr#yamerl_simple_doc/0">yamerl_constr:yamerl_simple_doc()</a>]}</code></li><li><code>Error = {error, Message}</code></li><li><code>Message = string()</code></li></ul></p>
 <p> </p>
 </div><p>Constructs a YAML document from a regular file.</p>
 <hr>

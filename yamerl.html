@@ -16,17 +16,17 @@
   2016-2022 Jean-Sébastien Pédron &lt;jean-sebastien.pedron@dumbbell.fr&gt;
  </p>
 
-<p><b>Authors:</b> Jean-Sébastien Pédron (<a href="mailto:jean-sebastien.pedron@dumbbell.fr"><tt>jean-sebastien.pedron@dumbbell.fr</tt></a>).</p>
+<p><b>Authors:</b> Jean-Sébastien Pédron (<a href="mailto:jean-sebastien.pedron@dumbbell.fr"><code>jean-sebastien.pedron@dumbbell.fr</code></a>).</p>
 
 <h2><a name="description">Description</a></h2>Wrappers for common uses of <a docgen-rel="seeerl" docgen-href="yamerl_constr" href="yamerl_constr.html"><code>yamerl_constr</code></a>.
 <h2><a name="index">Function Index</a></h2>
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#decode-1">decode/1</a></td><td>Equivalent to <a href="yamerl_constr.html#string-1"><tt>yamerl_constr:string(String)</tt></a>.
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#decode-1">decode/1</a></td><td>Equivalent to <a href="yamerl_constr.html#string-1" docgen-rel="seemfa" docgen-href="yamerl_constr#string/1"><code>yamerl_constr:string(String)</code></a>.
 </td></tr>
-<tr><td valign="top"><a href="#decode-2">decode/2</a></td><td>Equivalent to <a href="yamerl_constr.html#string-2"><tt>yamerl_constr:string(String, Options)</tt></a>.
+<tr><td valign="top"><a href="#decode-2">decode/2</a></td><td>Equivalent to <a href="yamerl_constr.html#string-2" docgen-rel="seemfa" docgen-href="yamerl_constr#string/2"><code>yamerl_constr:string(String, Options)</code></a>.
 </td></tr>
-<tr><td valign="top"><a href="#decode_file-1">decode_file/1</a></td><td>Equivalent to <a href="yamerl_constr.html#file-1"><tt>yamerl_constr:file(Filename)</tt></a>.
+<tr><td valign="top"><a href="#decode_file-1">decode_file/1</a></td><td>Equivalent to <a href="yamerl_constr.html#file-1" docgen-rel="seemfa" docgen-href="yamerl_constr#file/1"><code>yamerl_constr:file(Filename)</code></a>.
 </td></tr>
-<tr><td valign="top"><a href="#decode_file-2">decode_file/2</a></td><td>Equivalent to <a href="yamerl_constr.html#file-2"><tt>yamerl_constr:file(Filename, Options)</tt></a>.
+<tr><td valign="top"><a href="#decode_file-2">decode_file/2</a></td><td>Equivalent to <a href="yamerl_constr.html#file-2" docgen-rel="seemfa" docgen-href="yamerl_constr#file/2"><code>yamerl_constr:file(Filename, Options)</code></a>.
 </td></tr>
 </table>
 
@@ -34,34 +34,34 @@
 
 <h3 class="function"><a name="decode-1">decode/1</a></h3>
 <div class="spec">
-<p><tt>decode(String) -&gt; Result | no_return()</tt>
-<ul class="definitions"><li><tt>String = <a href="#type-unicode_data">unicode_data()</a></tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p><code>decode(String) -&gt; Result | no_return()</code>
+<ul class="definitions"><li><code>String = <a href="#type-unicode_data" docgen-rel="seetype" docgen-href="#unicode_data/0">unicode_data()</a></code></li><li><code>Result = [<a href="#type-yamerl_doc" docgen-rel="seetype" docgen-href="#yamerl_doc/0">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="#yamerl_simple_doc/0">yamerl_simple_doc()</a>] | term()</code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="yamerl_constr.html#string-1"><tt>yamerl_constr:string(String)</tt></a>.</p>
+</div><p>Equivalent to <a href="yamerl_constr.html#string-1" docgen-rel="seemfa" docgen-href="yamerl_constr#string/1"><code>yamerl_constr:string(String)</code></a>.</p>
 
 
 <h3 class="function"><a name="decode-2">decode/2</a></h3>
 <div class="spec">
-<p><tt>decode(String, Options) -&gt; Result | no_return()</tt>
-<ul class="definitions"><li><tt>String = <a href="#type-unicode_data">unicode_data()</a></tt></li><li><tt>Options = [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option">yamerl_parser:yamerl_parser_option()</a> | <a href="#type-yamerl_constr_option">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property">proplists:property()</a>]</tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p><code>decode(String, Options) -&gt; Result | no_return()</code>
+<ul class="definitions"><li><code>String = <a href="#type-unicode_data" docgen-rel="seetype" docgen-href="#unicode_data/0">unicode_data()</a></code></li><li><code>Options = [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option" docgen-rel="seetype" docgen-href="yamerl:yamerl_parser#yamerl_parser_option/0">yamerl_parser:yamerl_parser_option()</a> | <a href="#type-yamerl_constr_option" docgen-rel="seetype" docgen-href="#yamerl_constr_option/0">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property" docgen-rel="seetype" docgen-href="stdlib:proplists#property/0">proplists:property()</a>]</code></li><li><code>Result = [<a href="#type-yamerl_doc" docgen-rel="seetype" docgen-href="#yamerl_doc/0">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="#yamerl_simple_doc/0">yamerl_simple_doc()</a>] | term()</code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="yamerl_constr.html#string-2"><tt>yamerl_constr:string(String, Options)</tt></a>.</p>
+</div><p>Equivalent to <a href="yamerl_constr.html#string-2" docgen-rel="seemfa" docgen-href="yamerl_constr#string/2"><code>yamerl_constr:string(String, Options)</code></a>.</p>
 
 
 <h3 class="function"><a name="decode_file-1">decode_file/1</a></h3>
 <div class="spec">
-<p><tt>decode_file(Filename) -&gt; Result | no_return()</tt>
-<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p><code>decode_file(Filename) -&gt; Result | no_return()</code>
+<ul class="definitions"><li><code>Filename = string()</code></li><li><code>Result = [<a href="#type-yamerl_doc" docgen-rel="seetype" docgen-href="#yamerl_doc/0">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="#yamerl_simple_doc/0">yamerl_simple_doc()</a>] | term()</code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="yamerl_constr.html#file-1"><tt>yamerl_constr:file(Filename)</tt></a>.</p>
+</div><p>Equivalent to <a href="yamerl_constr.html#file-1" docgen-rel="seemfa" docgen-href="yamerl_constr#file/1"><code>yamerl_constr:file(Filename)</code></a>.</p>
 
 
 <h3 class="function"><a name="decode_file-2">decode_file/2</a></h3>
 <div class="spec">
-<p><tt>decode_file(Filename, Options) -&gt; Result | no_return()</tt>
-<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Options = [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option">yamerl_parser:yamerl_parser_option()</a> | <a href="#type-yamerl_constr_option">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property">proplists:property()</a>]</tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p><code>decode_file(Filename, Options) -&gt; Result | no_return()</code>
+<ul class="definitions"><li><code>Filename = string()</code></li><li><code>Options = [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option" docgen-rel="seetype" docgen-href="yamerl:yamerl_parser#yamerl_parser_option/0">yamerl_parser:yamerl_parser_option()</a> | <a href="#type-yamerl_constr_option" docgen-rel="seetype" docgen-href="#yamerl_constr_option/0">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property" docgen-rel="seetype" docgen-href="stdlib:proplists#property/0">proplists:property()</a>]</code></li><li><code>Result = [<a href="#type-yamerl_doc" docgen-rel="seetype" docgen-href="#yamerl_doc/0">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="#yamerl_simple_doc/0">yamerl_simple_doc()</a>] | term()</code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="yamerl_constr.html#file-2"><tt>yamerl_constr:file(Filename, Options)</tt></a>.</p>
+</div><p>Equivalent to <a href="yamerl_constr.html#file-2" docgen-rel="seemfa" docgen-href="yamerl_constr#file/2"><code>yamerl_constr:file(Filename, Options)</code></a>.</p>
 
 <hr>
 

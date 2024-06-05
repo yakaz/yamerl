@@ -16,7 +16,7 @@
   2016-2022 Jean-Sébastien Pédron &lt;jean-sebastien.pedron@dumbbell.fr&gt;
  </p>
 
-<p><b>Authors:</b> Jean-Sébastien Pédron (<a href="mailto:jean-sebastien.pedron@dumbbell.fr"><tt>jean-sebastien.pedron@dumbbell.fr</tt></a>).</p>
+<p><b>Authors:</b> Jean-Sébastien Pédron (<a href="mailto:jean-sebastien.pedron@dumbbell.fr"><code>jean-sebastien.pedron@dumbbell.fr</code></a>).</p>
 
 <h2><a name="description">Description</a></h2><p>yamerl_constr implements a YAML constructor. It uses <a docgen-rel="seeerl" docgen-href="yamerl_parser" href="yamerl_parser.html"><code>yamerl_parser</code></a> as the underlying parser. The parser emits YAML nodes  
 which are assembled as structured YAML documents by the constructor.</p>
@@ -62,26 +62,26 @@ about YAML nodes and their presentation.</p>
 <h2><a name="types">Data Types</a></h2>
 
 <h3 class="typedecl"><a name="type-yamerl_constr">yamerl_constr()</a></h3>
-<p><tt>yamerl_constr() = #yamerl_constr{}</tt></p>
+<p><code>yamerl_constr() = #yamerl_constr{}</code></p>
 
 
 <h2><a name="index">Function Index</a></h2>
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#file-1">file/1</a></td><td>Equivalent to <a href="#file-2"><tt>file(Filename, [])</tt></a>.
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#file-1">file/1</a></td><td>Equivalent to <a href="#file-2" docgen-rel="seemfa" docgen-href="#file/2"><code>file(Filename, [])</code></a>.
 </td></tr>
 <tr><td valign="top"><a href="#file-2">file/2</a></td><td>Constructs a YAML document from a regular file.</td></tr>
 <tr><td valign="top"><a href="#get_pres_details-1">get_pres_details/1</a></td><td>Returns presentation information in the stream for the given  
 node.</td></tr>
-<tr><td valign="top"><a href="#last_chunk-2">last_chunk/2</a></td><td>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Constr, Chunk, true)</tt></a>.
+<tr><td valign="top"><a href="#last_chunk-2">last_chunk/2</a></td><td>Equivalent to <a href="#next_chunk-3" docgen-rel="seemfa" docgen-href="#next_chunk/3"><code>next_chunk(Constr, Chunk, true)</code></a>.
 </td></tr>
-<tr><td valign="top"><a href="#new-1">new/1</a></td><td>Equivalent to <a href="#new-2"><tt>new(Source, [])</tt></a>.
+<tr><td valign="top"><a href="#new-1">new/1</a></td><td>Equivalent to <a href="#new-2" docgen-rel="seemfa" docgen-href="#new/2"><code>new(Source, [])</code></a>.
 </td></tr>
 <tr><td valign="top"><a href="#new-2">new/2</a></td><td>Creates and returns a new YAML construction state.</td></tr>
-<tr><td valign="top"><a href="#next_chunk-2">next_chunk/2</a></td><td>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Constr, Chunk, false)</tt></a>.
+<tr><td valign="top"><a href="#next_chunk-2">next_chunk/2</a></td><td>Equivalent to <a href="#next_chunk-3" docgen-rel="seemfa" docgen-href="#next_chunk/3"><code>next_chunk(Constr, Chunk, false)</code></a>.
 </td></tr>
 <tr><td valign="top"><a href="#next_chunk-3">next_chunk/3</a></td><td>Feeds the constructor with the next chunk from the YAML stream.</td></tr>
 <tr><td valign="top"><a href="#node_column-1">node_column/1</a></td><td>Returns the column number in the stream for the given node.</td></tr>
 <tr><td valign="top"><a href="#node_line-1">node_line/1</a></td><td>Returns the line number in the stream for the given node.</td></tr>
-<tr><td valign="top"><a href="#string-1">string/1</a></td><td>Equivalent to <a href="#string-2"><tt>string(String, [])</tt></a>.
+<tr><td valign="top"><a href="#string-1">string/1</a></td><td>Equivalent to <a href="#string-2" docgen-rel="seemfa" docgen-href="#string/2"><code>string(String, [])</code></a>.
 </td></tr>
 <tr><td valign="top"><a href="#string-2">string/2</a></td><td>Constructs a YAML document from an in-memory YAML string.</td></tr>
 </table>
@@ -90,16 +90,16 @@ node.</td></tr>
 
 <h3 class="function"><a name="file-1">file/1</a></h3>
 <div class="spec">
-<p><tt>file(Filename) -&gt; Result | no_return()</tt>
-<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p><code>file(Filename) -&gt; Result | no_return()</code>
+<ul class="definitions"><li><code>Filename = string()</code></li><li><code>Result = [<a href="#type-yamerl_doc" docgen-rel="seetype" docgen-href="#yamerl_doc/0">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="#yamerl_simple_doc/0">yamerl_simple_doc()</a>] | term()</code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="#file-2"><tt>file(Filename, [])</tt></a>.</p>
+</div><p>Equivalent to <a href="#file-2" docgen-rel="seemfa" docgen-href="#file/2"><code>file(Filename, [])</code></a>.</p>
 
 
 <h3 class="function"><a name="file-2">file/2</a></h3>
 <div class="spec">
-<p><tt>file(Filename, Options) -&gt; Result | no_return()</tt>
-<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Options = [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option">yamerl_parser:yamerl_parser_option()</a> | <a href="#type-yamerl_constr_option">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property">proplists:property()</a>]</tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p><code>file(Filename, Options) -&gt; Result | no_return()</code>
+<ul class="definitions"><li><code>Filename = string()</code></li><li><code>Options = [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option" docgen-rel="seetype" docgen-href="yamerl:yamerl_parser#yamerl_parser_option/0">yamerl_parser:yamerl_parser_option()</a> | <a href="#type-yamerl_constr_option" docgen-rel="seetype" docgen-href="#yamerl_constr_option/0">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property" docgen-rel="seetype" docgen-href="stdlib:proplists#property/0">proplists:property()</a>]</code></li><li><code>Result = [<a href="#type-yamerl_doc" docgen-rel="seetype" docgen-href="#yamerl_doc/0">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="#yamerl_simple_doc/0">yamerl_simple_doc()</a>] | term()</code></li></ul></p>
 <p> </p>
 </div><p><p>Constructs a YAML document from a regular file.</p>
  
@@ -120,7 +120,7 @@ more details about the returned documents.</p>
 
 <h3 class="function"><a name="get_pres_details-1">get_pres_details/1</a></h3>
 <div class="spec">
-<p><tt>get_pres_details(Token) -&gt; any()</tt></p>
+<p><code>get_pres_details(Token) -&gt; any()</code></p>
 <p> </p>
 </div><p><p>Returns presentation information in the stream for the given  
 node.</p>
@@ -130,24 +130,24 @@ node.</p>
 
 <h3 class="function"><a name="last_chunk-2">last_chunk/2</a></h3>
 <div class="spec">
-<p><tt>last_chunk(Constr, Chunk) -&gt; Result | no_return()</tt>
-<ul class="definitions"><li><tt>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>]</tt></li></ul></p>
+<p><code>last_chunk(Constr, Chunk) -&gt; Result | no_return()</code>
+<ul class="definitions"><li><code>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser" docgen-rel="seetype" docgen-href="yamerl:yamerl_parser#yamerl_parser/0">yamerl_parser:yamerl_parser()</a></code></li><li><code>Chunk = <a href="#type-unicode_binary" docgen-rel="seetype" docgen-href="#unicode_binary/0">unicode_binary()</a></code></li><li><code>Result = [<a href="#type-yamerl_doc" docgen-rel="seetype" docgen-href="#yamerl_doc/0">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="#yamerl_simple_doc/0">yamerl_simple_doc()</a>]</code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Constr, Chunk, true)</tt></a>.</p>
+</div><p>Equivalent to <a href="#next_chunk-3" docgen-rel="seemfa" docgen-href="#next_chunk/3"><code>next_chunk(Constr, Chunk, true)</code></a>.</p>
 
 
 <h3 class="function"><a name="new-1">new/1</a></h3>
 <div class="spec">
-<p><tt>new(Source) -&gt; Constr | no_return()</tt>
-<ul class="definitions"><li><tt>Source = term()</tt></li><li><tt>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li></ul></p>
+<p><code>new(Source) -&gt; Constr | no_return()</code>
+<ul class="definitions"><li><code>Source = term()</code></li><li><code>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser" docgen-rel="seetype" docgen-href="yamerl:yamerl_parser#yamerl_parser/0">yamerl_parser:yamerl_parser()</a></code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="#new-2"><tt>new(Source, [])</tt></a>.</p>
+</div><p>Equivalent to <a href="#new-2" docgen-rel="seemfa" docgen-href="#new/2"><code>new(Source, [])</code></a>.</p>
 
 
 <h3 class="function"><a name="new-2">new/2</a></h3>
 <div class="spec">
-<p><tt>new(Source, Options) -&gt; Constr | no_return()</tt>
-<ul class="definitions"><li><tt>Source = term()</tt></li><li><tt>Options = [<a href="#type-yamerl_constr_option">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option">yamerl_parser:yamerl_parser_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property">proplists:property()</a>]</tt></li><li><tt>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li></ul></p>
+<p><code>new(Source, Options) -&gt; Constr | no_return()</code>
+<ul class="definitions"><li><code>Source = term()</code></li><li><code>Options = [<a href="#type-yamerl_constr_option" docgen-rel="seetype" docgen-href="#yamerl_constr_option/0">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option" docgen-rel="seetype" docgen-href="yamerl:yamerl_parser#yamerl_parser_option/0">yamerl_parser:yamerl_parser_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property" docgen-rel="seetype" docgen-href="stdlib:proplists#property/0">proplists:property()</a>]</code></li><li><code>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser" docgen-rel="seetype" docgen-href="yamerl:yamerl_parser#yamerl_parser/0">yamerl_parser:yamerl_parser()</a></code></li></ul></p>
 <p> </p>
 </div><p><p>Creates and returns a new YAML construction state.</p>
  
@@ -234,21 +234,21 @@ It returns:</p>
     ]
   }</pre>
  </p>
-<p><b>See also:</b> <a href="#new-1">new/1</a>.</p>
+<p><b>See also:</b> <a href="#new-1" docgen-rel="seemfa" docgen-href="#new/1">new/1</a>.</p>
 
 <h3 class="function"><a name="next_chunk-2">next_chunk/2</a></h3>
 <div class="spec">
-<p><tt>next_chunk(Constr, Chunk) -&gt; Ret | no_return()</tt>
-<ul class="definitions"><li><tt>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Ret = {continue, New_Constr}</tt></li><li><tt>New_Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li></ul></p>
+<p><code>next_chunk(Constr, Chunk) -&gt; Ret | no_return()</code>
+<ul class="definitions"><li><code>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser" docgen-rel="seetype" docgen-href="yamerl:yamerl_parser#yamerl_parser/0">yamerl_parser:yamerl_parser()</a></code></li><li><code>Chunk = <a href="#type-unicode_binary" docgen-rel="seetype" docgen-href="#unicode_binary/0">unicode_binary()</a></code></li><li><code>Ret = {continue, New_Constr}</code></li><li><code>New_Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser" docgen-rel="seetype" docgen-href="yamerl:yamerl_parser#yamerl_parser/0">yamerl_parser:yamerl_parser()</a></code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Constr, Chunk, false)</tt></a>.</p>
+</div><p>Equivalent to <a href="#next_chunk-3" docgen-rel="seemfa" docgen-href="#next_chunk/3"><code>next_chunk(Constr, Chunk, false)</code></a>.</p>
 
 
 <h3 class="function"><a name="next_chunk-3">next_chunk/3</a></h3>
 <div class="spec">
-<p><tt>next_chunk(Constr, Chunk, EOS::false) -&gt; Ret | no_return()</tt>
-<ul class="definitions"><li><tt>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Ret = {continue, New_Constr}</tt></li><li><tt>New_Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li></ul></p><p><tt>next_chunk(Constr, Chunk, EOS::true) -&gt; Result | no_return()</tt>
-<ul class="definitions"><li><tt>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser">yamerl_parser:yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>]</tt></li></ul></p>
+<p><code>next_chunk(Constr, Chunk, EOS::false) -&gt; Ret | no_return()</code>
+<ul class="definitions"><li><code>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser" docgen-rel="seetype" docgen-href="yamerl:yamerl_parser#yamerl_parser/0">yamerl_parser:yamerl_parser()</a></code></li><li><code>Chunk = <a href="#type-unicode_binary" docgen-rel="seetype" docgen-href="#unicode_binary/0">unicode_binary()</a></code></li><li><code>Ret = {continue, New_Constr}</code></li><li><code>New_Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser" docgen-rel="seetype" docgen-href="yamerl:yamerl_parser#yamerl_parser/0">yamerl_parser:yamerl_parser()</a></code></li></ul></p><p><code>next_chunk(Constr, Chunk, EOS::true) -&gt; Result | no_return()</code>
+<ul class="definitions"><li><code>Constr = <a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser" docgen-rel="seetype" docgen-href="yamerl:yamerl_parser#yamerl_parser/0">yamerl_parser:yamerl_parser()</a></code></li><li><code>Chunk = <a href="#type-unicode_binary" docgen-rel="seetype" docgen-href="#unicode_binary/0">unicode_binary()</a></code></li><li><code>Result = [<a href="#type-yamerl_doc" docgen-rel="seetype" docgen-href="#yamerl_doc/0">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="#yamerl_simple_doc/0">yamerl_simple_doc()</a>]</code></li></ul></p>
 <p> </p>
 <p> </p>
 </div><p><p>Feeds the constructor with the next chunk from the YAML stream.</p>
@@ -278,7 +278,7 @@ stream.</p>
 
 <h3 class="function"><a name="node_column-1">node_column/1</a></h3>
 <div class="spec">
-<p><tt>node_column(Node) -&gt; any()</tt></p>
+<p><code>node_column(Node) -&gt; any()</code></p>
 <p> </p>
 </div><p><p>Returns the column number in the stream for the given node.</p>
  
@@ -287,7 +287,7 @@ stream.</p>
 
 <h3 class="function"><a name="node_line-1">node_line/1</a></h3>
 <div class="spec">
-<p><tt>node_line(Node) -&gt; any()</tt></p>
+<p><code>node_line(Node) -&gt; any()</code></p>
 <p> </p>
 </div><p><p>Returns the line number in the stream for the given node.</p>
  
@@ -296,16 +296,16 @@ stream.</p>
 
 <h3 class="function"><a name="string-1">string/1</a></h3>
 <div class="spec">
-<p><tt>string(String) -&gt; Result | no_return()</tt>
-<ul class="definitions"><li><tt>String = <a href="#type-unicode_data">unicode_data()</a></tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p><code>string(String) -&gt; Result | no_return()</code>
+<ul class="definitions"><li><code>String = <a href="#type-unicode_data" docgen-rel="seetype" docgen-href="#unicode_data/0">unicode_data()</a></code></li><li><code>Result = [<a href="#type-yamerl_doc" docgen-rel="seetype" docgen-href="#yamerl_doc/0">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="#yamerl_simple_doc/0">yamerl_simple_doc()</a>] | term()</code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="#string-2"><tt>string(String, [])</tt></a>.</p>
+</div><p>Equivalent to <a href="#string-2" docgen-rel="seemfa" docgen-href="#string/2"><code>string(String, [])</code></a>.</p>
 
 
 <h3 class="function"><a name="string-2">string/2</a></h3>
 <div class="spec">
-<p><tt>string(String, Options) -&gt; Result | no_return()</tt>
-<ul class="definitions"><li><tt>String = <a href="#type-unicode_data">unicode_data()</a></tt></li><li><tt>Options = [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option">yamerl_parser:yamerl_parser_option()</a> | <a href="#type-yamerl_constr_option">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property">proplists:property()</a>]</tt></li><li><tt>Result = [<a href="#type-yamerl_doc">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc">yamerl_simple_doc()</a>] | term()</tt></li></ul></p>
+<p><code>string(String, Options) -&gt; Result | no_return()</code>
+<ul class="definitions"><li><code>String = <a href="#type-unicode_data" docgen-rel="seetype" docgen-href="#unicode_data/0">unicode_data()</a></code></li><li><code>Options = [<a href="/home/runner/work/yamerl/yamerl/doc/yamerl_parser.html#type-yamerl_parser_option" docgen-rel="seetype" docgen-href="yamerl:yamerl_parser#yamerl_parser_option/0">yamerl_parser:yamerl_parser_option()</a> | <a href="#type-yamerl_constr_option" docgen-rel="seetype" docgen-href="#yamerl_constr_option/0">yamerl_constr_option()</a> | <a href="/home/runner/work/yamerl/stdlib/doc/proplists.html#type-property" docgen-rel="seetype" docgen-href="stdlib:proplists#property/0">proplists:property()</a>]</code></li><li><code>Result = [<a href="#type-yamerl_doc" docgen-rel="seetype" docgen-href="#yamerl_doc/0">yamerl_doc()</a>] | [<a href="#type-yamerl_simple_doc" docgen-rel="seetype" docgen-href="#yamerl_simple_doc/0">yamerl_simple_doc()</a>] | term()</code></li></ul></p>
 <p> </p>
 </div><p><p>Constructs a YAML document from an in-memory YAML string.</p>
  

@@ -16,7 +16,7 @@
   2016-2022 Jean-Sébastien Pédron &lt;jean-sebastien.pedron@dumbbell.fr&gt;
  </p>
 
-<p><b>Authors:</b> Jean-Sébastien Pédron (<a href="mailto:jean-sebastien.pedron@dumbbell.fr"><tt>jean-sebastien.pedron@dumbbell.fr</tt></a>).</p>
+<p><b>Authors:</b> Jean-Sébastien Pédron (<a href="mailto:jean-sebastien.pedron@dumbbell.fr"><code>jean-sebastien.pedron@dumbbell.fr</code></a>).</p>
 
 <h2><a name="description">Description</a></h2><p>yamerl_parser implements a YAML parser. It is not meant to be used
   directly. Instead, you should use <a docgen-rel="seeerl" docgen-href="yamerl_constr" href="yamerl_constr.html"><code>yamerl_constr</code></a>.</p>
@@ -25,24 +25,24 @@
 <h2><a name="types">Data Types</a></h2>
 
 <h3 class="typedecl"><a name="type-yamerl_parser">yamerl_parser()</a></h3>
-<p><tt>yamerl_parser() = #yamerl_parser{}</tt></p>
+<p><code>yamerl_parser() = #yamerl_parser{}</code></p>
 
 
 <h2><a name="index">Function Index</a></h2>
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#file-1">file/1</a></td><td>Equivalent to <a href="#file-2"><tt>file(Filename, [])</tt></a>.
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#file-1">file/1</a></td><td>Equivalent to <a href="#file-2" docgen-rel="seemfa" docgen-href="#file/2"><code>file(Filename, [])</code></a>.
 </td></tr>
 <tr><td valign="top"><a href="#file-2">file/2</a></td><td>Parses a YAML document from a regular file.</td></tr>
 <tr><td valign="top"><a href="#get_token_fun-1">get_token_fun/1</a></td><td>Returns the constructor callback function.</td></tr>
-<tr><td valign="top"><a href="#last_chunk-2">last_chunk/2</a></td><td>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Parser, Chunk, true)</tt></a>.
+<tr><td valign="top"><a href="#last_chunk-2">last_chunk/2</a></td><td>Equivalent to <a href="#next_chunk-3" docgen-rel="seemfa" docgen-href="#next_chunk/3"><code>next_chunk(Parser, Chunk, true)</code></a>.
 </td></tr>
-<tr><td valign="top"><a href="#new-1">new/1</a></td><td>Equivalent to <a href="#new-2"><tt>new(Source, [])</tt></a>.
+<tr><td valign="top"><a href="#new-1">new/1</a></td><td>Equivalent to <a href="#new-2" docgen-rel="seemfa" docgen-href="#new/2"><code>new(Source, [])</code></a>.
 </td></tr>
 <tr><td valign="top"><a href="#new-2">new/2</a></td><td>Creates and returns a new YAML parser state.</td></tr>
-<tr><td valign="top"><a href="#next_chunk-2">next_chunk/2</a></td><td>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Parser, Chunk, false)</tt></a>.
+<tr><td valign="top"><a href="#next_chunk-2">next_chunk/2</a></td><td>Equivalent to <a href="#next_chunk-3" docgen-rel="seemfa" docgen-href="#next_chunk/3"><code>next_chunk(Parser, Chunk, false)</code></a>.
 </td></tr>
 <tr><td valign="top"><a href="#next_chunk-3">next_chunk/3</a></td><td>Feeds the parser with the next chunk from the YAML stream.</td></tr>
 <tr><td valign="top"><a href="#set_token_fun-2">set_token_fun/2</a></td><td>Sets the constructor callback function.</td></tr>
-<tr><td valign="top"><a href="#string-1">string/1</a></td><td>Equivalent to <a href="#string-2"><tt>string(String, [])</tt></a>.
+<tr><td valign="top"><a href="#string-1">string/1</a></td><td>Equivalent to <a href="#string-2" docgen-rel="seemfa" docgen-href="#string/2"><code>string(String, [])</code></a>.
 </td></tr>
 <tr><td valign="top"><a href="#string-2">string/2</a></td><td>Parses a YAML document from an in-memory YAML string.</td></tr>
 </table>
@@ -51,81 +51,81 @@
 
 <h3 class="function"><a name="file-1">file/1</a></h3>
 <div class="spec">
-<p><tt>file(Filename) -&gt; Parser | no_return()</tt>
-<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p><code>file(Filename) -&gt; Parser | no_return()</code>
+<ul class="definitions"><li><code>Filename = string()</code></li><li><code>Parser = <a href="#type-yamerl_parser" docgen-rel="seetype" docgen-href="#yamerl_parser/0">yamerl_parser()</a></code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="#file-2"><tt>file(Filename, [])</tt></a>.</p>
+</div><p>Equivalent to <a href="#file-2" docgen-rel="seemfa" docgen-href="#file/2"><code>file(Filename, [])</code></a>.</p>
 
 
 <h3 class="function"><a name="file-2">file/2</a></h3>
 <div class="spec">
-<p><tt>file(Filename, Options) -&gt; Parser | no_return()</tt>
-<ul class="definitions"><li><tt>Filename = string()</tt></li><li><tt>Options = [<a href="#type-yamerl_parser_option">yamerl_parser_option()</a>]</tt></li><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p><code>file(Filename, Options) -&gt; Parser | no_return()</code>
+<ul class="definitions"><li><code>Filename = string()</code></li><li><code>Options = [<a href="#type-yamerl_parser_option" docgen-rel="seetype" docgen-href="#yamerl_parser_option/0">yamerl_parser_option()</a>]</code></li><li><code>Parser = <a href="#type-yamerl_parser" docgen-rel="seetype" docgen-href="#yamerl_parser/0">yamerl_parser()</a></code></li></ul></p>
 <p> </p>
 </div><p>Parses a YAML document from a regular file.</p>
 
 <h3 class="function"><a name="get_token_fun-1">get_token_fun/1</a></h3>
 <div class="spec">
-<p><tt>get_token_fun(Yamerl_parser) -&gt; any()</tt></p>
+<p><code>get_token_fun(Yamerl_parser) -&gt; any()</code></p>
 <p> </p>
 </div><p>Returns the constructor callback function</p>
 
 <h3 class="function"><a name="last_chunk-2">last_chunk/2</a></h3>
 <div class="spec">
-<p><tt>last_chunk(Parser, Chunk) -&gt; Ret | no_return()</tt>
-<ul class="definitions"><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Ret = {continue, New_Parser} | New_Parser</tt></li><li><tt>New_Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p><code>last_chunk(Parser, Chunk) -&gt; Ret | no_return()</code>
+<ul class="definitions"><li><code>Parser = <a href="#type-yamerl_parser" docgen-rel="seetype" docgen-href="#yamerl_parser/0">yamerl_parser()</a></code></li><li><code>Chunk = <a href="#type-unicode_binary" docgen-rel="seetype" docgen-href="#unicode_binary/0">unicode_binary()</a></code></li><li><code>Ret = {continue, New_Parser} | New_Parser</code></li><li><code>New_Parser = <a href="#type-yamerl_parser" docgen-rel="seetype" docgen-href="#yamerl_parser/0">yamerl_parser()</a></code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Parser, Chunk, true)</tt></a>.</p>
+</div><p>Equivalent to <a href="#next_chunk-3" docgen-rel="seemfa" docgen-href="#next_chunk/3"><code>next_chunk(Parser, Chunk, true)</code></a>.</p>
 
 
 <h3 class="function"><a name="new-1">new/1</a></h3>
 <div class="spec">
-<p><tt>new(Source) -&gt; Parser | no_return()</tt>
-<ul class="definitions"><li><tt>Source = term()</tt></li><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p><code>new(Source) -&gt; Parser | no_return()</code>
+<ul class="definitions"><li><code>Source = term()</code></li><li><code>Parser = <a href="#type-yamerl_parser" docgen-rel="seetype" docgen-href="#yamerl_parser/0">yamerl_parser()</a></code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="#new-2"><tt>new(Source, [])</tt></a>.</p>
+</div><p>Equivalent to <a href="#new-2" docgen-rel="seemfa" docgen-href="#new/2"><code>new(Source, [])</code></a>.</p>
 
 
 <h3 class="function"><a name="new-2">new/2</a></h3>
 <div class="spec">
-<p><tt>new(Source, Options) -&gt; Parser | no_return()</tt>
-<ul class="definitions"><li><tt>Source = term()</tt></li><li><tt>Options = [<a href="#type-yamerl_parser_option">yamerl_parser_option()</a>]</tt></li><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p><code>new(Source, Options) -&gt; Parser | no_return()</code>
+<ul class="definitions"><li><code>Source = term()</code></li><li><code>Options = [<a href="#type-yamerl_parser_option" docgen-rel="seetype" docgen-href="#yamerl_parser_option/0">yamerl_parser_option()</a>]</code></li><li><code>Parser = <a href="#type-yamerl_parser" docgen-rel="seetype" docgen-href="#yamerl_parser/0">yamerl_parser()</a></code></li></ul></p>
 <p> </p>
 </div><p>Creates and returns a new YAML parser state.</p>
 
 <h3 class="function"><a name="next_chunk-2">next_chunk/2</a></h3>
 <div class="spec">
-<p><tt>next_chunk(Parser, Chunk) -&gt; Ret | no_return()</tt>
-<ul class="definitions"><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Ret = {continue, New_Parser}</tt></li><li><tt>New_Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p><code>next_chunk(Parser, Chunk) -&gt; Ret | no_return()</code>
+<ul class="definitions"><li><code>Parser = <a href="#type-yamerl_parser" docgen-rel="seetype" docgen-href="#yamerl_parser/0">yamerl_parser()</a></code></li><li><code>Chunk = <a href="#type-unicode_binary" docgen-rel="seetype" docgen-href="#unicode_binary/0">unicode_binary()</a></code></li><li><code>Ret = {continue, New_Parser}</code></li><li><code>New_Parser = <a href="#type-yamerl_parser" docgen-rel="seetype" docgen-href="#yamerl_parser/0">yamerl_parser()</a></code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="#next_chunk-3"><tt>next_chunk(Parser, Chunk, false)</tt></a>.</p>
+</div><p>Equivalent to <a href="#next_chunk-3" docgen-rel="seemfa" docgen-href="#next_chunk/3"><code>next_chunk(Parser, Chunk, false)</code></a>.</p>
 
 
 <h3 class="function"><a name="next_chunk-3">next_chunk/3</a></h3>
 <div class="spec">
-<p><tt>next_chunk(Parser, Chunk, Last_Chunk) -&gt; Ret | no_return()</tt>
-<ul class="definitions"><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li><li><tt>Chunk = <a href="#type-unicode_binary">unicode_binary()</a></tt></li><li><tt>Last_Chunk = boolean()</tt></li><li><tt>Ret = {continue, New_Parser} | New_Parser</tt></li><li><tt>New_Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p><code>next_chunk(Parser, Chunk, Last_Chunk) -&gt; Ret | no_return()</code>
+<ul class="definitions"><li><code>Parser = <a href="#type-yamerl_parser" docgen-rel="seetype" docgen-href="#yamerl_parser/0">yamerl_parser()</a></code></li><li><code>Chunk = <a href="#type-unicode_binary" docgen-rel="seetype" docgen-href="#unicode_binary/0">unicode_binary()</a></code></li><li><code>Last_Chunk = boolean()</code></li><li><code>Ret = {continue, New_Parser} | New_Parser</code></li><li><code>New_Parser = <a href="#type-yamerl_parser" docgen-rel="seetype" docgen-href="#yamerl_parser/0">yamerl_parser()</a></code></li></ul></p>
 <p> </p>
 </div><p>Feeds the parser with the next chunk from the YAML stream.</p>
 
 <h3 class="function"><a name="set_token_fun-2">set_token_fun/2</a></h3>
 <div class="spec">
-<p><tt>set_token_fun(Parser, Fun) -&gt; any()</tt></p>
+<p><code>set_token_fun(Parser, Fun) -&gt; any()</code></p>
 <p> </p>
 </div><p>Sets the constructor callback function</p>
 
 <h3 class="function"><a name="string-1">string/1</a></h3>
 <div class="spec">
-<p><tt>string(String) -&gt; Parser | no_return()</tt>
-<ul class="definitions"><li><tt>String = <a href="#type-unicode_data">unicode_data()</a></tt></li><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p><code>string(String) -&gt; Parser | no_return()</code>
+<ul class="definitions"><li><code>String = <a href="#type-unicode_data" docgen-rel="seetype" docgen-href="#unicode_data/0">unicode_data()</a></code></li><li><code>Parser = <a href="#type-yamerl_parser" docgen-rel="seetype" docgen-href="#yamerl_parser/0">yamerl_parser()</a></code></li></ul></p>
 <p> </p>
-</div><p>Equivalent to <a href="#string-2"><tt>string(String, [])</tt></a>.</p>
+</div><p>Equivalent to <a href="#string-2" docgen-rel="seemfa" docgen-href="#string/2"><code>string(String, [])</code></a>.</p>
 
 
 <h3 class="function"><a name="string-2">string/2</a></h3>
 <div class="spec">
-<p><tt>string(String, Options) -&gt; Parser | no_return()</tt>
-<ul class="definitions"><li><tt>String = <a href="#type-unicode_data">unicode_data()</a></tt></li><li><tt>Options = [<a href="#type-yamerl_parser_option">yamerl_parser_option()</a>]</tt></li><li><tt>Parser = <a href="#type-yamerl_parser">yamerl_parser()</a></tt></li></ul></p>
+<p><code>string(String, Options) -&gt; Parser | no_return()</code>
+<ul class="definitions"><li><code>String = <a href="#type-unicode_data" docgen-rel="seetype" docgen-href="#unicode_data/0">unicode_data()</a></code></li><li><code>Options = [<a href="#type-yamerl_parser_option" docgen-rel="seetype" docgen-href="#yamerl_parser_option/0">yamerl_parser_option()</a>]</code></li><li><code>Parser = <a href="#type-yamerl_parser" docgen-rel="seetype" docgen-href="#yamerl_parser/0">yamerl_parser()</a></code></li></ul></p>
 <p> </p>
 </div><p>Parses a YAML document from an in-memory YAML string.</p>
 <hr>
