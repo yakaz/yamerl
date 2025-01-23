@@ -66,6 +66,7 @@ params_list() ->
 -spec get_param(atom()) -> term().
 
 get_param(Param) ->
+    application:load(yamerl),
     {ok, Value} = application:get_env(yamerl, Param),
     Value.
 
