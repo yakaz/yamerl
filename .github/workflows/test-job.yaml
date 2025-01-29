@@ -1,0 +1,52 @@
+name: Single test job
+
+on:
+  workflow_call:
+    inputs:
+      rebar_version:
+        required: true
+        type: string
+    secrets:
+      CODECOV_TOKEN:
+        required: true
+
+jobs:
+  test:
+    name: "Erlang/OTP ${{ matrix.otp_version }} + ${{ matrix.os }}"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        otp_version: ['26', '27']
+        # TODO: os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        id: install-erlang
+        with:
+          otp-version: ${{ matrix.otp_version }}
+          rebar3-version: ${{ inputs.rebar_version }}
+
+      - name: Compile
+        run: rebar3 compile
+
+      - name: Xref
+        run: rebar3 xref
+      - name: EUnit (unit tests)
+        run: env ERL_FLAGS='-enable-feature maybe_expr' rebar3 eunit --verbose --cover
+      - name: Common test (integration tests)
+        run: rebar3 ct --verbose --cover --sname ct
+
+      - name: Generate code coverage report
+        run: rebar3 as test covertool generate
+
+      - name: Upload code coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: _build/test/covertool/yamerl.covertool.xml
+          flags: erlang-${{ matrix.otp_version }},os-${{ matrix.os }}
+          name: Erlang/OTP ${{ matrix.otp_version }} on ${{ matrix.os }}
+          verbose: true # optional (default = false)
