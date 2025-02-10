@@ -660,10 +660,17 @@ construct(
 
 construct(
   #yamerl_constr{current_doc = Doc, anchors = Anchors} = Constr,
-  #yamerl_alias{name = Alias} = Token) when Doc /= undefined ->
+  #yamerl_alias{name = Alias, tag = Tag} = Token) when Doc /= undefined ->
     try
         Node = dict:fetch(Alias, Anchors),
-        handle_construct_return(Constr, Doc, {finished, Node})
+        MergeTag = hd(yamerl_node_merge:tags()),
+        TaggedNode = case Tag of
+                         undefined ->
+                             Node;
+                         #yamerl_tag{uri = MergeTag} ->
+                             {'$merge', Node}
+                     end,
+        handle_construct_return(Constr, Doc, {finished, TaggedNode})
     catch
         _:_ ->
             %% This alias references a non-existent anchor!
