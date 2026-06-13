@@ -62,14 +62,16 @@ try_construct_token(_, _, _) ->
 
 construct_token(#yamerl_constr{detailed_constr = false},
   undefined, #yamerl_scalar{text = Text} = Token) ->
-   case catch base64:decode(Text) of
+   try base64:decode(Text) of
         <<Result/bitstring>> -> {finished, Result};
-        {'EXIT', _} -> exception(Token)
-    end;
+        _ -> exception(Token)
+   catch
+        _:_ -> exception(Token)
+   end;
 
 construct_token(#yamerl_constr{detailed_constr = true},
   undefined, #yamerl_scalar{text = Text} = Token) ->
-   case catch base64:decode(Text) of
+   try base64:decode(Text) of
         <<Result/bitstring>> ->
           Pres = yamerl_constr:get_pres_details(Token),
           Node = #yamerl_binary{
@@ -79,8 +81,10 @@ construct_token(#yamerl_constr{detailed_constr = true},
             data   = Result
           },
           {finished, Node};
-        {'EXIT', _} -> exception(Token)
-    end;
+        _ -> exception(Token)
+   catch
+        _:_ -> exception(Token)
+   end;
 
 construct_token(_, _, Token) ->
     exception(Token).
